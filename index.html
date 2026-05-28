@@ -1,0 +1,3656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<title>Elite Rummy Circle - v91.6</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
+<link rel="apple-touch-icon" sizes="167x167" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Elite Rummy">
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+  :root {
+    --primary-bg: #1a252f;
+    --accent: #27ae60;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+    --info: #3498db;
+    --text-light: #ffffff;
+    --glass-border: rgba(255, 255, 255, 0.15);
+  }
+
+  body { 
+    margin: 0; font-family: 'Segoe UI', Arial, sans-serif; 
+    color: var(--text-light); min-height: 100vh;
+    background: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.95)), url('https://images.unsplash.com/photo-1511193311914-0346f16efe90?q=80&w=2073&auto=format&fit=crop');
+    background-size: cover; background-position: center; background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  #mainApp, #authScreen { display: none; }
+  .app-wrapper { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+  .left-sidebar { width: 260px; background: var(--primary-bg); padding: 25px; border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; }
+  .main-pane { flex: 3; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  
+  @media (max-width: 900px) {
+    .app-wrapper { flex-direction: column; }
+    .left-sidebar { width: 100%; height: auto; padding: 10px; border-right: none; border-bottom: 1px solid var(--glass-border); }
+    .nav-section { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; scrollbar-width: none; }
+    .nav-section::-webkit-scrollbar { display: none; }
+    .navBtn { min-width: 110px; margin-bottom: 0 !important; font-size: 11px !important; padding: 10px !important; text-align: center !important; }
+    .main-pane { padding: 15px; }
+    .sidebar-footer { display: none; }
+  }
+
+  .std-input, select.std-input, input.std-input { width: 100%; height: 50px; padding: 0 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: #ffffff; color: #000 !important; -webkit-text-fill-color: #000 !important; font-size: 16px; font-weight: 600; box-sizing: border-box; }
+  .score-input { color: #000 !important; -webkit-text-fill-color: #000 !important; background: #fff !important; }
+  button { padding: 12px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+  button:active { transform: scale(0.95); }
+  button:disabled { opacity: 0.2; filter: grayscale(1); }
+  
+  .tactic-btn { border: 2px solid transparent; flex: 1; padding: 8px 5px; font-size: 11px; }
+  .tactic-btn.active { border-color: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); filter: brightness(1.3); }
+
+  .navBtn { width: 100%; margin-bottom: 10px; background: rgba(255,255,255,0.08); color: white; text-align: left; }
+  .navBtn.active-nav { background: var(--accent); }
+  .actionBtn { background: var(--accent); color: white; width: 100%; height: 50px; font-size: 16px; margin-top: 5px; }
+
+  .dealer-badge { background: var(--warning); color: #000; padding: 2px 5px; border-radius: 4px; font-size: 9px; font-weight: bold; }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th { text-align: left; padding: 8px 5px; color: var(--accent); font-size: 10px; text-transform: uppercase; border-bottom: 2px solid var(--glass-border); }
+  td { padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; justify-content: center; align-items: center; padding: 20px; overflow-y: auto; }
+  .modal-card { background: #2c3e50; width: 100%; max-width: 450px; padding: 25px; border-radius: 15px; text-align: center; max-height: 90vh; overflow-y: auto; border: 1px solid var(--glass-border); }
+
+  .avatar-lg { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); margin: 0 auto 15px auto; display: block; background: #1a252f; }
+  .avatar-sm { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent); vertical-align: middle; margin-right: 5px; }
+  
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
+  .stat-item { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+  .stat-val { font-size: 16px; font-weight: bold; color: var(--accent); display: block; }
+  .stat-lbl { font-size: 9px; color: #aaa; text-transform: uppercase; }
+
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; border: 1px solid rgba(0,0,0,0.2); }
+  .online-dot { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
+  .offline-dot { background: #95a5a6; }
+  .status-text { font-size: 10px; font-weight: bold; text-transform: uppercase; }
+
+  .pause-btn { background: var(--info); color: white; border: 1px solid rgba(255,255,255,0.3); font-size: 11px; padding: 8px 12px; }
+  
+  /* Fullscreen TV Mode Styles */
+  #fullscreenOverlay { 
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    background: #000; 
+    z-index: 6000; 
+    flex-direction: column; 
+    padding: 3vh 5vw; 
+    overflow-y: auto; 
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .tv-table { width: 100%; border-collapse: collapse; }
+  .tv-table th { 
+    color: var(--accent); 
+    font-size: 1.4vh; 
+    padding: 0.6vh 1vh; 
+    text-align: left; 
+    border-bottom: 1px solid rgba(255,255,255,0.1); 
+    text-transform: uppercase; 
+    letter-spacing: 1px;
+  }
+  .tv-table td { 
+    padding: 2.2vh 1.5vh; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    font-size: 4.5vh; 
+    color: #fff; 
+    vertical-align: middle; 
+  }
+  .tv-table tr.is-out { opacity: 0.3; }
+  .tv-table .score-val { 
+    color: var(--warning); 
+    font-weight: 900; 
+    font-size: 6vh; 
+    font-family: 'JetBrains Mono', monospace; 
+  }
+  .tv-table .dealer-badge { 
+    background: var(--warning); 
+    color: #000; 
+    font-size: 1.8vh; 
+    padding: 2px 10px; 
+    border-radius: 4px; 
+    font-weight: 900; 
+    margin-left: 15px;
+    text-transform: uppercase;
+  }
+  .tv-table .avatar-tv { 
+    width: 7vh; 
+    height: 7vh; 
+    border-radius: 50%; 
+    border: 2px solid var(--accent); 
+    margin-right: 20px; 
+    object-fit: cover; 
+  }
+
+  @keyframes tv-blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); transform: scale(1); }
+    70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); transform: scale(1.02); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); transform: scale(1); }
+  }
+
+  .tv-close { 
+    position: fixed; 
+    bottom: 30px; 
+    right: 30px; 
+    background: var(--danger); 
+    border-radius: 50px; 
+    padding: 10px 25px;
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 16px; 
+    font-weight: bold;
+    cursor: pointer; 
+    transition: opacity 0.5s, transform 0.2s;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 7000;
+  }
+  .tv-close.visible { opacity: 1; pointer-events: auto; }
+  .tv-close.visible:hover { opacity: 1; transform: scale(1.05); }
+
+  @keyframes float-avatar {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+  @keyframes bounce-in {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    70% { transform: scale(0.9); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes scale-up {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @media print {
+    #fullscreenOverlay { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="authScreen">
+  <div class="modal-card" style="background:#1a252f; width:100%; max-width:400px; padding: 30px;">
+    <h1 style="color:var(--accent); margin-bottom: 25px;">Elite Rummy Circle</h1>
+    
+    <div id="loginView">
+      <input id="loginEmail" class="std-input" placeholder="Email Address">
+      <input id="loginPassword" class="std-input" type="password" placeholder="Password">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-size:13px; opacity:0.8; user-select:none;">
+          <div style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="showPassToggle" onchange="togglePasswordVisibility(this.checked)" style="width:16px; height:16px; cursor:pointer;">
+              <label for="showPassToggle" style="cursor:pointer;">Show Password</label>
+          </div>
+          <span onclick="toggleAuthView('forgot')" style="color:var(--accent); cursor:pointer; text-decoration:underline; font-weight:bold;">Forgot Password?</span>
+      </div>
+
+      <button class="actionBtn" onclick="login()">Log In</button>
+      
+      <div style="margin: 15px 0; display: flex; align-items: center; gap: 10px;">
+          <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+          <span style="font-size: 12px; opacity: 0.5;">OR</span>
+          <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+      </div>
+
+      <button class="actionBtn" style="background:#fff; color:#333; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="googleSignIn()">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="18"> Continue with Google
+      </button>
+      
+      <p style="margin-top:20px; font-size:14px;">
+        New here? <span onclick="toggleAuthView('signup')" style="color:var(--accent); cursor:pointer; text-decoration:underline; font-weight:bold;">Create Account</span>
+      </p>
+    </div>
+
+    <div id="signupView" style="display:none">
+      <input id="signupFirst" class="std-input" placeholder="First Name">
+      <input id="signupLast" class="std-input" placeholder="Last Name">
+      <input id="signupEmail" class="std-input" placeholder="Email Address">
+      <input id="signupPass" class="std-input" type="password" placeholder="Password">
+      <input id="signupConfirmPass" class="std-input" type="password" placeholder="Confirm Password">
+      
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:15px; font-size:13px; opacity:0.8; user-select:none;">
+          <input type="checkbox" id="showPassToggleSignup" onchange="togglePasswordVisibility(this.checked)" style="width:16px; height:16px; cursor:pointer;">
+          <label for="showPassToggleSignup" style="cursor:pointer;">Show Password</label>
+      </div>
+
+      <button class="actionBtn" style="background:var(--warning); color:#111;" onclick="signup()">Register Now</button>
+      <p style="margin-top:20px; font-size:14px;">
+        Already have an account? <span onclick="toggleAuthView('login')" style="color:var(--accent); cursor:pointer; text-decoration:underline; font-weight:bold;">Back to Login</span>
+      </p>
+    </div>
+
+    <div id="forgotView" style="display:none">
+      <h3 style="color:var(--accent); margin-bottom:15px; font-size:18px;">Reset Password</h3>
+      <p style="font-size:13px; opacity:0.8; margin-bottom:15px; line-height:1.4; text-align:left;">Enter your email address below, and we will send you a secure link to reset your password.</p>
+      
+      <input id="forgotEmail" class="std-input" placeholder="Email Address">
+      
+      <button class="actionBtn" style="background:var(--warning); color:#111;" onclick="resetPassword()">Send Reset Link</button>
+      
+      <p style="margin-top:20px; font-size:14px;">
+        Remembered password? <span onclick="toggleAuthView('login')" style="color:var(--accent); cursor:pointer; text-decoration:underline; font-weight:bold;">Back to Login</span>
+      </p>
+    </div>
+
+    <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v91.6</span>
+        <div style="font-size: 10px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
+    </div>
+  </div>
+</div>
+
+<div id="reentryModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2 style="color:var(--warning);">Player Elimination</h2>
+        <p id="reentryText"></p>
+        <div style="display:flex; gap:10px;">
+            <button class="actionBtn" style="background:#555; flex:1;" id="btnReentryNo">Leave</button>
+            <button class="actionBtn" style="background:var(--accent); flex:1;" id="btnReentryYes">Re-enter</button>
+        </div>
+    </div>
+</div>
+
+<div id="profileModal" class="modal-overlay">
+    <div class="modal-card">
+        <img id="pPhoto" class="avatar-lg" src="">
+        <h2 id="pName" style="color:var(--accent); margin:0;"></h2>
+        <p id="pID" style="font-size:10px; opacity:0.5; margin-bottom:10px;"></p>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="stat-val" id="statWins">0</span><span class="stat-lbl">Wins</span></div>
+            <div class="stat-item"><span class="stat-val" id="statS">0</span><span class="stat-lbl">Shows</span></div>
+            <div class="stat-item"><span class="stat-val" id="statFC">0</span><span class="stat-lbl">Full</span></div>
+            <div class="stat-item"><span class="stat-val" id="statD">0</span><span class="stat-lbl">Drops</span></div>
+            <div class="stat-item"><span class="stat-val" id="statMD">0</span><span class="stat-lbl">Mid</span></div>
+            <div class="stat-item"><span class="stat-val" id="statTotal">0</span><span class="stat-lbl">Games</span></div>
+        </div>
+        <div id="aiAnalysis" style="background:rgba(39, 174, 96, 0.1); border-left: 4px solid var(--accent); padding:12px; text-align:left; font-size:12px; border-radius:4px; margin-bottom:15px; line-height:1.5;"></div>
+        <button id="btnEditProfile" style="background:var(--warning); color:#111; margin-bottom:10px; font-size:12px; display:none;" onclick="openEditProfile()">Edit My Profile</button>
+        <button class="actionBtn" onclick="document.getElementById('profileModal').style.display='none'">Close</button>
+    </div>
+</div>
+
+<div id="editProfileModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2>Edit Profile</h2>
+        <img id="editPhotoPreview" class="avatar-lg" src="">
+        <input type="file" id="photoUpload" style="display:none;" onchange="handlePhotoUpload(event)">
+        <button onclick="document.getElementById('photoUpload').click()" style="background:var(--warning); margin-bottom:15px;">Change Photo</button>
+        <input id="editName" class="std-input" placeholder="Display Name">
+        <button class="actionBtn" onclick="saveProfile()">Save Changes</button>
+        <button class="actionBtn" style="background:#555; margin-top:10px;" onclick="document.getElementById('editProfileModal').style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<div id="addMidGameModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2>Add Player Mid-Game</h2>
+        <select id="midGameSelect" class="std-input"></select>
+        <button class="actionBtn" onclick="confirmAddMidGame()">Add Now</button>
+        <button class="actionBtn" style="background:#555; margin-top:10px;" onclick="document.getElementById('addMidGameModal').style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<div id="editRoundModal" class="modal-overlay" style="display:none; overflow-y:auto; padding:20px 0;">
+    <div class="modal-card" style="max-width:480px; width:90%; padding:20px; text-align:left;">
+        <h2 style="color:var(--accent); margin-top:0; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Edit Round <span id="editRoundModalNum"></span> Scores</span>
+            <span style="font-size:12px; opacity:0.6; font-weight:normal;">Admin Mode</span>
+        </h2>
+        <div id="editRoundModalPlayersContainer" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; max-height:60vh; overflow-y:auto; padding-right:5px;">
+            <!-- Render players dynamic fields here -->
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="actionBtn" style="background:#555; flex:1; height:42px; font-size:14px; margin:0;" onclick="closeEditRoundModal()">Cancel</button>
+            <button class="actionBtn" style="background:var(--accent); flex:1; height:42px; font-size:14px; margin:0;" onclick="saveEditedRoundScores()">Save & Recalculate</button>
+        </div>
+    </div>
+</div>
+
+<div id="releaseNotesModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: left; max-width: 400px;">
+         <h2 style="color:var(--accent); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-top:0;">Release Notes</h2>
+         <div style="margin-bottom: 20px;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.6 - Custom Tactic Separation & Manual Keypad Decoupling</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Manual Entry Separation:</b> Manually entered scores (like 20 or 40 points) on the keyboard/keypad no longer auto-click or highlight the Drop (D) or Middle Drop (MD) buttons.<br>
+                 • <b>Explicit Drop Rule:</b> The strict Drop/Declare consecutive rounds lockout rule (D rule) is preserved exclusively for players who clicked-to-drop, avoiding accidental application for raw scores.<br>
+                 • <b>Intelligent Active States:</b> Updated UI button status rendering to require explicit tactic identifiers, ensuring clean layout coherence during real-time database updates.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.5 - Pixel-Perfect Header Alignments & Fit-to-Screen Formula</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Mathematical Zero-Overflow Fitting:</b> Perfected a spacing-aware mathematical height algorithm that includes browser cell spacing directly in equations to accurately fit any number of players to the TV screen without any vertical cut-offs.<br>
+                 • <b>Pixel-Perfect Alignments:</b> Left-aligned column headers perfectly matching player avatars and text indentation coordinates, correcting previous misalignments.<br>
+                 • <b>Automated Column Safe Margin:</b> Added dynamic text clamping limits to long names on TV displays to ensure they never overlap neighboring elements.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.4 - Zero-Overflow Dynamic Fitting & Screen Sleep Preventer</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Zero-Overflow Spacing Budget:</b> Created an dynamic mathematical spacing formula taking row sizes, player counts, and border spacing precisely into account to avoid any cut-offs.<br>
+                 • <b>Fully Adaptive Scaling:</b> Set proportional relative limits for Position, Names, badges and scores so they adjust automatically for large tournament brackets without being half hidden.<br>
+                 • <b>Active Tournament Screen Lock:</b> Implemented native Screen Wake Lock integration to keep the TV dashboard continuously running over long matches.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.3 - Dynamic TV Mode Fit, Raised Names & Bottom Safe Space</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Raised Player Lineup:</b> Slightly raised the vertical positioning of player names and metadata relative to avatars for an elegant visual center.<br>
+                 • <b>Intelligent Fit Reset:</b> Configured the dynamic row calculations to seamlessly balance high and low player counts so the entire scoreboard fits the screen.<br>
+                 • <b>Overscan Protected Bottom Space:</b> Added a dedicated 7vh safe zone under the TV screen to provide comfortable breathing room and protect against TV cutoff.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.2 - Left-Aligned Scorecard Full Screen & Split Layout</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Left-Pinned Full Screen Button:</b> Relocated the 'Full Screen' action to the far left of the scorecard header next to the Game Title/Round information.<br>
+                 • <b>Right-Pinned Pause Button:</b> Kept the 'Pause' / 'Home' button securely anchored to the far right margin for elegant visual separation.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.1 - Scoreboard Floating Controls & Classical Left-Aligned Lineup</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Right-Floating Scoreboard Actions:</b> Re-oriented the 'Full Screen' and 'Pause' controls in the active scoreboard to anchor cleanly on the right of the header section.<br>
+                 • <b>Centered Header with Classic Left Alignment:</b> Restored elegant left alignment for all player seating blocks (avatar, names, and badges) while keeping the 'Player' column table-header centered for supreme readability.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.0 - Stable Esports Sorting & High-Contrast TV Precision</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Uniform Leaderboard Serials:</b> Set all position numbers to share an elegant, consistent uniform color contrast for high-clarity viewing.<br>
+                 • <b>Protected Stable Eliminated Sorting:</b> Fast-locked the positioning order of OUT/eliminated players to ensure they remain perfectly stable and never shift relative to each other.<br>
+                 • <b>Enlarged Tournament Brand & Header:</b> Enlarged the Game Name (to 6.5vh) and Current Round display (to 5.5vh) in the TV screen for elite legibility.<br>
+                 • <b>Centered Competitor Seats:</b> Aligned the Player details (avatars, name, badges) to the center of the column to establish high aesthetic symmetry.<br>
+                 • <b>TV Re-entry Badging:</b> Extended the "RE" and "RE (Count)" badge to the full screen Esports view so live spectators can see who has reentered.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v90.3 - Esports Arena Centering & Pure-Live Interface</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Centered Champion Screen:</b> Re-engineered the TV championship view to align the Champion title, recipient photo, team name, and winning score card with absolute precision.<br>
+                 • <b>Active Cursor Close Action:</b> Programmed the TV exit button to stay entirely non-intrusive and become discoverable exclusively on cursor/touch active movement.<br>
+                 • <b>Refined LIVE Badge:</b> Tailored the tournament headers by adopting the concise, clean 'LIVE' badge instead of general descriptive labels.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v90.2 - Arena-Grade Spacing & Ultra-Large Player avatars</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Enormous Player Display Pictures:</b> Enriched player images with a massive 26% size enlargement, enhanced rings, and drop shadows matching their game state.<br>
+                 • <b>Dynamic High-Visibility Layout:</b> Completely redesigned the dynamic font system utilizing safe-max bounds for outstanding display clarity on high-resolution TV displays.<br>
+                 • <b>Responsive Row Compression:</b> Programmed row heights to smoothly scale from a luxurious 14.5vh for small matches down to 4.2vh to comfortably fit large tables on one screen without scrolling.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v90.1 - Immersive TV Layout & High-Visibility Typography</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>High-Visibility Scoreboard:</b> Massive font enlargement for player rankings (POS), competitor names, and total round scores.<br>
+                 • <b>Cinema-Style Proportional Spacing:</b> Implemented beautiful proportional line heights and automatic vertical centering to eliminate large empty gaps when playing with smaller groups.<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v90.0 - Admin Control & Seat-Cut Alignment</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Authorized Game Admins:</b> Designate an admin user during game setup who receives sole authority to rename games and edit round scores.<br>
+                • <b>Latest-Round Editing Lock:</b> Restricted score editing exclusively to the newest round to safeguard game sequence consistency.<br>
+                • <b>Dynamic Seat Layout Preservation:</b> Editing previously busted player scores automatically restores them to their active state in their original seat-cut positions.<br>
+                • <b>Solid Accent Styling:</b> Styled the Custom Rules option button as a high-contrast, fully solid orange-accent selector for clearer visibility.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v89.0 - Scoreboard Customization & Real Estate Focus</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Ultra-Focused Player Scores:</b> Shrunk the TV scoreboard's top header and aligned all past/inactive players into a single horizontal ticker, resulting in massive, high-contrast player names and score texts.<br>
+                • <b>Inline Scoreboard Renaming:</b> Seamlessly rename any live game directly from the main scoreboard screen with automatic timestamp appending.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v88.0 - Immersive Fullscreen & Adaptive Fitting</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>True Fullscreen API:</b> Fullscreen mode now opens in standard browser fullscreen without headers or search bars across all devices.<br>
+                • <b>Unified Display Auto-Fitting:</b> The entire scoreboard fits perfectly within 100vh of the display with no scrolling list container, automatically resizing names, row ratios, and avatars based on the number of players.<br>
+                • <b>Horizontal Past Participants:</b> Relocated inactive/busted players to single-line horizontal scrolls to preserve scoreboard space.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v87.1 - Zero-Default Rule Fields</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Refined Input States:</b> Configured the "Number of Re-entries allowed" numeric box to start at '0' consistently, matching the exit score behavior.<br>
+                • <b>Dynamic Re-entry Handling:</b> Seamlessly handles matches with zero allowed re-entries where players exit permanently upon busting.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v87.0 - Dynamic Custom Rulesets</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Configurable Criteria:</b> Selection of Standard or Custom rulesets during new game setup.<br>
+                • <b>Flexible Exit Limit:</b> Instantly define the exact total score that will eliminate a player, complete with auto-wipe numeric fields.<br>
+                • <b>Multi Re-Entry Tuning:</b> Enforce custom re-entry counts with automatic multi-badge RE(x) counters tracking history back-to-back.<br>
+                • <b>Cohesive Syncing:</b> Fully calculated dynamic score entries and PDF metrics scaling to the custom boundaries perfectly.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v86.0 - Forgot Password Recovery</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Forgot Password:</b> Integrated a highly secure and intuitive password reset flow back-to-back with the login card.<br>
+                • <b>Prefill Automation:</b> Automatically transfers and prefills typed email values into the recovery field to expedite user workflow.<br>
+                • <b>Instant Dispatch:</b> Leverages standard Firebase authentication pathways to deliver secure, branded password-reset hooks directly to player mailboxes.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v85.0 - Deleted Games Archive</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Soft Delete:</b> Deleting active or completed games now safely moves them to a restorable "Deleted Games" folder instead of permanent immediate erasure.<br>
+                • <b>Recovery Systems:</b> Replaced immediate DB deletions with stateful recovery switches, allowing admins to view, restore, or permanently remove deleted games from a central repository.<br>
+                • <b>Seamless Filters:</b> Deleted matches are automatically filtered and excluded from the active lobbies, Hall of Fame win ratios, and PDF reporting pages.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v84.0 - TV Heartbeat Protection</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Match Protection:</b> Dedicated view-only layouts (TV Broadcast Screens) now emit active Firestore heartbeat signals, securely preventing remote game terminations on other admin devices.<br>
+                • <b>Stealth TV Scorecard:</b> Completely deactivated the fullscreen close button on dedicated view-only devices while preserving motion-responsive controls for administrators.<br>
+                • <b>Full Sizing Harness:</b> Perfected cross-platform rendering for all desktop and mobile browsers.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v83.0 - Intelligent Scaling & UI</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Smart Fit:</b> Scoreboard now automatically adjusts font sizes and row heights based on player count to fill the screen perfectly.<br>
+                • <b>Hidden Controls:</b> TV Mode close button is now invisible by default, appearing only on movement for a cleaner "broadcast" look.<br>
+                • <b>Enhanced Clarity:</b> Optimized spacing and proportions for high-distance viewing on large displays.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v82.0 - Report Uniformity & Classic TV</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Uniform Reports:</b> Standardized date formatting extended to all PDF certificates, report lists, and table views.<br>
+                • <b>Retroactive Polish:</b> Older games in the history list now display the standardized date format.<br>
+                • <b>Classic TV Mode:</b> Reverted to the absolute initial high-performance table layout, removing specialized card animations for maximum clarity.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v81.0 - Cross-Platform Date Logic</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Uniform Formatting:</b> Standardized all date and time stamps to the DD-MM-YY TIME (AM/PM) format across all devices.<br>
+                • <b>Enhanced Parsing:</b> Improved date handling to ensure consistent output on Android, iOS, and PC.<br>
+                • <b>Certificate Accuracy:</b> Ensuring certificates and reports reflect the new standardized time format.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v80.0 - Match Security & Classic Scale</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Match Protection:</b> The "End Game" button is now automatically locked if someone is actively managing the match elsewhere.<br>
+                • <b>Live Indicators:</b> Flashing "Live Match" status in the game manager to prevent accidental terminations.<br>
+                • <b>v77 Scale Restored:</b> Reverted the TV scoreboard to the high-visibility card-based scale for better viewing at a distance.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v78.0 - Classic TV Scoreboard</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Refined UI:</b> Restored the classic table-based scoreboard for maximum clarity and performance.<br>
+                • <b>Clean Display:</b> Simplified the TV mode interface to focus on core game data.<br>
+                • <b>High Visibility:</b> Optimized font sizes and contrast for large screen viewing.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v77.0 - Re-entry Data Persistence & Fallback</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Enhanced Reporting:</b> Added logic to retroactively calculate and display "Busted" totals for past games where data was not explicitly stored.<br>
+                • <b>Clearer Labels:</b> Re-entry rows now explicitly show "Busted: [Score]" and "Re-entered at [Points]".<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v76.0 - Re-entry Detail Optimization</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Clearer Re-entry Flow:</b> Reports now explicitly display the "Busted" total (e.g., 275) above the re-entry adjustment (e.g., 9) for better round-by-round auditing.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v75.0 - Re-entry Score Formatting</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Refined Re-entry Display:</b> The Reports table now shows the "busted" total score prominently above the re-entry adjustment for clearer tracking.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v74.0 - Re-entry Busted Score Tracking</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Busted Score Visibility:</b> Reports and certificates now show the actual score (e.g., 275) that exceeded the limit before revealing the re-entry adjustment.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v73.0 - Enhanced Re-entry Tracking</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Detailed Re-entry Logs:</b> Reports and certificates now display the score at which a player re-entered the game (e.g., RE @ 180).<br>
+                • <b>Round Count:</b> The current round number is now visible in both the game title and the "Next Round" button.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v72.0 - Reports Table Fix</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Complete Round History:</b> Fixed an issue where the reports table and PDF only showed a subset of rounds. All recorded rounds are now displayed.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v71.0 - Re-entry Rule Correction</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Highest + 1 Rule:</b> Re-entry score is now strictly calculated as the highest survivor's score plus one.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v70.0 - Scoreboard Persistence & Manual Termination</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Persistent Scoreboard:</b> Main and TV screens now retain full table views after game completion.<br>
+                • <b>Manual Game End:</b> Automatic termination is disabled; games now require a manual "Next Round" confirmation to conclude, allowing for score corrections.<br>
+                • <b>Enhanced Validation:</b> Stricter checks for missing scores and improved re-entry stability.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v66.0 - Persistent Main Scoreboard & Final Results</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Persistent Scoreboard:</b> Main screen now retains the full player table after game completion instead of showing a simple winner card.<br>
+                • <b>Final Result Display:</b> Inputs are deactivated and automatically populated with final total scores, providing a clear post-game summary.<br>
+                • <b>Enhanced Winner Announcement:</b> The winner is prominently displayed above the final scoreboard for a celebratory finish.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v65.0 - Persistent TV Scoreboard</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Persistent Game-Over State:</b> The TV Scoreboard now remains active even after a game ends, replacing the round indicator with a prominent "GAME OVER" and Winner announcement.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v64.0 - Dynamic Re-entry Scoring</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Refined Re-entry Math:</b> Players now re-enter with the second-highest survivor's score plus one (capped at 240). If only one survivor remains, it defaults to their score plus one.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v63.0 - Unified Re-entry & Elimination Guard</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Enhanced Re-entry logic:</b> Fixed a critical bug where re-entry prompts were skipped if everyone reached 240+ simultaneously. Now correctly triggers one (and only one) re-entry opportunity for players reaching the limit via points.<br>
+                • <b>Automatic Winner Check:</b> Refined the winner detection to wait for all re-entry decisions before closing a game.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v62.0 - Optimized Home Screen Icon</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Enhanced Icon Support:</b> Added specific apple-touch-icon tags to ensure the app icon appears correctly when saved to home screen on iOS.<br>
+                • <b>UI Clean-up:</b> Removed the manual "Install" button to keep the interface focused.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v61.0 - PWA Mobile App Support</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Native Mobile Experience:</b> Enabled Progressive Web App (PWA) support. You can now use "Add to Home Screen" on iPhone/Android for a full 100% fullscreen app experience.<br>
+                • <b>App Manifest:</b> Configured splash screens and standalone display mode for professional branding.<br>
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v60.0 - Professional Scoreboard & Dealer Logic</b>
+            <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                • <b>Professional TV Scoreboard:</b> Re-engineered for high-impact viewing. Dynamic scaling ensures all players fit one screen (no scrolling) with enhanced typography and "Past Players" history.<br>
+                • <b>Advanced Dealer Transfer Rule:</b> Implemented specific rotation logic where if the next consecutive player is out, the current dealer repeats.<br>
+                • <b>Hall of Fame Integration:</b> Consolidated Registered Players into Hall of Fame. Added real-time Online/Offline status lights.<br>
+                • <b>Start Game (with Seat Cut):</b> Renamed and updated start logic for clearer game initiation.<br>
+                • <b>Past Player Display:</b> Added to TV mode to track players who have left the active game.
+            </div>
+            <hr style="margin: 10px 0; opacity: 0.2;">
+            <b style="color: var(--warning); display: block; margin-bottom: 5px;">v59.0 - UX Safety & Terminal Precision</b>
+            <ul style="padding-left: 20px; list-style: disc; opacity: 0.9; font-size: 13px; line-height: 1.6;">
+                <li>Relocated "OUT" button to the left of the score input to prevent accidental clicks on mobile.</li>
+                <li>Introduced "Hall of Fame" with real-time win tracking and rank progression.</li>
+                <li>New Medal Brackets: Pro (3 Wins), Ultra Pro (6 Wins), Ultra Pro Max (10 Wins).</li>
+                <li>Redesigned TV Mode with a blinking red "LIVE" indicator and heritage round tracking.</li>
+                <li>Hardened Certification Engine with background layering and character encoding safety.</li>
+                <li>Adopted "Game" terminology platform-wide for professional consistency.</li>
+                <li>Developer: Elite IT</li>
+            </ul>
+        </div>
+        <button class="actionBtn" onclick="document.getElementById('releaseNotesModal').style.display='none'">Close</button>
+    </div>
+</div>
+
+<div class="app-wrapper" id="mainApp">
+  <div class="left-sidebar">
+    <h2 style="color:var(--accent); margin-bottom:15px; margin-top:0;">Elite Circle</h2>
+    <div class="nav-section">
+      <button id="navNewGame" class="navBtn" onclick="showScreen('newGame')">New Game</button>
+      <button id="navContinue" class="navBtn" onclick="showScreen('continue')">Active</button>
+      <button id="navStats" class="navBtn" onclick="showScreen('stats')">Hall of Fame</button>
+      <button id="navHistory" class="navBtn" onclick="showScreen('history')">History</button>
+      <button id="navReports" class="navBtn" onclick="showScreen('reports')">Reports</button>
+      <button class="navBtn" style="background:var(--danger);" onclick="handleLogout()">Logout</button>
+    </div>
+    <div style="margin-top:auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display:none;">
+        <div onclick="showReleaseNotes()" style="font-size: 11px; color: var(--accent); font-weight: bold; cursor: pointer; text-decoration: underline;">v54.0</div>
+        <div style="font-size: 9px; opacity: 0.4;">Developer: Elite IT</div>
+    </div>
+  </div>
+  <div class="main-pane" id="mainPane"></div>
+  <div id="fullscreenOverlay">
+      <div id="tvContent"></div>
+      <div class="tv-close" id="tvCloseBtn" onclick="closeFullScreen()">Close</div>
+  </div>
+  <div style="position: fixed; bottom: 8px; left: 12px; z-index: 4000; text-align: left; pointer-events: auto;">
+      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v91.6</div>
+      <div style="font-size: 9px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
+  </div>
+</div>
+
+<script>
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('SW Registered!', reg);
+    }).catch(err => {
+      console.log('SW Registration failed', err);
+    });
+  });
+}
+
+// --- FIREBASE INIT ---
+const firebaseConfig = {
+  apiKey: "AIzaSyCo_G5Vo7OkUsK-tUXVQKCkeTn_IHw9vB0",
+  authDomain: "elite-rummy-circle.firebaseapp.com",
+  projectId: "elite-rummy-circle",
+  storageBucket: "elite-rummy-circle.firebasestorage.app",
+  messagingSenderId: "762468709641",
+  appId: "1:762468709641:web:b4e193ed1670e5d13ccfd8"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+let playersDb =[], savedGames =[], state = null, currentScreen = '';
+let isPromptingReEntry = false;
+
+function getExitLimitFor(g) {
+    const target = g || state;
+    return (target && target.exitScoreLimit !== undefined) ? parseInt(target.exitScoreLimit) : 240;
+}
+function getMaxReEntriesFor(g) {
+    const target = g || state;
+    return (target && target.maxReEntries !== undefined) ? parseInt(target.maxReEntries) : 1;
+}
+function getPlayerReEntriesCount(p, targetState) {
+    const sObj = targetState || state;
+    if (!sObj || !sObj.reEntries) return 0;
+    const val = sObj.reEntries[p];
+    if (typeof val === 'number') return val;
+    if (val === true) return 1;
+    return 0;
+}
+function canPlayerReEnter(p, targetState) {
+    const sObj = targetState || state;
+    const currentCount = getPlayerReEntriesCount(p, sObj);
+    const maxVal = getMaxReEntriesFor(sObj);
+    return currentCount < maxVal;
+}
+
+function getDealerForState(sObj) {
+    const targetState = sObj || state;
+    if (!targetState || targetState.winner) return null;
+    
+    const exitLimit = getExitLimitFor(targetState);
+    const activeInRound = targetState.players.filter(p => !targetState.eliminated[p] && (targetState.totals[p] || 0) < exitLimit);
+    if (activeInRound.length === 0) return null;
+    
+    const roster = targetState.startingPlayers || targetState.players;
+    const dIdx = (targetState.round - 1) % roster.length;
+    let dealer = roster[dIdx];
+    
+    // Rule: If a player Y is slated to deal this round (sObj.round), and they exited in the playing round (sObj.round - 1) and reentered,
+    // the deal must go back to them. We force them as the dealer, bypassing standard skip/repeat dealer logic.
+    let forceReenteredDealer = false;
+    if (targetState.round > 1 && targetState.history) {
+        const lastRound = targetState.round - 1;
+        const lastEntry = targetState.history.find(h => h.round === lastRound);
+        if (lastEntry) {
+            const scoreInLastRound = lastEntry.scores && lastEntry.scores[dealer];
+            const wasBusted = (lastEntry.bustedTotals && lastEntry.bustedTotals[dealer] !== undefined) || (scoreInLastRound === 'OUT');
+            const hasReentered = (lastEntry.reentries && lastEntry.reentries[dealer] !== undefined) || 
+                                 (!targetState.eliminated[dealer] && (targetState.totals[dealer] || 0) < exitLimit);
+            
+            if (wasBusted && hasReentered) {
+                forceReenteredDealer = true;
+            }
+        }
+    }
+    
+    if (forceReenteredDealer && !targetState.eliminated[dealer] && (targetState.totals[dealer] || 0) < exitLimit) {
+        return dealer;
+    }
+    
+    // Standard rotation: If dealer is OUT, the previous active player repeats.
+    if (targetState.eliminated[dealer] || (targetState.totals[dealer] || 0) >= exitLimit) {
+        for (let i = 1; i <= roster.length; i++) {
+            let prevIdx = (dIdx - i + roster.length) % roster.length;
+            let prevP = roster[prevIdx];
+            if (!targetState.eliminated[prevP] && (targetState.totals[prevP] || 0) < exitLimit && targetState.players.includes(prevP)) {
+                dealer = prevP;
+                break;
+            }
+        }
+    }
+    
+    return dealer;
+}
+
+// --- AUTH ---
+function checkScheduledLogout() {
+  if (!auth.currentUser) return;
+  const dubaiTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Dubai"});
+  const dubaiDate = new Date(dubaiTime);
+  const hour = dubaiDate.getHours();
+  const min = dubaiDate.getMinutes();
+  
+  // Target: 07:07 AM Gulf Standard Time (GST) daily
+  if (hour === 7 && min === 7) {
+    const todayStr = dubaiDate.toDateString();
+    if (localStorage.getItem('lastLogoutTriggeredTodayGST') !== todayStr) {
+      localStorage.setItem('lastLogoutTriggeredTodayGST', todayStr);
+      console.log("Daily session reset triggered at 07:07 AM GST");
+      handleLogout();
+      alert("Daily session reset (07:07 AM GST). Logging out...");
+    }
+  }
+}
+setInterval(checkScheduledLogout, 20000); // Check every 20 seconds
+
+auth.onAuthStateChanged(async user => {
+  if(user) {
+    const nowInDubai = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Dubai"}));
+    if (nowInDubai.getHours() === 7 && nowInDubai.getMinutes() === 7) {
+      localStorage.setItem('lastLogoutTriggeredTodayGST', nowInDubai.toDateString());
+    }
+    
+    // Check for Fullscreen Parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const fsGameId = urlParams.get('fullscreen');
+    if (fsGameId) {
+        db.collection('eliteGames').doc(fsGameId).onSnapshot(doc => {
+            if (doc.exists) {
+                state = doc.data();
+                showTVViewOnly();
+            }
+        });
+        return; 
+    }
+    
+    document.getElementById('authScreen').style.display='none';
+    document.getElementById('mainApp').style.display='flex';
+    db.collection('players').doc(user.uid).set({ isOnline: true }, {merge:true});
+    loadData();
+
+    // Persist View on Refresh
+    const hash = window.location.hash.substring(1);
+    const [screen, gid] = hash.split(':');
+    
+    if (screen === 'activeGame' && gid) {
+        const gameDoc = await db.collection('eliteGames').doc(gid).get();
+        if (gameDoc.exists) {
+            state = gameDoc.data();
+            showScreen('activeGame');
+        } else {
+            showScreen('newGame');
+        }
+    } else if (screen && ['newGame', 'continue', 'history', 'reports'].includes(screen)) {
+        showScreen(screen);
+    } else if(!currentScreen) {
+        showScreen('newGame');
+    }
+  } else {
+    document.getElementById('authScreen').style.display='flex';
+    document.getElementById('mainApp').style.display='none';
+  }
+});
+
+function login() { auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); }
+async function googleSignIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+async function signup() {
+    const pass = document.getElementById('signupPass').value;
+    const confirm = document.getElementById('signupConfirmPass').value;
+    
+    if (pass !== confirm) {
+        alert("Passwords do not match!");
+        return;
+    }
+    if (pass.length < 6) {
+        alert("Password should be at least 6 characters.");
+        return;
+    }
+
+    const cred = await auth.createUserWithEmailAndPassword(document.getElementById('signupEmail').value, pass);
+    await db.collection('players').doc(cred.user.uid).set({ 
+        fullName: (document.getElementById('signupFirst').value + " " + document.getElementById('signupLast').value).toUpperCase(), 
+        isOnline: true, photoURL: "", createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+    });
+}
+function handleLogout() { if(auth.currentUser) db.collection('players').doc(auth.currentUser.uid).update({ isOnline: false }).then(() => auth.signOut()); }
+
+function togglePasswordVisibility(isVisible) {
+  const type = isVisible ? 'text' : 'password';
+  const fields = ['loginPassword', 'signupPass', 'signupConfirmPass'];
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.type = type;
+  });
+  // Sync all toggle checkboxes
+  const toggles = ['showPassToggle', 'showPassToggleSignup'];
+  toggles.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = isVisible;
+  });
+}
+
+function toggleAuthView(v) {
+  document.getElementById('loginView').style.display = v==='login'?'block':'none';
+  document.getElementById('signupView').style.display = v==='signup'?'block':'none';
+  document.getElementById('forgotView').style.display = v==='forgot'?'block':'none';
+  if (v === 'forgot') {
+      const loginVal = document.getElementById('loginEmail').value.trim();
+      if (loginVal) {
+          document.getElementById('forgotEmail').value = loginVal;
+      }
+  }
+}
+
+async function resetPassword() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) {
+        alert("Please enter your email address.");
+        return;
+    }
+    try {
+        await auth.sendPasswordResetEmail(email);
+        alert("A password reset email has been sent to " + email + ". Please check your inbox / spam folder and follow the instructions to reset your password.");
+        toggleAuthView('login');
+    } catch (err) {
+        console.error("Error sending password reset email:", err);
+        alert("Error: " + err.message);
+    }
+}
+
+function showReleaseNotes() {
+    document.getElementById('releaseNotesModal').style.display = 'flex';
+}
+
+// --- DATA LISTENER ---
+function loadData() {
+  db.collection('players').onSnapshot(snap => { 
+    playersDb =[]; snap.forEach(doc => playersDb.push({id: doc.id, ...doc.data()})); 
+    if(currentScreen === 'stats') showScreen('stats');
+  });
+    db.collection('eliteGames').onSnapshot(snap => {
+    savedGames =[]; snap.forEach(d => savedGames.push(d.data()));
+    if(currentScreen === 'activeGame' && state && !isPromptingReEntry) {
+        let s = savedGames.find(g => g.id === state.id);
+        if(s) {
+            // Check if we need full render or just UI sync
+            const isOutChanged = state.players.some(p => {
+                const wasOut = state.eliminated[p] || state.totals[p] >= getExitLimitFor(state);
+                const isOut = s.eliminated[p] || s.totals[p] >= getExitLimitFor(s);
+                return wasOut !== isOut;
+            });
+            const needsFull = state.round !== s.round || state.winner !== s.winner || state.players.length !== s.players.length || isOutChanged;
+            state = s;
+            if (needsFull) {
+                renderActive();
+                if (document.getElementById('fullscreenOverlay').style.display === 'flex') renderTVContent();
+            } else {
+                updateRoundScoresUI();
+                if (document.getElementById('fullscreenOverlay').style.display === 'flex') renderTVContent();
+            }
+        } else {
+            state = null; showScreen('newGame');
+        }
+    } else if(['continue', 'history', 'reports'].includes(currentScreen)) {
+        showScreen(currentScreen);
+    }
+  });
+}
+
+// --- NAVIGATION ---
+function showScreen(s) {
+  currentScreen = s;
+  // Update Hash for URL Persistence
+  if (s === 'activeGame' && state) {
+      window.location.hash = 'activeGame:' + state.id;
+      startHeartbeat();
+  } else {
+      window.location.hash = s;
+  }
+
+  document.querySelectorAll('.navBtn').forEach(b => b.classList.remove('active-nav'));
+  const btnId = 'nav' + s.charAt(0).toUpperCase() + s.slice(1);
+  const btn = document.getElementById(btnId);
+  if(btn) btn.classList.add('active-nav');
+  
+  if(s==='newGame') renderNewGame();
+  if(s==='players') renderPlayers();
+  if(s==='stats') renderStats();
+  if(s==='continue') renderContinue();
+  if(s==='history') renderHistory();
+  if(s==='reports') renderReports();
+  if(s==='activeGame') renderActive();
+}
+
+// --- VIEWS ---
+function setRulesetMode(mode) {
+    const stdBtn = document.getElementById('ruleStandardBtn');
+    const custBtn = document.getElementById('ruleCustomBtn');
+    const customBlock = document.getElementById('customRulesBlock');
+    
+    if (mode === 'standard') {
+        if (stdBtn) {
+            stdBtn.style.background = 'var(--accent)';
+            stdBtn.style.border = 'none';
+            stdBtn.style.color = 'white';
+            stdBtn.classList.add('active-rule');
+        }
+        if (custBtn) {
+            custBtn.style.background = '#8a3c00';
+            custBtn.style.border = 'none';
+            custBtn.style.color = 'white';
+            custBtn.classList.remove('active-rule');
+        }
+        if (customBlock) customBlock.style.display = 'none';
+    } else {
+        if (stdBtn) {
+            stdBtn.style.background = 'rgba(255,255,255,0.08)';
+            stdBtn.style.border = 'none';
+            stdBtn.style.color = 'white';
+            stdBtn.classList.remove('active-rule');
+        }
+        if (custBtn) {
+            custBtn.style.background = '#e67e22';
+            custBtn.style.border = 'none';
+            custBtn.style.color = 'white';
+            custBtn.classList.add('active-rule');
+        }
+        if (customBlock) customBlock.style.display = 'block';
+    }
+}
+
+function renderNewGame() {
+  document.getElementById('mainPane').innerHTML = `
+    <h2>New Game Setup</h2>
+    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
+        <input id="gName" class="std-input" placeholder="Enter Game Name">
+        <button onclick="appendDT()" style="background:var(--warning); width:100%; color:#111; margin-bottom:15px;">🕒 Insert Date/Time</button>
+        
+        <div style="margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+            <label style="display:block; font-size:12px; font-weight:bold; color:var(--accent); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Ruleset Selection</label>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button id="ruleStandardBtn" class="active-rule" onclick="setRulesetMode('standard')" style="flex:1; background:var(--accent); color:white; font-size:13px; font-weight:bold; height:38px; border:none; border-radius:6px; cursor:pointer; padding:0 8px; transition: all 0.2s;">Standard Game</button>
+                <button id="ruleCustomBtn" onclick="setRulesetMode('custom')" style="flex:1; background:#8a3c00; color:white; font-size:13px; font-weight:bold; height:38px; border:none; border-radius:6px; cursor:pointer; padding:0 8px; transition: all 0.2s;">Custom Rules</button>
+            </div>
+            
+            <div id="customRulesBlock" style="display:none; background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--glass-border); margin-top:10px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; font-size:11px; margin-bottom:5px; opacity:0.8; font-weight:600;">Exit Score (Total score that will exit a player):</label>
+                    <input id="exitScoreInput" type="text" inputmode="numeric" pattern="[0-9]*" class="std-input" value="0" style="margin-bottom:0; height:36px; padding:0 10px; font-size:13px;" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value.trim()==='')this.value='0';">
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; margin-bottom:5px; opacity:0.8; font-weight:600;">Number of Re-entries allowed:</label>
+                    <input id="maxReentriesInput" type="text" inputmode="numeric" pattern="[0-9]*" class="std-input" value="0" style="margin-bottom:0; height:36px; padding:0 10px; font-size:13px;" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value.trim()==='')this.value='0';">
+                </div>
+            </div>
+        </div>
+
+        <div id="playerList"></div>
+        <button class="navBtn" style="background:rgba(255,255,255,0.1); width:100%; border:1px dashed var(--glass-border); margin-bottom:15px;" onclick="addPlayerField()">+ Add Player</button>
+        
+        <div id="adminSelectionWrapper" style="display:none; margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+            <label style="display:block; font-size:12px; font-weight:bold; color:var(--accent); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Authorize Game Admin</label>
+            <select id="gameAdminSelect" class="std-input" style="margin-bottom:0;"></select>
+            <div style="font-size:10px; opacity:0.5; margin-top:4px;">The Admin has the sole authority to rename games and correct scores for ended rounds.</div>
+        </div>
+
+        <button class="actionBtn" onclick="startGame()">Start Game (with Seat Cut)</button>
+    </div>`;
+  updateAdminSelect();
+}
+
+function appendDT() { document.getElementById('gName').value += " " + formatEliteDate(new Date()); }
+
+function addPlayerField() {
+  const selected = Array.from(document.querySelectorAll('#playerList select')).map(s => s.value);
+  let opts = `<option value="">-- Select Player --</option>` + 
+    playersDb.map(p => {
+        if(selected.includes(p.fullName)) return '';
+        const name = p.fullName || `Elite-User-${p.id.substring(0,5)}`;
+        return `<option value="${name}">${name} ${p.isOnline?'':'(OFFLINE)'}</option>`;
+    }).join('');
+  const div = document.createElement('div');
+  div.style="display:flex; gap:10px; margin-bottom:10px;";
+  div.innerHTML = `<select class="std-input" style="margin-bottom:0; flex:1;" onchange="updateAdminSelect()">${opts}</select><button onclick="this.parentElement.remove(); updateAdminSelect();" style="background:var(--danger); width:50px;">✕</button>`;
+  document.getElementById('playerList').appendChild(div);
+  updateAdminSelect();
+}
+
+function formatEliteDate(dateObj) {
+    if (!dateObj) return '-';
+    let d;
+    if (dateObj instanceof Date) {
+        d = dateObj;
+    } else {
+        d = new Date(dateObj);
+        if (isNaN(d.getTime())) return dateObj; 
+    }
+    
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yy = String(d.getFullYear()).slice(-2);
+    
+    let hours = d.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; 
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    
+    return `${dd}-${mm}-${yy} ${hours}:${minutes} ${ampm}`;
+}
+
+function startGame() {
+  let pList = Array.from(document.querySelectorAll('#playerList select')).map(s => s.value).filter(v => v !== "");
+  if(pList.length < 2) return alert("Select at least 2 players");
+  for(let i=pList.length-1; i>0; i--){ let j=Math.floor(Math.random()*(i+1)); [pList[i],pList[j]]=[pList[j],pList[i]]; }
+  
+  // Grab ruleset configurations
+  const isCustomMode = document.getElementById('ruleCustomBtn') && document.getElementById('ruleCustomBtn').classList.contains('active-rule');
+  const rulesetMode = isCustomMode ? 'custom' : 'standard';
+  let exitLimit = 240;
+  let maxRE = 1;
+
+  if (rulesetMode === 'custom') {
+      exitLimit = parseInt(document.getElementById('exitScoreInput').value);
+      maxRE = parseInt(document.getElementById('maxReentriesInput').value);
+      if (isNaN(exitLimit) || exitLimit <= 0) {
+          alert("Please enter a valid exit score limit greater than 0.");
+          return;
+      }
+      if (isNaN(maxRE) || maxRE < 0) {
+          alert("Please enter a valid number of re-entries (min 0).");
+          return;
+      }
+  }
+
+  const selectedAdmin = document.getElementById('gameAdminSelect')?.value || pList[0];
+
+  state = {
+    id: Date.now().toString(), name: document.getElementById('gName').value || "Game",
+    startTime: formatEliteDate(new Date()), players: pList, startingPlayers: [...pList], totals: {}, roundScores: {}, roundTactics: {}, lastDropRound: {},
+    eliminated: {}, reEntries: {}, actionStats: {}, round: 1, history: [], winner: null, endTime: null,
+    ruleset: rulesetMode, exitScoreLimit: exitLimit, maxReEntries: maxRE,
+    admin: selectedAdmin
+  };
+  pList.forEach(p => { state.totals[p]=0; state.roundScores[p]=null; state.roundTactics[p]=null; state.lastDropRound[p]=-1; state.actionStats[p]={shows:0,fcs:0,drops:0,mds:0}; });
+  db.collection('eliteGames').doc(state.id).set(state);
+  showScreen('activeGame');
+}
+
+function renderActive(focusPlayer = null) {
+  if(!state) return;
+  
+  const exitLimit = getExitLimitFor(state);
+  let activeInRound = state.players.filter(p => !state.eliminated[p] && state.totals[p] < exitLimit);
+  
+  // Determine who to render: survivors or everyone from the last round if game is over
+  let activePlayers = state.winner ? state.players : activeInRound;
+
+  let dealer = getDealerForState(state);
+
+  let titleHtml = '';
+  if (state.winner) {
+      titleHtml = `
+      <div id="activeGameTitleContainer" style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; flex-grow: 1;">
+          <h3 style="margin:0; color:var(--warning)">GAME OVER</h3>
+          ${state.admin ? `<span style="font-size:11px; font-weight:bold; color:var(--accent); background:rgba(39,174,96,0.15); border:1px solid rgba(39,174,96,0.25); padding:2px 6px; border-radius:4px; margin-left:10px;">Admin: ${state.admin}${isAdmin() ? ' (You)' : ''}</span>` : ''}
+      </div>`;
+  } else {
+      const allowedToRename = isAdmin();
+      titleHtml = `
+      <div id="activeGameTitleContainer" style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; flex-grow: 1;">
+          <h3 style="margin:0; ${allowedToRename ? 'cursor:pointer;' : ''}" ${allowedToRename ? 'onclick="editGameNameInline()" title="Click to edit game name"' : 'title="Only game admin can rename"'}>${state.name}</h3>
+          ${allowedToRename ? `
+          <span style="font-size:11px; color:#fff; font-weight:bold; opacity:0.8; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:4px; cursor:pointer;" onclick="editGameNameInline()">
+              <svg style="width:10px; height:10px; stroke:currentColor; stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round;" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              Rename
+          </span>` : ''}
+          <span style="font-size:12px; opacity:0.6; line-height:1.2; padding-left:4px;">(Round ${state.round})</span>
+          ${state.admin ? `<span style="font-size:11px; font-weight:bold; color:var(--accent); background:rgba(39,174,96,0.15); border:1px solid rgba(39,174,96,0.25); padding:2px 6px; border-radius:4px; margin-left:4px;">Admin: ${state.admin}${isAdmin() ? ' (You)' : ''}</span>` : ''}
+      </div>`;
+  }
+
+  let h = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px; flex-wrap:wrap; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex-grow: 1;">
+        <button onclick="toggleFullScreen()" class="pause-btn" style="background: linear-gradient(to bottom, var(--accent), #1e8449); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 10px rgba(39, 174, 96, 0.3); width:80px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">Full Screen</button>
+        ${titleHtml}
+    </div>
+    <div style="display:flex; gap:5px; flex-shrink: 0; margin-left: auto;">
+        <button onclick="state=null; showScreen('newGame')" class="pause-btn" style="width:80px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;">${state.winner?'Home':'Pause'}</button>
+    </div>
+  </div>`;
+
+  const pastPlayers = Object.keys(state.totals).filter(p => !state.players.includes(p) || state.eliminated[p] || state.totals[p] >= exitLimit);
+
+  const renderPlayerRow = (p) => {
+    let rs = state.roundScores[p];
+    let isOut = state.eliminated[p] || state.totals[p] >= exitLimit;
+    let dLock = state.lastDropRound[p] === (state.round-1);
+    let tactic = state.roundTactics ? state.roundTactics[p] : null;
+    
+    // Custom RE count checking
+    const reCount = getPlayerReEntriesCount(p, state);
+    let reLabel = '';
+    if (reCount > 1) reLabel = `RE (${reCount})`;
+    else if (reCount === 1) reLabel = 'RE';
+    
+    let isPendingOut = (rs === 'OUT');
+    let isS = (rs === 'S');
+
+    return `<tr style="${isOut?'opacity:0.3':''}" id="row-${p}">
+        <td>
+            ${p===dealer?'<span class="dealer-badge">D</span>':''} 
+            <b>${p}</b>
+            ${reLabel ? `<span style="background:var(--warning); color:#000; padding:1px 4px; border-radius:3px; font-size:8px; margin-left:4px; font-weight:bold;">${reLabel}</span>` : ''}
+        </td>
+        <td>
+            <div style="display:flex; gap:3px; flex-wrap:wrap;">
+                <button class="tactic-btn t-S ${(rs==='S' && tactic==='S')?'active':''}" style="background:var(--accent)" onclick="setTactic('${p}', 'S')" ${isOut || state.winner?'disabled':''}>S</button>
+                <button class="tactic-btn t-D ${(rs===20 && tactic==='D')?'active':''}" style="background:var(--warning)" onclick="setTactic('${p}', 'D')" ${isOut || dLock || state.winner?'disabled':''}>D</button>
+                <button class="tactic-btn t-MD ${(rs===40 && tactic==='MD')?'active':''}" style="background:#8e44ad; color:white;" onclick="setTactic('${p}', 'MD')" ${isOut || state.winner?'disabled':''}>MD</button>
+                <button class="tactic-btn t-FC ${(rs===80 && tactic==='FC')?'active':''}" style="background:var(--danger); color:white;" onclick="setTactic('${p}', 'FC')" ${isOut || state.winner?'disabled':''}>FC</button>
+                <button class="tactic-btn t-FS ${(rs===0 && tactic==='FS')?'active':''}" style="background: linear-gradient(to bottom, #34495e, #1a232e); border: 1px solid rgba(255,255,255,0.4); color:white;" onclick="setTactic('${p}', 'FS')" ${isOut || state.winner?'disabled':''}>FS</button>
+            </div>
+            <div style="display:flex; gap:5px; align-items:center; margin-top:5px;">
+                <button class="tactic-btn t-OUT" style="background:var(--danger); color:white; flex:none; width:35px; height:32px; padding:0; font-size:9px; font-weight:900;" onclick="markOut('${p}')" ${state.winner?'disabled':''}>OUT</button>
+                <input type="text" id="input-${p}" inputmode="numeric" pattern="[0-9]*" class="std-input score-input" data-player="${p}" style="height:32px; margin:0; text-align:center; font-size:12px; flex:1; background:${(isOut || isPendingOut || isS || state.winner) ? '#e0e0e0' : '#fff'}; color:${(isOut || isPendingOut || isS || state.winner) ? '#888' : '#000'}; font-weight:${(isOut || isPendingOut || state.winner) ? 'bold' : '600'};" value="${state.winner ? (state.totals[p] || 0) : (isOut?'OUT':(rs===null?'':rs))}" oninput="manualInput('${p}', this.value)" onkeydown="if(event.key==='Enter') { event.preventDefault(); this.blur(); }" ${isOut || isPendingOut || isS || state.winner?'disabled':''}>
+            </div>
+        </td>
+        <td><b style="color:var(--warning)">${(isOut || isPendingOut) ? 'OUT' : state.totals[p]}</b></td>
+    </tr>`;
+  };
+
+  h += `<table style="table-layout: fixed;">
+        <colgroup><col style="width:32%"><col style="width:48%"><col style="width:20%"></colgroup>
+        <tr><th>Player</th><th>Tactics</th><th>Total</th></tr>`;
+
+  activePlayers.forEach(p => h += renderPlayerRow(p));
+
+  h += `</table>`;
+
+  if(!state.winner) {
+      const isRoundInProgress = Object.keys(state.roundScores).some(p => {
+          const isNotOut = !state.eliminated[p] && (state.totals[p] || 0) < exitLimit;
+          return isNotOut && state.roundScores[p] !== null;
+      });
+      h += `<button id="endBtn" class="actionBtn" style="margin-top:15px;" onclick="nextRound()">Next Round (${state.round + 1})</button>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="actionBtn" style="background:${isRoundInProgress?'#333':'#555'}; height:45px; font-size:12px; margin:0; flex:1; opacity:${isRoundInProgress?0.5:1};" onclick="openMidGame()">+ Add Player Mid-Game</button>
+            </div>`;
+  } else {
+      h += `<div style="text-align:center; padding:10px 0; margin-top:15px; margin-bottom:10px; background:rgba(255,255,255,0.05); border-radius:8px; border:1px dashed var(--warning);">
+            <div style="font-size:12px; opacity:0.8; margin-bottom:2px;">🏆 WINNER 🏆</div>
+            <div style="font-size:24px; color:var(--warning); font-weight:900; text-shadow: 0 0 10px rgba(241, 196, 15, 0.3);">${state.winner}</div>
+          </div>`;
+  }
+
+  const shownPast = pastPlayers.slice(0, 10);
+  if (pastPlayers.length > 0) {
+      h += `<div style="margin-top:15px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:11px; opacity:0.8;">
+            <b>Past:</b> ${pastPlayers.map(p => {
+                const reCount = getPlayerReEntriesCount(p, state);
+                const reSuf = reCount > 1 ? ` (RE:${reCount})` : (reCount === 1 ? ' (RE)' : '');
+                return `${p}${reSuf} (${state.totals[p]})`;
+            }).join(' | ')}
+            </div>`;
+  }
+  
+  h += `<div style="margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border:1px solid var(--glass-border);">
+        <h4 style="margin: 0 0 10px 0; color:var(--accent);">Scoreboard Logs</h4>`;
+  if (state.history.length === 0) h += `<div style="font-size:11px; opacity:0.5;">Waiting for round completion...</div>`;
+  else {
+      state.history.slice().reverse().forEach(r => {
+          const isLatestRound = r.round === state.history.length;
+          const adminAllowed = isAdmin();
+          const editBtnHtml = isLatestRound ? (adminAllowed ? 
+              `<button onclick="openEditRoundModal(${r.round})" style="background:rgba(39, 174, 96, 0.15); color:var(--accent); border:1px solid rgba(39, 174, 96, 0.4); border-radius:4px; padding:2px 8px; font-size:10px; font-weight:bold; cursor:pointer;" onmouseover="this.style.background='var(--accent)'; this.style.color='white';" onmouseout="this.style.background='rgba(39, 174, 96, 0.15)'; this.style.color='var(--accent)';">Edit Round</button>` :
+              `<button style="background:rgba(255,255,255,0.02); color:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:4px; padding:2px 8px; font-size:10px; font-weight:bold; cursor:not-allowed;" disabled title="Only admin can edit rounds">Inactive</button>`) : '';
+
+          h += `<div style="font-size:11px; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+              <div style="flex:1; min-width:200px; padding-right:10px; line-height:1.4;">
+                  <b style="color:var(--accent);">Round ${r.round}</b>: ${(r.players || state.players).map(p => {
+                      let rs = r.scores[p] === undefined ? '-' : r.scores[p];
+                      let tot = r.totals[p] !== undefined ? r.totals[p] : '-';
+                      
+                      const historicReCount = r.reentries && r.reentries[p] !== undefined ? 1 : 0; 
+                      let reSuf = historicReCount > 0 ? ' (RE)' : '';
+                      let tactic = (r.tactics && r.tactics[p]) ? r.tactics[p] : null;
+                      
+                      let displayScore = tactic ? tactic : rs;
+                      if (rs === 'OUT' || tot >= exitLimit) {
+                          return `${p}${reSuf}: <span style="color:var(--danger)">OUT (${exitLimit})</span>`;
+                      }
+                      return `${p}${reSuf}: ${displayScore} (${tot})`;
+                  }).join(' | ')}
+              </div>
+              <div style="flex:none;">
+                  ${editBtnHtml}
+              </div>
+          </div>`;
+      });
+  }
+  h += `</div>`;
+  document.getElementById('mainPane').innerHTML = h;
+  validateEndBtn();
+
+  if (focusPlayer) {
+      setTimeout(() => {
+          const inp = document.getElementById(`input-${focusPlayer}`);
+          if (inp && !inp.disabled) inp.focus();
+      }, 100);
+  }
+}
+
+function editGameNameInline() {
+    const headerTitleElement = document.getElementById('activeGameTitleContainer');
+    if (!headerTitleElement) return;
+    
+    // Extract base game name, removing any trailing Date & Time format e.g. "DD-MM-YY HH:MM AM/PM"
+    let baseName = state.name;
+    const datePatternRegex = /\s+\d{2}-\d{2}-\d{2}\s+\d{1,2}:\d{2}\s+(?:AM|PM)$/i;
+    baseName = baseName.replace(datePatternRegex, '');
+    
+    // Render an input + Save/Cancel buttons
+    headerTitleElement.innerHTML = `
+        <div style="display:flex; gap:6px; align-items:center; width:100%; max-width:420px; background:rgba(0,0,0,0.2); padding:4px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+            <input id="editGameNameInput" type="text" class="std-input" value="${baseName.replace(/"/g, '&quot;')}" style="margin-bottom:0; height:32px; padding:0 8px; font-size:13px; flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2); color:#fff !important; -webkit-text-fill-color:#fff !important; border-radius:4px;" onkeydown="if(event.key==='Enter') saveGameNameInline(); if(event.key==='Escape') cancelGameNameInline();">
+            <button onclick="saveGameNameInline()" style="background:var(--accent); color:white; height:32px; padding:0 12px; font-size:12px; font-weight:bold; border:none; border-radius:4px; cursor:pointer;">Save</button>
+            <button onclick="cancelGameNameInline()" style="background:rgba(255,255,255,0.1); color:white; height:32px; padding:0 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer;">Cancel</button>
+        </div>
+    `;
+    const inputEl = document.getElementById('editGameNameInput');
+    if (inputEl) {
+        inputEl.focus();
+        inputEl.select();
+    }
+}
+
+function saveGameNameInline() {
+    if (!isAdmin()) {
+        alert("Only the game admin can rename the game.");
+        cancelGameNameInline();
+        return;
+    }
+    const input = document.getElementById('editGameNameInput');
+    if (!input) return;
+    let base = input.value.trim();
+    if (!base) base = "Game";
+    
+    // Automatically include Date and Time in the format DD-MM-YY TIME (AM/PM) from the original startTime (or current if missing)
+    let dateStr = state.startTime || formatEliteDate(new Date());
+    state.name = base + " " + dateStr;
+    
+    // Sync to Firestore & re-render
+    db.collection('eliteGames').doc(state.id).set(state).then(() => {
+        renderActive();
+    }).catch(e => {
+        console.error("Failed to update game name:", e);
+        renderActive();
+    });
+}
+
+function cancelGameNameInline() {
+    renderActive();
+}
+
+function setTactic(p, type) {
+    if(state.winner || state.eliminated[p]) return;
+    let v = null;
+    let tactic = type;
+    if(!state.roundTactics) state.roundTactics = {};
+
+    if(type==='S'){ 
+        const isCurrentlyS = state.roundScores[p] === 'S' && state.roundTactics[p] === 'S';
+        // Clear mandatory Show 'S' from others
+        state.players.forEach(pl => {
+            if(state.roundScores[pl]==='S') {
+                state.roundScores[pl]=null;
+                state.roundTactics[pl]=null;
+            }
+        }); 
+        v = isCurrentlyS ? null : 'S'; 
+        tactic = isCurrentlyS ? null : 'S';
+    }
+    else if(type==='D') {
+        const isCurrentlyD = state.roundScores[p] === 20 && state.roundTactics[p] === 'D';
+        v = isCurrentlyD ? null : 20;
+        tactic = isCurrentlyD ? null : 'D';
+    }
+    else if(type==='MD') {
+        const isCurrentlyMD = state.roundScores[p] === 40 && state.roundTactics[p] === 'MD';
+        v = isCurrentlyMD ? null : 40;
+        tactic = isCurrentlyMD ? null : 'MD';
+    }
+    else if(type==='FC') {
+        const isCurrentlyFC = state.roundScores[p] === 80 && state.roundTactics[p] === 'FC';
+        v = isCurrentlyFC ? null : 80;
+        tactic = isCurrentlyFC ? null : 'FC';
+    }
+    else if(type==='OUT') {
+        markOut(p);
+        return;
+    }
+    else if(type==='FS') {
+        const isCurrentlyFS = state.roundScores[p] === 0 && state.roundTactics[p] === 'FS';
+        v = isCurrentlyFS ? null : 0;
+        tactic = isCurrentlyFS ? null : 'FS';
+    }
+    state.roundScores[p] = v;
+    state.roundTactics[p] = tactic;
+    
+    updateRoundScoresUI();
+    db.collection('eliteGames').doc(state.id).update({ 
+        roundScores: state.roundScores,
+        roundTactics: state.roundTactics
+    });
+}
+
+function manualInput(p, val) {
+    let raw = val.trim();
+    let v = null;
+    if(!state.roundTactics) state.roundTactics = {};
+
+    if(raw !== "") {
+        let up = raw.toUpperCase();
+        if (up === 'S') v = 'S';
+        else if (up === 'OUT') {
+            markOut(p);
+            return;
+        } else {
+            v = parseInt(raw);
+        }
+        
+        if(v==='S') {
+            state.players.forEach(pl => {
+                if(pl !== p && state.roundScores[pl]==='S') {
+                    state.roundScores[pl]=null;
+                    state.roundTactics[pl]=null;
+                }
+            });
+        }
+        if(v !== 'S' && isNaN(v)) v = null;
+    }
+    state.roundScores[p] = v;
+    state.roundTactics[p] = (v === 'S') ? 'S' : null; // Clear tactic highlight on manual input except for 'S'
+    
+    updateRoundScoresUI();
+    const el = document.getElementById(`input-${p}`);
+    if (el) el.focus();
+    db.collection('eliteGames').doc(state.id).update({ 
+        roundScores: state.roundScores,
+        roundTactics: state.roundTactics
+    });
+}
+
+function updateRoundScoresUI() {
+    state.players.forEach(p => {
+        const row = document.getElementById(`row-${p}`);
+        if(!row) return;
+        const val = state.roundScores[p];
+        const input = row.querySelector('.score-input');
+        const buttons = row.querySelectorAll('.tactic-btn');
+        
+        const isOut = state.eliminated[p] || (state.totals[p] || 0) >= getExitLimitFor(state);
+        const isS = (val === 'S');
+        const isPendingOut = (val === 'OUT');
+        
+        // Update row appearance
+        if (isOut || isPendingOut) {
+            row.style.opacity = '0.3';
+        } else {
+            row.style.opacity = '1';
+        }
+
+        if (input) {
+            if (document.activeElement !== input) {
+                if (isOut || isPendingOut) input.value = 'OUT';
+                else input.value = (val === null) ? '' : val;
+            }
+            input.disabled = (isOut || isS || isPendingOut || !!state.winner);
+            
+            // Visual indicators for deactivated boxes
+            if (input.disabled) {
+                input.style.background = '#e0e0e0';
+                input.style.color = '#888';
+                if (isOut || isPendingOut) input.style.fontWeight = 'bold';
+            } else {
+                input.style.background = '#fff';
+                input.style.color = '#000';
+                input.style.fontWeight = '600';
+            }
+        }
+        
+        buttons.forEach(btn => {
+            const dLock = state.lastDropRound && state.lastDropRound[p] === (state.round - 1);
+            btn.classList.remove('active');
+            btn.disabled = (isOut || !!state.winner || (btn.classList.contains('t-D') && dLock));
+            
+            const tactic = state.roundTactics ? state.roundTactics[p] : null;
+            if(btn.classList.contains('t-OUT') && val === 'OUT') btn.classList.add('active');
+            if(btn.classList.contains('t-S') && tactic === 'S' && val === 'S') btn.classList.add('active');
+            if(btn.classList.contains('t-D') && tactic === 'D' && val === 20) btn.classList.add('active');
+            if(btn.classList.contains('t-MD') && tactic === 'MD' && val === 40) btn.classList.add('active');
+            if(btn.classList.contains('t-FC') && tactic === 'FC' && val === 80) btn.classList.add('active');
+            if(btn.classList.contains('t-OUT') && (val === 'OUT' || isOut)) btn.classList.add('active');
+            if(btn.classList.contains('t-FS') && tactic === 'FS' && val === 0) btn.classList.add('active');
+        });
+    });
+    validateEndBtn();
+    
+    // Update Add Mid-Game Player button state
+    const midGameBtn = Array.from(document.querySelectorAll('.actionBtn')).find(b => b.innerText.includes('Add Player Mid-Game'));
+    if (midGameBtn) {
+        const isRoundInProgress = Object.keys(state.roundScores).some(p => {
+            const isNotOut = !state.eliminated[p] && (state.totals[p] || 0) < 240;
+            return isNotOut && state.roundScores[p] !== null;
+        });
+        midGameBtn.style.background = isRoundInProgress ? '#333' : '#555';
+        midGameBtn.style.opacity = isRoundInProgress ? '0.5' : '1';
+    }
+}
+
+function focusNext(p) {
+    const idx = state.players.indexOf(p);
+    for (let i = 1; i < state.players.length; i++) {
+        const nextIdx = (idx + i) % state.players.length;
+        const nextP = state.players[nextIdx];
+        if (!state.eliminated[nextP] && state.totals[nextP] < 240) {
+            const nextInput = document.getElementById(`input-${nextP}`);
+            if (nextInput) {
+                // Use a tiny delay to ensure keyboard stays up on all devices
+                setTimeout(() => {
+                    nextInput.focus();
+                    nextInput.select();
+                }, 10);
+                return;
+            }
+        }
+    }
+    // If no next input, try to finish round if ready
+    const btn = document.getElementById('endBtn');
+    if (btn && !btn.disabled) {
+        nextRound();
+    } else {
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    }
+}
+
+function validateEndBtn() {
+    if(!state) return;
+    // Participants in the current round (under 240 and not eliminated at start)
+    let participants = state.players.filter(p => !state.eliminated[p]);
+    
+    // Calculate potential survivors based on entered scores
+    let survivors = participants.filter(p => {
+        let rs = state.roundScores[p];
+        if (rs === 'OUT') return false;
+        if (rs === 'S') return true;
+        let n = parseInt(rs) || 0;
+        return ((state.totals[p] || 0) + n) < 240;
+    });
+    
+    let shows = participants.filter(p => state.roundScores[p] === 'S');
+    
+    // Ensure ALL active participants have some score entered
+    let allEntered = participants.every(p => {
+        const val = state.roundScores[p];
+        if (val === 'S' || val === 'OUT') return true;
+        if (typeof val === 'number' && !isNaN(val)) return true;
+        return false;
+    });
+
+    const btn = document.getElementById('endBtn');
+    if(btn) { 
+        // If survivors exist, one must be 'S'. If all out, all must have scores.
+        let isReady = allEntered;
+        if (survivors.length > 0) {
+            isReady = isReady && (shows.length === 1);
+        }
+        
+        btn.disabled = !isReady; 
+        if (isReady) {
+            btn.style.background = "#27ae60"; 
+            btn.style.color = "white";
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
+            btn.style.boxShadow = "0 0 15px rgba(39, 174, 96, 0.4)";
+        } else {
+            btn.style.background = "#444";
+            btn.style.color = "rgba(255,255,255,0.4)";
+            btn.style.opacity = "0.6";
+            btn.style.cursor = "not-allowed";
+            btn.style.boxShadow = "none";
+        }
+    }
+}
+
+function markOut(p) {
+    if(!state || state.winner) return;
+    if (state.roundScores[p] === 'OUT') {
+        state.roundScores[p] = null;
+        state.roundTactics[p] = null;
+    } else {
+        if(confirm(`${p} will be eliminated and can rejoin in the other rounds. Proceed?`)) {
+            state.roundScores[p] = 'OUT';
+            state.roundTactics[p] = 'OUT';
+        }
+    }
+    updateRoundScoresUI();
+    db.collection('eliteGames').doc(state.id).set(state);
+}
+
+async function nextRound() {
+    if(!state || state.winner || isPromptingReEntry) return;
+    isPromptingReEntry = true;
+    try {
+        let scores = {...state.roundScores};
+        let tactics = state.roundTactics ? {...state.roundTactics} : {};
+        let allParticipants = Array.from(new Set([...state.players, ...Object.keys(scores)]));
+        
+        let entry = { round: state.round, players: allParticipants, scores: scores, tactics: tactics, totals: {}, reentries: {}, bustedTotals: {} };
+        
+        // Ensure all roundScores have a value before proceeding
+        const exitLimit = getExitLimitFor(state);
+        for (let p of state.players) {
+            const sc = state.roundScores[p];
+            if ((sc === undefined || sc === null || sc === "") && !state.eliminated[p] && (state.totals[p] || 0) < exitLimit) {
+                 alert(`Score missing for ${p}. Please enter a score or mark as OUT.`);
+                 isPromptingReEntry = false;
+                 return;
+            }
+        }
+
+        // 1. Calculate totals for all participants
+        allParticipants.forEach(p => {
+            const isOutThisRound = (scores[p] === 'OUT');
+            if(!state.eliminated[p] || isOutThisRound) {
+                let val = scores[p];
+                let n = 0;
+                if (val === 'S') n = 0;
+                else if (val === 'OUT') {
+                    state.totals[p] = exitLimit;
+                    state.eliminated[p] = true; // Mark as eliminated for next check
+                    n = 0; 
+                } else {
+                    n = (parseInt(val) === 0 ? 0 : (parseInt(val) || 0));
+                    if (state.totals[p] === undefined) state.totals[p] = n;
+                    else state.totals[p] += n;
+                    if (state.totals[p] >= exitLimit) entry.bustedTotals[p] = state.totals[p];
+                }
+
+                let tactic = tactics[p];
+                if(tactic==='S') if(state.actionStats[p]) state.actionStats[p].shows++;
+                if(tactic==='D') { 
+                    if(state.actionStats[p]) state.actionStats[p].drops++; 
+                    if(state.lastDropRound) state.lastDropRound[p]=state.round; 
+                }
+                if(tactic==='MD') if(state.actionStats[p]) state.actionStats[p].mds++;
+                if(tactic==='FC') if(state.actionStats[p]) state.actionStats[p].fcs++;
+            }
+        });
+
+        // 2. Process Re-entries
+        let activeSurvivors = state.players.filter(p => state.totals[p] < exitLimit && !state.eliminated[p]);
+        let reEntryQueue = [];
+        
+        // Calculate re-entry score: highest survivor score + 1
+        let entryScore = Math.round(exitLimit * 0.73);
+        if (activeSurvivors.length > 0) {
+            let maxScore = Math.max(...activeSurvivors.map(p => state.totals[p]));
+            entryScore = maxScore + 1;
+        }
+        if (entryScore > exitLimit) entryScore = exitLimit;
+
+        for(let p of state.players) {
+            const canReEnter = canPlayerReEnter(p, state);
+            // Only players who reached exitLimit+ via scores (not manually marked OUT) get a chance
+            if(state.totals[p] >= exitLimit && !state.eliminated[p]) {
+                if(canReEnter) {
+                    reEntryQueue.push({player: p, score: entryScore});
+                } else {
+                    state.eliminated[p] = true; // No second chance
+                }
+            }
+        }
+
+        if(reEntryQueue.length > 0) {
+            await processReEntryQueue(reEntryQueue, entry, allParticipants);
+        } else {
+            // Check if game should continue or end
+            let nextSurvivors = state.players.filter(p => !state.eliminated[p] && state.totals[p] < exitLimit);
+            if (nextSurvivors.length === 0) {
+                // Everyone is eliminated or over exitLimit - Game Ends!
+                let allInRound = state.players.filter(p => !state.eliminated[p] || state.totals[p] >= exitLimit);
+                let minScore = Math.min(...allInRound.map(p => state.totals[p]));
+                let winners = allInRound.filter(p => state.totals[p] === minScore);
+                state.winner = (winners.length > 1 ? winners.join(' & ') : winners[0]) || "Tie";
+                state.endTime = formatEliteDate(new Date());
+                allParticipants.forEach(p => { entry.totals[p] = state.totals[p] || 0; });
+                state.history.push(entry);
+                await db.collection('eliteGames').doc(state.id).set(state);
+            } else {
+                await finalizeRound(entry, allParticipants);
+            }
+        }
+    } catch (e) {
+        console.error("Round transition error:", e);
+    } finally {
+        isPromptingReEntry = false;
+        renderActive();
+    }
+}
+
+function processReEntryQueue(queue, entry, allParticipants) {
+    return new Promise((resolve) => {
+        const next = () => {
+            if (queue.length === 0) {
+                finalizeRound(entry, allParticipants).then(resolve);
+                return;
+            }
+            
+            let { player, score } = queue.shift();
+            const exitLimit = getExitLimitFor(state);
+            
+            if (score >= exitLimit) {
+                document.getElementById('reentryText').innerHTML = `<b style="color:var(--danger)">No points available to Re-entry</b><br><b>${player}</b> reached <b>${state.totals[player]}</b> and is eliminated.`;
+                document.getElementById('reentryModal').style.display = 'flex';
+                document.getElementById('btnReentryYes').style.display = 'none';
+                document.getElementById('btnReentryNo').innerText = 'Dismiss';
+                document.getElementById('btnReentryNo').onclick = () => {
+                    state.eliminated[player] = true;
+                    document.getElementById('reentryModal').style.display = 'none';
+                    document.getElementById('btnReentryYes').style.display = 'flex'; // Reset for next
+                    document.getElementById('btnReentryNo').innerText = 'Leave'; // Reset
+                    next();
+                };
+                return;
+            }
+            
+            document.getElementById('reentryText').innerHTML = `<b>${player}</b> reached <b>${state.totals[player]}</b>.<br>Re-enter at <b>${score}</b>?`;
+            document.getElementById('reentryModal').style.display = 'flex';
+            
+            document.getElementById('btnReentryYes').onclick = () => {
+                const currentCount = state.reEntries[player] ? (state.reEntries[player] === true ? 1 : state.reEntries[player]) : 0;
+                state.reEntries[player] = currentCount + 1;
+                state.totals[player] = score;
+                entry.reentries[player] = score;
+                document.getElementById('reentryModal').style.display = 'none';
+                next();
+            };
+            
+            document.getElementById('btnReentryNo').onclick = () => {
+                state.eliminated[player] = true;
+                document.getElementById('reentryModal').style.display = 'none';
+                next();
+            };
+        };
+        next();
+    });
+}
+
+
+function getFirstName(name) {
+    if (!name) return "";
+    return name.split(' ')[0];
+}
+
+async function finalizeRound(entry, allParticipants) {
+    allParticipants.forEach(p => { entry.totals[p] = (state.totals[p] !== undefined) ? state.totals[p] : 0; });
+    state.history.push(entry);
+    state.round++; 
+    
+    const exitLimit = getExitLimitFor(state);
+    // Players who are now eliminated or over exitLimit must be removed from the active roster for the next round
+    state.players = state.players.filter(p => !state.eliminated[p] && (state.totals[p] || 0) < exitLimit);
+
+    state.players.forEach(p => {
+        state.roundScores[p] = null;
+        if(state.roundTactics) state.roundTactics[p] = null;
+    });
+
+    let currentSurvivors = state.players.filter(p => !state.eliminated[p] && (state.totals[p] || 0) < exitLimit);
+    if (currentSurvivors.length === 1) {
+        state.winner = currentSurvivors[0];
+        state.endTime = formatEliteDate(new Date());
+    } else if (currentSurvivors.length === 0) {
+        // Tie-break if everyone somehow got out (sudden death handler)
+        let participantsInLastRound = allParticipants.filter(p => state.totals[p] !== undefined);
+        if (participantsInLastRound.length > 0) {
+            let minScore = Math.min(...participantsInLastRound.map(p => state.totals[p]));
+            let winners = participantsInLastRound.filter(p => state.totals[p] === minScore);
+            state.winner = (winners.length > 1 ? winners.join(' & ') : winners[0]) || "Tie";
+            state.endTime = formatEliteDate(new Date());
+        } else {
+            state.winner = "No Winner";
+            state.endTime = formatEliteDate(new Date());
+        }
+    }
+    
+    await db.collection('eliteGames').doc(state.id).set(state);
+    isPromptingReEntry = false;
+
+    renderActive(null); // Round over, don't auto-focus keypad
+}
+
+// --- PROFILE & AI ANALYSIS ---
+function viewProfile(uid) {
+    const p = playersDb.find(x => x.id === uid); if(!p) return;
+    const name = p.fullName || `Elite-ID: ${p.id.substring(0,8)}`;
+    let games = savedGames.filter(g => g.winner && g.players.includes(name) && !g.isAborted && !g.isDeleted);
+    let wins = games.filter(g => g.winner === name).length;
+    let s=0, fc=0, d=0, md=0;
+    games.forEach(g => { if(g.actionStats && g.actionStats[name]){ s+=g.actionStats[name].shows; fc+=g.actionStats[name].fcs; d+=g.actionStats[name].drops; md+=g.actionStats[name].mds; } });
+    
+    document.getElementById('pPhoto').src = p.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=27ae60&color=fff&size=150`;
+    document.getElementById('pName').innerText = name;
+    document.getElementById('pID').innerText = "PLAYER ID: " + p.id;
+    document.getElementById('statWins').innerText = wins;
+    document.getElementById('statS').innerText = s;
+    document.getElementById('statFC').innerText = fc;
+    document.getElementById('statD').innerText = d;
+    document.getElementById('statMD').innerText = md;
+    document.getElementById('statTotal').innerText = games.length;
+
+    // Medals Logic: 3 = Pro, 6 = Ultra Pro, 10 = Ultra Pro Max
+    let medalsHTML = `<div onclick="showMedalInfo()" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:5px; cursor:pointer;" title="Click for medal info">
+        <div style="text-align:center; opacity:${wins >= 3 ? 1 : 0.2}">
+            <div style="font-size:24px;">🏅</div>
+            <div style="font-size:9px; font-weight:bold; color:${wins >= 3 ? '#e67e22' : '#aaa'}">PRO</div>
+            <div style="font-size:10px;">${wins >= 3 ? 1 : 0}</div>
+        </div>
+        <div style="text-align:center; opacity:${wins >= 6 ? 1 : 0.2}">
+            <div style="font-size:24px;">🏆</div>
+            <div style="font-size:9px; font-weight:bold; color:${wins >= 6 ? '#f39c12' : '#aaa'}">ULTRA PRO</div>
+            <div style="font-size:10px;">${wins >= 6 ? 1 : 0}</div>
+        </div>
+        <div style="text-align:center; opacity:${wins >= 10 ? 1 : 0.2}">
+            <div style="font-size:24px;">👑</div>
+            <div style="font-size:9px; font-weight:bold; color:${wins >= 10 ? '#f1c40f' : '#aaa'}">ULTRA PRO MAX</div>
+            <div style="font-size:10px;">${wins >= 10 ? 1 : 0}</div>
+        </div>
+    </div>`;
+
+    let certsHTML = "";
+    const wonGames = games.filter(g => g.winner === name);
+    if (wonGames.length > 0) {
+        certsHTML = `<div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+            <b style="font-size:12px; display:block; margin-bottom:5px;">AWARDED CERTIFICATES</b>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                ${wonGames.map(g => `<button onclick="viewCertificate('${g.id}')" style="background:#f1c40f; color:#000; font-size:10px; padding:4px; width:100%; text-align:left; border-radius:4px; border:none; font-weight:bold;">📜 ${g.name}</button>`).join('')}
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('aiAnalysis').innerHTML = `<div style="display:flex; flex-direction:column; gap:10px;">
+        <div><b>MEDALS & RANK:</b>${medalsHTML}</div>
+        ${certsHTML}
+    </div>`;
+    document.getElementById('btnEditProfile').style.display = (auth.currentUser && uid === auth.currentUser.uid) ? 'inline-block' : 'none';
+    document.getElementById('profileModal').style.display='flex';
+}
+
+function viewCertificate(id) {
+    const g = savedGames.find(x => x.id === id);
+    if (!g || !g.winner) return alert("Certificate only available for finished games.");
+    if (g.isAborted) return alert("Certificate not available for abandoned games.");
+    
+    let jsPDF;
+    try {
+        jsPDF = window.jspdf ? window.jspdf.jsPDF : (typeof jspdf !== 'undefined' ? jspdf.jsPDF : null);
+        if (!jsPDF) throw new Error("jsPDF not defined");
+    } catch (err) {
+        return alert("Error: PDF library (jsPDF) is not successfully loaded. Please check your internet connection.");
+    }
+    
+    // Create PDF in Landscape
+    const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+    });
+
+    // Sanitized Data
+    const sanitizePDF = (s) => (s || "").replace(/[^\x20-\x7E\xA0-\xFF]/g, " ").trim();
+    const winnerName = sanitizePDF(g.winner).toUpperCase();
+    const gameName = sanitizePDF(g.name) || "Elite Game";
+    const dateStr = sanitizePDF(g.endTime || g.startTime || formatEliteDate(new Date()));
+    
+    // Background: Rich Parchment
+    doc.setFillColor(252, 250, 242);
+    doc.rect(0, 0, 297, 210, 'F');
+
+    // Watermark (Drawn in background layer)
+    doc.setTextColor(235, 235, 235);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(100);
+    doc.text("ELITE", 148.5, 165, { align: "center", angle: 0 });
+
+    // Ornamental Borders (Gold & Black)
+    doc.setDrawColor(165, 124, 0); // Golden Rod
+    doc.setLineWidth(4);
+    doc.rect(8, 8, 281, 194); // Outer most
+
+    doc.setDrawColor(30, 30, 30); // Charcoal Black
+    doc.setLineWidth(0.5);
+    doc.rect(13, 13, 271, 184); // Inner line 1
+    doc.rect(15, 15, 267, 180); // Inner line 2
+
+    // Header: Elegant Display Font (using helvetica fallback)
+    doc.setTextColor(20, 20, 20);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(48);
+    doc.text("CERTIFICATE OF TRIUMPH", 148.5, 52, { align: "center" });
+
+    doc.setTextColor(165, 124, 0);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("ELITE RUMMY CIRCLE CHAMPIONSHIP", 148.5, 63, { align: "center" });
+
+    // Decorative Separator
+    doc.setDrawColor(165, 124, 0);
+    doc.setLineWidth(0.8);
+    doc.line(90, 70, 207, 70);
+
+    // Salutation
+    doc.setTextColor(70, 70, 70);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(20);
+    doc.text("This official commendation is awarded to", 148.5, 90, { align: "center" });
+
+    // Winner Name: Center Piece
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(52);
+    doc.setFont("helvetica", "bold");
+    doc.text(winnerName, 148.5, 115, { align: "center" });
+    
+    // Name Underline
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(1.2);
+    doc.line(50, 120, 247, 120);
+
+    // Detailed Achievement Text
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "normal");
+    const achievementLine1 = `for emerging victorious in the game of "${gameName}"`;
+    const achievementLine2 = `demonstrating exceptional mental discipline and tactical excellence.`;
+    
+    doc.text(achievementLine1, 148.5, 138, { align: "center" });
+    doc.text(achievementLine2, 148.5, 148, { align: "center" });
+
+    // Footer: Signatures & Verification
+    doc.setFontSize(14);
+    doc.setTextColor(30, 30, 30);
+    
+    // Date Section (Left)
+    doc.text(dateStr, 75, 175, { align: "center" });
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.5);
+    doc.line(45, 170, 105, 170);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("AWARD DATE", 75, 182, { align: "center" });
+
+    // Commissioner Section (Right)
+    doc.setFontSize(14);
+    doc.text("S. A. R.", 222, 175, { align: "center" });
+    doc.line(192, 170, 252, 170);
+    doc.setFontSize(11);
+    doc.text("ELITE RUMMY COMMISSIONER", 222, 182, { align: "center" });
+
+    // Official Seal (Top Right)
+    doc.setFillColor(31, 58, 147); // Dark Academic Blue
+    doc.circle(260, 40, 18, 'F');
+    doc.setDrawColor(165, 124, 0);
+    doc.setLineWidth(1.5);
+    doc.circle(260, 40, 16);
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("AUTHENTIC", 260, 38, { align: "center" });
+    doc.text("ELITE", 260, 42, { align: "center" });
+    doc.text("WINNER", 260, 46, { align: "center" });
+    
+    // Final Save with sanitized filename
+    const safeName = winnerName.replace(/[^a-z0-9]/gi, '_');
+    doc.save(`Elite_Certificate_${safeName}.pdf`);
+}
+
+function viewMyProfile() { if(auth.currentUser) viewProfile(auth.currentUser.uid); }
+
+function openEditProfile() {
+    const p = playersDb.find(x => x.id === auth.currentUser.uid);
+    document.getElementById('editName').value = p.fullName || "";
+    document.getElementById('editPhotoPreview').src = p.photoURL || "";
+    document.getElementById('profileModal').style.display = 'none';
+    document.getElementById('editProfileModal').style.display = 'flex';
+}
+
+async function saveProfile() {
+    await db.collection('players').doc(auth.currentUser.uid).update({ fullName: document.getElementById('editName').value.toUpperCase(), photoURL: document.getElementById('editPhotoPreview').src });
+    document.getElementById('editProfileModal').style.display = 'none';
+    viewMyProfile();
+}
+
+/**
+ * SCOREBOARD ANIMATOR (Disabled)
+ */
+function handlePhotoUpload(event) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 150;
+            const scale = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scale;
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            document.getElementById('editPhotoPreview').src = canvas.toDataURL('image/jpeg', 0.7);
+        }
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+// --- UTILS & SCREENS ---
+function showMedalInfo() {
+    alert("Elite Medal Brackets:\n\n🏅 PRO: 3 Wins\n🏆 ULTRA PRO: 6 Wins\n👑 ULTRA PRO MAX: 10 Wins");
+}
+
+let tvCloseTimer = null;
+function handleTVMouseMove() {
+    const overlay = document.getElementById('fullscreenOverlay');
+    if (!overlay || overlay.style.display !== 'flex') return;
+    const btn = document.getElementById('tvCloseBtn');
+    if (!btn) return;
+    btn.classList.add('visible');
+    if (tvCloseTimer) clearTimeout(tvCloseTimer);
+    tvCloseTimer = setTimeout(() => {
+        btn.classList.remove('visible');
+    }, 3000);
+}
+document.addEventListener('mousemove', handleTVMouseMove);
+document.addEventListener('touchstart', handleTVMouseMove);
+
+let screenWakeLock = null;
+let silentAudio = null;
+
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            if (screenWakeLock && !screenWakeLock.released) return;
+            screenWakeLock = await navigator.wakeLock.request('screen');
+            console.log("Screen Wake Lock active.");
+        }
+    } catch (err) {
+        console.warn("Screen Wake Lock request failed: ", err);
+    }
+    
+    // Play silent audio loop to prevent sleep on Smart TVs and tablets
+    try {
+        if (!silentAudio) {
+            silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAAGYg==');
+            silentAudio.loop = true;
+        }
+        silentAudio.play().catch(e => console.log("Silent audio autoplay blocked or deferred:", e));
+    } catch (e) {
+        console.error("Failed to start silent audio wake lock helper:", e);
+    }
+}
+
+async function releaseWakeLock() {
+    try {
+        if (screenWakeLock !== null) {
+            await screenWakeLock.release();
+            screenWakeLock = null;
+            console.log("Screen Wake Lock released.");
+        }
+    } catch (err) {
+        console.warn("Screen Wake Lock release failed: ", err);
+    }
+    
+    // Stop silent audio loop
+    try {
+        if (silentAudio) {
+            silentAudio.pause();
+            silentAudio = null;
+        }
+    } catch (e) {
+        console.error("Failed to stop silent audio wake lock helper:", e);
+    }
+}
+
+document.addEventListener('visibilitychange', async () => {
+    const overlay = document.getElementById('fullscreenOverlay');
+    if (overlay && overlay.style.display === 'flex') {
+        if (document.visibilityState === 'visible') {
+            await requestWakeLock();
+        }
+    }
+});
+
+function onFullScreenChange() {
+    const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+    if (!isFs) {
+        const overlay = document.getElementById('fullscreenOverlay');
+        if (overlay) overlay.style.display = 'none';
+        releaseWakeLock();
+    }
+}
+document.addEventListener('fullscreenchange', onFullScreenChange);
+document.addEventListener('webkitfullscreenchange', onFullScreenChange);
+document.addEventListener('mozfullscreenchange', onFullScreenChange);
+document.addEventListener('MSFullscreenChange', onFullScreenChange);
+
+function toggleFullScreen() {
+    const overlay = document.getElementById('fullscreenOverlay');
+    if (!overlay) return;
+    renderTVContent();
+    overlay.style.display = 'flex';
+    requestWakeLock();
+    
+    const closeBtn = document.getElementById('tvCloseBtn');
+    if (closeBtn) {
+        closeBtn.style.display = 'flex';
+        closeBtn.style.opacity = '';
+        closeBtn.style.pointerEvents = '';
+    }
+    
+    const requestMethod = overlay.requestFullscreen || overlay.webkitRequestFullscreen || overlay.mozRequestFullScreen || overlay.msRequestFullscreen;
+    if (requestMethod) {
+        requestMethod.call(overlay).catch(e => {
+            console.log("Overlay fullscreen request failed, trying document.documentElement:", e);
+            const docReq = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.mozRequestFullScreen;
+            if (docReq) {
+                docReq.call(document.documentElement).catch(err => console.log("Doc fullscreen error:", err));
+            }
+        });
+    }
+}
+
+function closeFullScreen() {
+    const overlay = document.getElementById('fullscreenOverlay');
+    if (overlay) overlay.style.display = 'none';
+    releaseWakeLock();
+    const exitMethod = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if (exitMethod) {
+        exitMethod.call(document).catch(e => console.log(e));
+    }
+    if (window.hasOwnProperty('preHistoryState')) {
+        state = window.preHistoryState;
+        delete window.preHistoryState;
+    }
+}
+
+function openHistoryScoreboard(id) {
+    const g = savedGames.find(x => x.id === id);
+    if (!g) return;
+    
+    // Store the current active game state so we can restore it when the overlay is closed
+    window.preHistoryState = state;
+    
+    state = g; // Set active state to the historical game
+    
+    const overlay = document.getElementById('fullscreenOverlay');
+    if (overlay) {
+        overlay.style.display = 'flex';
+        const closeBtn = document.getElementById('tvCloseBtn');
+        if (closeBtn) {
+            closeBtn.style.display = 'flex';
+            closeBtn.style.opacity = '';
+            closeBtn.style.pointerEvents = '';
+        }
+        renderTVContent();
+        requestWakeLock();
+    }
+}
+
+function isAdmin() {
+    if (!state) return false;
+    if (!state.admin) return true; // Retroactive support for games created before admin feature
+    if (!auth.currentUser) return false;
+    const p = playersDb.find(x => x.id === auth.currentUser.uid);
+    if (!p) return false;
+    return p.fullName === state.admin;
+}
+
+function updateAdminSelect() {
+    const wrapper = document.getElementById('adminSelectionWrapper');
+    const select = document.getElementById('gameAdminSelect');
+    if (!wrapper || !select) return;
+    
+    const pList = Array.from(document.querySelectorAll('#playerList select')).map(s => s.value).filter(v => v !== "");
+    if (pList.length === 0) {
+        wrapper.style.display = 'none';
+        return;
+    }
+    
+    wrapper.style.display = 'block';
+    
+    const prevVal = select.value;
+    let html = '<option value="">Choose Admin</option>';
+    pList.forEach(p => {
+        html += `<option value="${p}">${p}</option>`;
+    });
+    select.innerHTML = html;
+    
+    if (prevVal && pList.includes(prevVal)) {
+        select.value = prevVal;
+    } else {
+        select.value = '';
+    }
+}
+
+let currentEditingRoundNum = null;
+
+function openEditRoundModal(roundNum) {
+    if (!state) return;
+    const r = state.history.find(h => h.round === roundNum);
+    if (!r) return;
+    
+    currentEditingRoundNum = roundNum;
+    document.getElementById('editRoundModalNum').innerText = roundNum;
+    
+    const container = document.getElementById('editRoundModalPlayersContainer');
+    if (!container) return;
+    
+    let html = '';
+    const exitLimit = getExitLimitFor(state);
+    const roundPlayers = r.players || state.startingPlayers || state.players;
+    
+    roundPlayers.forEach(p => {
+        let rs = r.scores[p];
+        if (rs === undefined || rs === null) rs = '';
+        let tact = r.tactics ? r.tactics[p] : '';
+        
+        html += `
+        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="font-weight:bold; font-size:14px; color:#fff; margin-bottom:8px;">${p}</div>
+            <div style="display:flex; gap:3px; margin-bottom:8px; flex-wrap:wrap;">
+                <button type="button" class="tactic-btn t-S ${tact==='S'?'active':''}" id="edit-tactic-S-${p}" style="background:var(--accent); font-size:10px; padding:3px 8px; height:24px;" onclick="setEditTactic('${p}', 'S')">S</button>
+                <button type="button" class="tactic-btn t-D ${tact==='D'?'active':''}" id="edit-tactic-D-${p}" style="background:var(--warning); font-size:10px; padding:3px 8px; height:24px;" onclick="setEditTactic('${p}', 'D')">D</button>
+                <button type="button" class="tactic-btn t-MD ${tact==='MD'?'active':''}" id="edit-tactic-MD-${p}" style="background:#8e44ad; color:white; font-size:10px; padding:3px 8px; height:24px;" onclick="setEditTactic('${p}', 'MD')">MD</button>
+                <button type="button" class="tactic-btn t-FC ${tact==='FC'?'active':''}" id="edit-tactic-FC-${p}" style="background:var(--danger); color:white; font-size:10px; padding:3px 8px; height:24px;" onclick="setEditTactic('${p}', 'FC')">FC</button>
+                <button type="button" class="tactic-btn t-FS ${tact==='FS'?'active':''}" id="edit-tactic-FS-${p}" style="background:linear-gradient(to bottom, #34495e, #1a232e); border: 1px solid rgba(255,255,255,0.4); color:white; font-size:10px; padding:3px 8px; height:24px;" onclick="setEditTactic('${p}', 'FS')">FS</button>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+                <button type="button" class="tactic-btn t-OUT" style="background:var(--danger); color:white; font-size:10px; height:32px; padding:0 8px; font-weight:900;" onclick="setEditOut('${p}')">OUT</button>
+                <input type="text" id="edit-score-${p}" inputmode="numeric" pattern="[0-9]*" class="std-input" style="height:32px; margin:0; flex:1; font-size:13px; text-align:center; background:#fff; color:#000; font-weight:bold;" value="${rs}" placeholder="Enter score">
+                <input type="hidden" id="edit-tactic-val-${p}" value="${tact || ''}">
+            </div>
+        </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    document.getElementById('editRoundModal').style.display = 'flex';
+}
+
+function setEditTactic(player, tactic) {
+    const scoreInput = document.getElementById(`edit-score-${player}`);
+    const tacticInput = document.getElementById(`edit-tactic-val-${player}`);
+    if (!scoreInput || !tacticInput) return;
+    
+    ['S', 'D', 'MD', 'FC', 'FS'].forEach(t => {
+        const btn = document.getElementById(`edit-tactic-${t}-${player}`);
+        if (btn) {
+            if (t === tactic) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+    });
+    
+    tacticInput.value = tactic;
+    
+    if (tactic === 'S') scoreInput.value = 'S';
+    else if (tactic === 'D') scoreInput.value = '20';
+    else if (tactic === 'MD') scoreInput.value = '40';
+    else if (tactic === 'FC') scoreInput.value = '80';
+    else if (tactic === 'FS') scoreInput.value = '0';
+}
+
+function setEditOut(player) {
+    const scoreInput = document.getElementById(`edit-score-${player}`);
+    const tacticInput = document.getElementById(`edit-tactic-val-${player}`);
+    if (!scoreInput || !tacticInput) return;
+    
+    ['S', 'D', 'MD', 'FC', 'FS'].forEach(t => {
+        const btn = document.getElementById(`edit-tactic-${t}-${player}`);
+        if (btn) btn.classList.remove('active');
+    });
+    
+    tacticInput.value = '';
+    scoreInput.value = 'OUT';
+}
+
+function closeEditRoundModal() {
+    document.getElementById('editRoundModal').style.display = 'none';
+    currentEditingRoundNum = null;
+}
+
+async function saveEditedRoundScores() {
+    if (!state || !currentEditingRoundNum) return;
+    const r = state.history.find(h => h.round === currentEditingRoundNum);
+    if (!r) return;
+    
+    const roundPlayers = r.players || state.startingPlayers || state.players;
+    
+    roundPlayers.forEach(p => {
+        const scoreInput = document.getElementById(`edit-score-${p}`);
+        const tacticInput = document.getElementById(`edit-tactic-val-${p}`);
+        
+        let val = scoreInput ? scoreInput.value.trim().toUpperCase() : '';
+        let tact = tacticInput ? tacticInput.value.trim() : '';
+        
+        if (val === '') {
+            r.scores[p] = null;
+        } else if (val === 'OUT') {
+            r.scores[p] = 'OUT';
+        } else if (val === 'S') {
+            r.scores[p] = 'S';
+        } else {
+            const parsed = parseInt(val);
+            r.scores[p] = isNaN(parsed) ? null : parsed;
+        }
+        
+        if (!r.tactics) r.tactics = {};
+        r.tactics[p] = tact || null;
+    });
+    
+    recalculateGameStateFromHistory();
+    
+    await db.collection('eliteGames').doc(state.id).set(state);
+    closeEditRoundModal();
+    renderActive();
+}
+
+function recalculateGameStateFromHistory() {
+    if (!state) return;
+    
+    const exitLimit = getExitLimitFor(state);
+    
+    state.totals = {};
+    state.eliminated = {};
+    state.reEntries = {};
+    state.lastDropRound = {};
+    state.actionStats = {};
+    
+    // Gather all unique players across the entire game
+    const allUniquePlayers = new Set(state.startingPlayers || state.players || []);
+    if (state.players) {
+        state.players.forEach(p => allUniquePlayers.add(p));
+    }
+    if (state.history) {
+        state.history.forEach(r => {
+            if (r.players) {
+                r.players.forEach(p => allUniquePlayers.add(p));
+            }
+            if (r.scores) {
+                Object.keys(r.scores).forEach(p => allUniquePlayers.add(p));
+            }
+        });
+    }
+
+    const starting = state.startingPlayers || state.players || [];
+
+    // Clear & initialize everyone with correct baseline scores
+    allUniquePlayers.forEach(p => {
+        let startingScore = 0;
+        
+        // If they are a mid-game player (not in starting), find their join entry score
+        if (!starting.includes(p)) {
+            if (state.midGamePlayerEntries && state.midGamePlayerEntries[p] !== undefined) {
+                startingScore = state.midGamePlayerEntries[p];
+            } else {
+                // Find first round appearance and calculate baseline
+                const firstRound = state.history ? state.history.find(h => 
+                    (h.players && h.players.includes(p)) || 
+                    (h.scores && h.scores[p] !== undefined)
+                ) : null;
+                
+                if (firstRound && firstRound.totals && firstRound.totals[p] !== undefined) {
+                    let pts = 0;
+                    const val = firstRound.scores[p];
+                    if (val === 'S' || val === 'OUT') pts = 0;
+                    else pts = parseInt(val) || 0;
+                    startingScore = firstRound.totals[p] - pts;
+                    if (startingScore < 0) startingScore = 0;
+                }
+            }
+        }
+        
+        state.totals[p] = startingScore;
+        state.eliminated[p] = false;
+        state.reEntries[p] = 0;
+        state.lastDropRound[p] = -1;
+        state.actionStats[p] = {shows: 0, fcs: 0, drops: 0, mds: 0};
+    });
+    
+    state.history.forEach((r, idx) => {
+        const roundNum = idx + 1;
+        r.round = roundNum;
+        if (!r.reentries) r.reentries = {};
+        if (!r.bustedTotals) r.bustedTotals = {};
+        if (!r.totals) r.totals = {};
+        
+        let activeThisRound = r.players || starting;
+        
+        activeThisRound.forEach(p => {
+            // If they are explicitly playing in this round, they aren't eliminated yet
+            if (r.players && r.players.includes(p)) {
+                state.eliminated[p] = false;
+            }
+            
+            if (state.eliminated[p]) return;
+            
+            const val = r.scores[p];
+            const tactic = r.tactics ? r.tactics[p] : null;
+            
+            if (val === 'OUT') {
+                state.totals[p] = exitLimit;
+                state.eliminated[p] = true;
+                r.totals[p] = exitLimit;
+                return;
+            }
+            
+            let points = 0;
+            if (val === 'S') points = 0;
+            else points = parseInt(val) || 0;
+            
+            state.totals[p] = (state.totals[p] || 0) + points;
+            
+            if (tactic === 'S') state.actionStats[p].shows++;
+            if (tactic === 'D') {
+                state.actionStats[p].drops++;
+                state.lastDropRound[p] = roundNum;
+            }
+            if (tactic === 'MD') state.actionStats[p].mds++;
+            if (tactic === 'FC') state.actionStats[p].fcs++;
+            
+            if (state.totals[p] >= exitLimit) {
+                r.bustedTotals[p] = state.totals[p];
+                if (r.reentries[p] !== undefined) {
+                    state.reEntries[p] = (state.reEntries[p] || 0) + 1;
+                    state.totals[p] = r.reentries[p];
+                } else {
+                    state.eliminated[p] = true;
+                }
+            }
+            
+            r.totals[p] = state.totals[p];
+        });
+    });
+    
+    // Set active players to all players who aren't eliminated and below limit
+    state.players = Array.from(allUniquePlayers).filter(p => !state.eliminated[p] && (state.totals[p] || 0) < exitLimit);
+    
+    let activeSurvivors = state.players;
+    if (activeSurvivors.length === 0) {
+        let allInLast = Array.from(allUniquePlayers).filter(p => !state.eliminated[p] || state.totals[p] >= exitLimit);
+        let minScore = Math.min(...allInLast.map(p => state.totals[p]));
+        let winners = allInLast.filter(p => state.totals[p] === minScore);
+        state.winner = (winners.length > 1 ? winners.join(' & ') : winners[0]) || "Tie";
+        state.endTime = state.endTime || formatEliteDate(new Date());
+    } else {
+        state.winner = null;
+        state.endTime = null;
+        state.round = state.history.length + 1;
+        
+        state.players.forEach(p => {
+            state.roundScores[p] = null;
+            state.roundTactics[p] = null;
+        });
+    }
+}
+
+function showTVViewOnly() {
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('fullscreenOverlay').style.display = 'flex';
+    const closeBtn = document.getElementById('tvCloseBtn');
+    if (closeBtn) closeBtn.style.display = 'none'; // Absolutely no close button in view-only mode
+    renderTVContent();
+    startHeartbeat();
+}
+
+let heartbeatTimer = null;
+function startHeartbeat() {
+    if (heartbeatTimer) return;
+    heartbeatTimer = setInterval(async () => {
+        const overlay = document.getElementById('fullscreenOverlay');
+        const isOverlayVisible = overlay && overlay.style.display === 'flex';
+        if ((currentScreen === 'activeGame' || isOverlayVisible) && state && state.id) {
+            try {
+                await db.collection('eliteGames').doc(state.id).update({
+                    lastActivity: Date.now()
+                });
+            } catch (e) {
+                console.error("Heartbeat Error:", e);
+            }
+        } else {
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
+        }
+    }, 5000);
+}
+
+function renderTVContent() {
+    if (!state) return;
+    
+    const isGameOver = !!state.winner;
+    
+    // Auto-apply optimal vertical budget settings to the fullscreen overlay
+    const overlay = document.getElementById('fullscreenOverlay');
+    const pTop = 2.0; 
+    const pBottom = 7.0; // 7vh bottom padding leaves a beautiful small space under the screen to prevent overscan
+    if (overlay) {
+        overlay.style.padding = isGameOver ? '0' : `${pTop}vh 3vw ${pBottom}vh 3vw`;
+        overlay.style.overflow = 'hidden';
+        overlay.style.background = '#0a0d14'; // Premium deep-dark arena background
+    }
+    const displayRound = Math.max(0, state.round - 1);
+    const playerCount = state.players.length;
+    
+    // Past Players - parsed first so we can gauge screen budget
+    const past = Object.keys(state.totals).filter(p => !state.players.includes(p));
+    const hasPast = past.length > 0;
+    
+    // Height budget out of 100vh:
+    // This perfectly centers and fits columns within viewport heights
+    const occupiedHeight = pTop + pBottom + 13.5 + (hasPast ? 4.5 : 0);
+    const remainingHeight = 100 - occupiedHeight; // vertical budget for the table in vh
+    
+    // Constant header row height to save vertical space
+    const headerRowHeightVh = 4.0;
+    
+    const spacingFactor = 0.10; // 10% of row height is for vertical row spacing gaps
+    
+    // Mathematically perfect fit calculation (Solving for rowHeightVh to guarantee Total Height <= remainingHeight):
+    // Total Height = headerRowHeightVh + (playerCount * rowHeightVh) + ((playerCount + 2) * spacingVh) = remainingHeight
+    // since spacingVh = rowHeightVh * spacingFactor, we substitute:
+    // headerRowHeightVh + (playerCount * rowHeightVh) + ((playerCount + 2) * spacingFactor * rowHeightVh) = remainingHeight
+    // rowHeightVh * (playerCount + (playerCount + 2) * spacingFactor) = remainingHeight - headerRowHeightVh
+    // rowHeightVh = (remainingHeight - headerRowHeightVh) / (playerCount + (playerCount + 2) * spacingFactor)
+    let rowHeightVh = (remainingHeight - headerRowHeightVh) / (playerCount + (playerCount + 2) * spacingFactor);
+    let spacingVh = rowHeightVh * spacingFactor;
+    
+    // Adjust spacing & boundaries to perfectly fit the screen depending on player count to prevent any overflow
+    if (rowHeightVh > 12.0) {
+        rowHeightVh = 12.0; // Limit row height vertical sizing to keep it highly balanced
+        spacingVh = 0.8; // Keep spacing tight and standard
+    } else if (rowHeightVh < 1.1) {
+        rowHeightVh = 1.1;  // Dynamically scale down lower to guarantee fit on all screen sizes (up to 50 players)
+        spacingVh = 0.1;
+    }
+    
+    // Total table height calculation for vertical budget centering (including all spacing gaps)
+    const tableHeightVh = (rowHeightVh * playerCount) + headerRowHeightVh + (spacingVh * (playerCount + 2));
+    
+    // Dynamic vertical alignment strategy to prevent clipping of headers on large counts
+    const isOverflowing = tableHeightVh > remainingHeight + 0.1;
+    const containerAlign = isOverflowing ? 'flex-start' : 'center';
+    const tableMargin = isOverflowing ? '0' : 'auto 0';
+    
+    // CSS layout settings
+    const rankWidth = '10%';
+    const getTVAvatar = (pName) => {
+        if (!pName) return 'https://ui-avatars.com/api/?name=Player&background=2c3e50&color=fff&size=200';
+        const searchName = pName.trim().toUpperCase();
+        
+        // 1. First seek a perfect case-insensitive match on the trimmed name
+        let pData = playersDb.find(x => (x.fullName || '').trim().toUpperCase() === searchName);
+        
+        // 2. Fallback: If no exact match, see if either name contains the other
+        if (!pData) {
+            pData = playersDb.find(x => {
+                const dbName = (x.fullName || '').trim().toUpperCase();
+                return dbName && (dbName.includes(searchName) || searchName.includes(dbName));
+            });
+        }
+        
+        // 3. Fallback: Try splitting and matching individual name parts (for names like "Anand Mohan" matching against "Anand")
+        if (!pData) {
+            const searchParts = searchName.split(/\s+/).filter(Boolean);
+            pData = playersDb.find(x => {
+                const dbName = (x.fullName || '').trim().toUpperCase();
+                if (!dbName) return false;
+                const dbParts = dbName.split(/\s+/).filter(Boolean);
+                return searchParts.some(sp => dbParts.includes(sp));
+            });
+        }
+        
+        if (pData?.photoURL) return pData.photoURL;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(pName)}&background=2c3e50&color=fff&size=200`;
+    };
+
+    if (isGameOver) {
+        let winnerName = state.winner;
+        let pScore = '';
+        if (state.totals[winnerName] !== undefined) {
+            pScore = state.totals[winnerName];
+        } else {
+            const firstWinner = winnerName.split(' & ')[0].trim();
+            if (state.totals[firstWinner] !== undefined) {
+                pScore = state.totals[firstWinner];
+            }
+        }
+        
+        let winnerAvatarHtml = '';
+        if (winnerName && winnerName !== 'No Winner') {
+            const names = winnerName.split(' & ');
+            winnerAvatarHtml = `<div style="display:flex; justify-content:center; gap:40px; margin-bottom:4vh; position:relative; z-index:10;">`;
+            names.forEach(name => {
+                const trimmedName = name.trim();
+                const avatarUrl = getTVAvatar(trimmedName);
+                winnerAvatarHtml += `
+                    <div style="position:relative; display:inline-block;">
+                        <img src="${avatarUrl}" style="width:26vh; height:26vh; border-radius:50%; border:6px solid #f1c40f; object-fit:cover; box-shadow: 0 0 50px rgba(241,196,15,0.7); background:#1a252f;" referrerPolicy="no-referrer">
+                    </div>
+                `;
+            });
+            winnerAvatarHtml += `</div>`;
+        }
+
+        let h = `
+            <canvas id="celebrationCanvas" style="position:absolute; inset:0; pointer-events:none; width:100%; height:100%; z-index:2;"></canvas>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width:100vw; text-align:center; position:relative; z-index:5; font-family:'Inter', sans-serif; overflow:hidden; box-sizing:border-box; background:#0a0d14;">
+                
+                <div style="animation: bounce-in 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); position:relative; z-index:10; margin-bottom:4.5vh;">
+                    <div style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000; font-weight:900; font-size:6vh; padding:1.8vh 8vh; border-radius:100px; text-transform:uppercase; letter-spacing:4px; box-shadow: 0px 15px 45px rgba(243,156,18,0.5); display:inline-block; border:4px solid #fff;">
+                        🏆 Champion 🏆
+                    </div>
+                </div>
+
+                ${winnerAvatarHtml}
+
+                <div style="animation: scale-up 0.8s ease-out 0.2s both; position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <h1 style="font-size:8.5vh; font-weight:900; margin:0 0 2vh 0; color:#fff; text-shadow: 0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(241,196,15,0.5); letter-spacing:1px; line-height:1.1; max-width:90vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        ${state.winner}
+                    </h1>
+                    
+                    ${pScore !== '' ? `
+                    <div style="font-size:3.5vh; opacity:0.9; color:#f1c40f; font-weight:800; text-transform:uppercase; letter-spacing:2px; display:flex; align-items:center; justify-content:center; gap:15px; margin-top:1vh;">
+                        <span>WINNING SCORE:</span>
+                        <span style="font-size:6vh; font-family:'JetBrains Mono', monospace; font-weight:900; color:#fff; text-shadow:0 0 20px rgba(255,255,255,0.5);">${pScore}</span>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+
+        document.getElementById('tvContent').innerHTML = h;
+        startCelebrationCanvas();
+        return;
+    }
+
+    // Esports Arena Header
+    let h = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5vh; border-bottom: 2px solid rgba(255,255,255,0.12); padding-bottom: 1.5vh; height: 13.5vh; box-sizing: border-box;">
+            <div style="display: flex; flex-direction: column; gap: 0.5vh; max-width: 70%;">
+                <h1 style="font-size: 6.5vh; margin:0; color: #fff; font-weight: 900; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; letter-spacing: -0.5px; text-shadow: 0 0 15px rgba(255,255,255,0.25);">${state.name}</h1>
+                <div style="font-size: 2.0vh; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Elite Rummy Circle Tournament</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 3vh;">
+                <div style="text-align: right; display: flex; flex-direction: column; gap: 0.3vh;">
+                    <span style="font-size: 5.5vh; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.4); line-height: 1.1; font-family: 'JetBrains Mono', monospace;">ROUND ${displayRound}</span>
+                    <div style="display: flex; align-items: center; gap: 0.8vh; font-size: 1.8vh; font-weight: 800; color: #e74c3c; text-transform: uppercase; letter-spacing: 1px; justify-content: flex-end;">
+                        <span style="width: 1.2vh; height: 1.2vh; background: #e74c3c; border-radius: 50%; box-shadow: 0 0 10px #e74c3c; animation: tv-blink 1.5s infinite; display: inline-block;"></span>
+                        LIVE
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: ${containerAlign}; height: ${remainingHeight}vh; min-height: ${remainingHeight}vh; overflow: hidden; box-sizing: border-box;">
+            <table class="tv-table" style="height: ${tableHeightVh}vh; table-layout: fixed; margin: ${tableMargin}; padding: 0; border-collapse: separate; border-spacing: 0 ${spacingVh}vh; width: 100%;">
+                <thead>
+                    <tr style="height: ${headerRowHeightVh}vh;">
+                        <th style="width: ${rankWidth}; font-size: max(1.2vh, calc(${rowHeightVh}vh * 0.24)); opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; padding: 0 1.5vh; height: ${headerRowHeightVh}vh; vertical-align: middle; font-weight: 800; text-align: center; border: none; color: #fff;">Pos</th>
+                        <th style="font-size: max(1.2vh, calc(${rowHeightVh}vh * 0.24)); opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; padding: 0 3vh; height: ${headerRowHeightVh}vh; vertical-align: middle; font-weight: 800; text-align: left; border: none; color: #fff;">Player</th>
+                        <th style="width: 25%; text-align: right; font-size: max(1.2vh, calc(${rowHeightVh}vh * 0.24)); opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; padding: 0 2.5vh; height: ${headerRowHeightVh}vh; vertical-align: middle; font-weight: 800; border: none; color: #fff;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    const exitLimit = getExitLimitFor(state);
+
+    const sortedPlayersTV = [...state.players].sort((a, b) => {
+        const aOut = state.eliminated[a] || (state.totals[a] || 0) >= exitLimit;
+        const bOut = state.eliminated[b] || (state.totals[b] || 0) >= exitLimit;
+        if (aOut && !bOut) return 1;
+        if (!aOut && bOut) return -1;
+        if (aOut && bOut) {
+            const roster = state.startingPlayers || state.players;
+            return roster.indexOf(a) - roster.indexOf(b);
+        }
+        return (state.totals[a] || 0) - (state.totals[b] || 0); 
+    });
+
+    let dealer = getDealerForState(state);
+
+    sortedPlayersTV.forEach((p, index) => {
+        const isOut = state.eliminated[p] || (state.totals[p] || 0) >= exitLimit;
+        const score = state.totals[p] || 0;
+
+        // Gamified ranks & style values
+        let rankWeight = '600';
+        let rankDisplay = index + 1;
+        let rowBackground = 'rgba(255,255,255,0.02)';
+        let rowBorderLeft = '6px solid rgba(255,255,255,0.15)';
+        
+        if (!isOut) {
+            if (index === 0) {
+                rankWeight = '900';
+                rowBackground = 'rgba(241,196,15,0.06)';
+                rowBorderLeft = '6px solid #f1c40f';
+            } else if (index === 1) {
+                rankWeight = '800';
+                rowBackground = 'rgba(189,195,199,0.04)';
+                rowBorderLeft = '6px solid #bdc3c7';
+            } else if (index === 2) {
+                rankWeight = '700';
+                rowBackground = 'rgba(230,126,34,0.04)';
+                rowBorderLeft = '6px solid #e67e22';
+            } else {
+                rankWeight = '700';
+                rowBackground = 'rgba(255,255,255,0.02)';
+                rowBorderLeft = '6px solid rgba(255,255,255,0.2)';
+            }
+        } else {
+            rankWeight = '400';
+            rowBackground = 'rgba(231,76,60,0.02)';
+            rowBorderLeft = '6px solid rgba(231,76,60,0.25)';
+        }
+
+        // DP sizes & borders
+        const avatarBorder = isOut 
+            ? '3px solid rgba(231, 76, 60, 0.45)' 
+            : (index === 0 ? '4px solid #f1c40f' : '3px solid var(--accent)');
+        const avatarShadow = isOut
+            ? '0 0 10px rgba(231, 76, 60, 0.15)'
+            : (index === 0 ? '0 0 25px rgba(241, 196, 15, 0.5)' : '0 0 18px rgba(39, 174, 96, 0.3)');
+        const avatarFilter = isOut ? 'filter: grayscale(100%) opacity(0.65) brightness(0.7);' : '';
+
+        // Dynamic score colors
+        const scoreColor = isOut ? 'rgba(231, 76, 60, 0.65)' : (index === 0 ? '#f1c40f' : 'var(--warning)');
+        const scoreShadow = isOut ? 'none' : (index === 0 ? '0 0 15px rgba(241, 196, 15, 0.4)' : 'none');
+
+        // Dynamic font-size compression based on the player name's length to display the FULL name beautifully
+        let nameSize = rowHeightVh * 0.44; 
+        if (p.length > 20) {
+            nameSize = rowHeightVh * 0.28;
+        } else if (p.length > 15) {
+            nameSize = rowHeightVh * 0.32;
+        } else if (p.length > 10) {
+            nameSize = rowHeightVh * 0.36;
+        }
+        nameSize = Math.max(1.1, Math.min(5.5, nameSize)); // Bound gracefully to ensure outstanding TV legibility
+
+        // Scoring value size
+        let scoreSize = rowHeightVh * 0.65;
+        scoreSize = Math.max(1.3, Math.min(8.5, scoreSize));
+
+        // Get Player Re-entry marker count
+        const reCount = getPlayerReEntriesCount(p, state);
+        let reLabel = '';
+        if (reCount > 1) reLabel = `RE (${reCount})`;
+        else if (reCount === 1) reLabel = 'RE';
+
+        h += `
+            <tr class="${isOut ? 'is-out' : ''}" style="height: ${rowHeightVh}vh; background: ${rowBackground}; border-left: ${rowBorderLeft}; margin-bottom: 0.8vh; transition: all 0.3s ease;">
+                <td style="color: rgba(255, 255, 255, 0.75); font-weight:${rankWeight}; font-size: max(1.2vh, calc(${rowHeightVh}vh * 0.44)); padding: 0 1.5vh; height: ${rowHeightVh}vh; vertical-align: middle; font-family: 'JetBrains Mono', monospace; text-align: center; border-radius: 0 0 0 0;">${rankDisplay}</td>
+                <td style="padding: 0 3vh; height: ${rowHeightVh}vh; vertical-align: middle; text-align: left;">
+                    <div style="display:flex; align-items:center; overflow: visible;">
+                        <img src="${getTVAvatar(p)}" class="avatar-tv" referrerPolicy="no-referrer" style="width: calc(${rowHeightVh}vh * 0.72); height: calc(${rowHeightVh}vh * 0.72); margin-right: 1.5vh; border-radius: 50%; object-fit: cover; border: ${avatarBorder}; box-shadow: ${avatarShadow}; ${avatarFilter} flex-shrink: 0;">
+                        <div style="display: flex; align-items: center; gap: 1.5vh; overflow: visible; transform: translateY(calc(${rowHeightVh}vh * -0.04));">
+                            <span style="font-weight:900; font-size: ${nameSize}vh; white-space: nowrap; color: #fff; text-shadow: ${index === 0 && !isOut ? '0 0 12px rgba(241,196,15,0.4)' : 'none'}; ${isOut ? 'color: rgba(255,255,255,0.25); text-decoration: line-through; font-style: italic;' : ''}">${p}</span>
+                            ${reLabel ? `<span class="reentry-badge" style="font-size: max(0.9vh, calc(${rowHeightVh}vh * 0.15)); padding: 0.1vh calc(${rowHeightVh}vh * 0.15); border-radius:4px; font-weight:900; background:var(--accent); color:#fff; text-transform:uppercase; letter-spacing:0.5px; height: calc(${rowHeightVh}vh * 0.32); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(46,204,113,0.3);">${reLabel}</span>` : ''}
+                            ${p === dealer ? `<span class="dealer-badge" style="font-size: max(0.9vh, calc(${rowHeightVh}vh * 0.15)); padding: 0.1vh calc(${rowHeightVh}vh * 0.15); border-radius:4px; font-weight:900; background:var(--warning); color:#000; text-transform:uppercase; letter-spacing:0.5px; height: calc(${rowHeightVh}vh * 0.32); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(241,196,15,0.3);">Dealer</span>` : ''}
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align:right; padding: 0 2.5vh; height: ${rowHeightVh}vh; vertical-align: middle; border-radius: 0 8px 8px 0;"><span class="score-val" style="font-size: ${scoreSize}vh; font-weight: 900; color: ${scoreColor}; text-shadow: ${scoreShadow}; font-family: 'JetBrains Mono', monospace;">${score}</span></td>
+            </tr>
+        `;
+    });
+
+    h += `</tbody></table></div>`;
+
+    // Past Players (Single scrolling ticker row aligned horizontally to maximize vertical scoreboard space)
+    if (past.length > 0) {
+        h += `
+        <div style="margin-top: 0.5vh; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.3vh; height: 4.5vh; overflow: hidden;">
+            <div style="display:flex; align-items:center; gap: 2vh; height: 100%;">
+                <div style="font-size: 1.1vh; opacity: 0.4; text-transform: uppercase; letter-spacing: 1.5px; white-space: nowrap;">Out:</div>
+                <div style="display:flex; gap: 1.2vh; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; width: 100%;">
+                    ${past.map(p => `
+                        <div style="font-size: 1.4vh; opacity: 0.6; background: rgba(255,255,255,0.03); padding: 2px 10px; border-radius: 4px; display: inline-block; flex-shrink: 0; line-height: 1.2;">
+                            ${p}: <span style="color:var(--warning); font-weight:900;">${state.totals[p]}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('tvContent').innerHTML = h;
+}
+
+let celebrationAnimationId = null;
+function startCelebrationCanvas() {
+    if (celebrationAnimationId) {
+        cancelAnimationFrame(celebrationAnimationId);
+    }
+    const canvas = document.getElementById('celebrationCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
+        canvas.height = canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Brilliant premium celebration colors
+    const colors = [
+        '#f1c40f', // Vibrant Gold
+        '#ff007f', // Cyber Pink
+        '#00f3ff', // Neon Cyan
+        '#39ff14', // Electric Green
+        '#ff5e00', // Crimson Orange
+        '#8e44ad', // Indigo Purple
+        '#e74c3c', // Fire Red
+        '#ffbe76'  // Sunset Pearl
+    ];
+    
+    const particles = []; // Confetti
+    const fireworks = []; // Active rising rocket shells
+    const fireworkParticles = []; // Exploding colored stars
+    
+    const startTime = Date.now();
+    let lastFireworkTime = 0;
+    
+    // Initialize endless cascade of micro-ticker/confetti tape
+    const confettiCount = 220;
+    for (let i = 0; i < confettiCount; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 1.5 - canvas.height, // staggered initial coordinates
+            r: Math.random() * 5 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            tilt: Math.random() * 8 - 4,
+            tiltAngleIncremental: Math.random() * 0.05 + 0.03,
+            tiltAngle: Math.random() * Math.PI,
+            speed: Math.random() * 2.5 + 2.0,
+            type: Math.random() > 0.5 ? 'rect' : 'circle'
+        });
+    }
+
+    // Instantly launch multiple grand rockets for immediate theatrical action
+    for (let i = 0; i < 3; i++) {
+        fireworks.push({
+            x: canvas.width * (0.18 + i * 0.32) + (Math.random() * 60 - 30),
+            y: canvas.height + 15,
+            targetY: Math.random() * canvas.height * 0.32 + canvas.height * 0.08,
+            speed: Math.random() * 3 + 8,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            type: i === 1 ? 'ring' : (i === 2 ? 'crackle' : 'standard')
+        });
+    }
+
+    function animate() {
+        // Redraw transparent overlay to leave magnificent neon particle trails
+        ctx.fillStyle = 'rgba(10, 13, 20, 0.25)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        const now = Date.now();
+        const elapsed = now - startTime;
+        
+        // --- 1. RENDER CONTINUOUS CONFETTI ---
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.tiltAngle += p.tiltAngleIncremental;
+            p.y += p.speed;
+            p.x += Math.sin(p.tiltAngle) * 0.8;
+            
+            // Loop confetti back to top endlessly for constant vibrance
+            if (p.y > canvas.height) {
+                p.y = -20;
+                p.x = Math.random() * canvas.width;
+                p.speed = Math.random() * 2.5 + 2.0;
+            }
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.tiltAngle);
+            ctx.fillStyle = p.color;
+            
+            if (p.type === 'rect') {
+                ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+            } else {
+                ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+        
+        // --- 2. CONTINOUS ROCKET CONTROLLER ---
+        // Dynamically launches a rocket every 450-700ms 
+        const interval = Math.max(450, 750 - Math.floor(elapsed / 120));
+        if (now - lastFireworkTime > interval) {
+            fireworks.push({
+                x: Math.random() * canvas.width * 0.74 + canvas.width * 0.13,
+                y: canvas.height + 15,
+                targetY: Math.random() * canvas.height * 0.40 + canvas.height * 0.08,
+                speed: Math.random() * 3.5 + 7.5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                type: Math.random() > 0.5 ? 'standard' : (Math.random() > 0.5 ? 'ring' : 'crackle')
+            });
+            lastFireworkTime = now;
+        }
+        
+        // --- 3. COMMENCE ROCKET CORES ---
+        for (let i = fireworks.length - 1; i >= 0; i--) {
+            const f = fireworks[i];
+            f.y -= f.speed;
+            
+            // Draw glowing rocket flare
+            ctx.beginPath();
+            ctx.arc(f.x, f.y, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = f.color;
+            ctx.fill();
+            ctx.shadowBlur = 0; // stop shadow bleeding to standard primitives
+            
+            // Launch small golden sparks falling behind the rocket flight trail
+            if (Math.random() < 0.6) {
+                fireworkParticles.push({
+                    x: f.x,
+                    y: f.y + 4,
+                    vx: Math.random() * 1.4 - 0.7,
+                    vy: Math.random() * 1.5 + 1.8,
+                    color: '#ffdd57',
+                    alpha: 0.95,
+                    decay: Math.random() * 0.04 + 0.03,
+                    gravity: 0.03,
+                    friction: 0.98,
+                    glow: 8
+                });
+            }
+            
+            // Explode once threshold elevation reached
+            if (f.y <= f.targetY) {
+                let sparklesCount = 80;
+                let shell = f.type;
+                
+                if (shell === 'ring') {
+                    sparklesCount = 60;
+                    for (let k = 0; k < sparklesCount; k++) {
+                        const angle = (k / sparklesCount) * Math.PI * 2;
+                        const sp = Math.random() * 1.5 + 5.5; // tight velocity ring bands
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: Math.cos(angle) * sp,
+                            vy: Math.sin(angle) * sp,
+                            color: f.color,
+                            alpha: 1.0,
+                            decay: Math.random() * 0.012 + 0.008,
+                            gravity: 0.05,
+                            friction: 0.97,
+                            glow: 15
+                        });
+                    }
+                } else if (shell === 'crackle') {
+                    sparklesCount = 95;
+                    for (let k = 0; k < sparklesCount; k++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const sp = Math.random() * 7.0 + 1.2;
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: Math.cos(angle) * sp,
+                            vy: Math.sin(angle) * sp,
+                            color: '#ffdd57', // gold stars
+                            alpha: 1.0,
+                            decay: Math.random() * 0.024 + 0.015,
+                            gravity: 0.06,
+                            friction: 0.96,
+                            glow: 11,
+                            isCracker: true
+                        });
+                    }
+                } else {
+                    // Massive Chrysanthemum / Radial burst spanning alternate secondary glow
+                    sparklesCount = 100;
+                    const altColors = colors.filter(c => c !== f.color);
+                    const secondaryColor = altColors[Math.floor(Math.random() * altColors.length)];
+                    for (let k = 0; k < sparklesCount; k++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const sp = Math.random() * 8.5 + 1.5;
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: Math.cos(angle) * sp,
+                            vy: Math.sin(angle) * sp,
+                            color: Math.random() > 0.4 ? f.color : secondaryColor,
+                            alpha: 1.0,
+                            decay: Math.random() * 0.012 + 0.007,
+                            gravity: 0.045,
+                            friction: 0.975,
+                            glow: 18
+                        });
+                    }
+                }
+                
+                fireworks.splice(i, 1);
+            }
+        }
+        
+        // --- 4. ANIMATE EXPLOSION SPARKS ---
+        for (let j = fireworkParticles.length - 1; j >= 0; j--) {
+            const p = fireworkParticles[j];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity || 0.05; // apply physics gravity
+            p.vx *= p.friction || 0.97; // air friction
+            p.vy *= p.friction || 0.97;
+            p.alpha -= p.decay;
+            
+            // Playful sub-crackle spark releases
+            if (p.isCracker && p.alpha > 0.35 && Math.random() < 0.09) {
+                // Spawn micro sub-crackers flashing in-flight
+                fireworkParticles.push({
+                    x: p.x + (Math.random() * 6 - 3),
+                    y: p.y + (Math.random() * 6 - 3),
+                    vx: Math.random() * 2.2 - 1.1,
+                    vy: Math.random() * 2.2 - 1.1,
+                    color: '#ffffff',
+                    alpha: 0.85,
+                    decay: 0.08,
+                    gravity: 0.03,
+                    friction: 0.94,
+                    glow: 10
+                });
+            }
+            
+            if (p.alpha <= 0) {
+                fireworkParticles.splice(j, 1);
+            } else {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.random() * 2.0 + 2.2, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = p.glow || 12;
+                ctx.shadowColor = p.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        
+        celebrationAnimationId = requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    // Clean up when overlay is closed
+    const overlay = document.getElementById('fullscreenOverlay');
+    const observer = new MutationObserver(() => {
+        if (overlay.style.display === 'none') {
+            cancelAnimationFrame(celebrationAnimationId);
+            window.removeEventListener('resize', resizeCanvas);
+            observer.disconnect();
+        }
+    });
+    observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
+}
+
+function openMidGame() {
+    // Check if any round score is entered for active players
+    const exitLimit = getExitLimitFor(state);
+    const isRoundInProgress = Object.keys(state.roundScores).some(p => {
+        const isNotOut = !state.eliminated[p] && (state.totals[p] || 0) < exitLimit;
+        return isNotOut && state.roundScores[p] !== null;
+    });
+    
+    if (isRoundInProgress) {
+        alert("New Player can be added only after the end of a round");
+        return;
+    }
+    let avail = playersDb.filter(p => {
+        const name = p.fullName;
+        const isCurrentlyIn = state.players.includes(name);
+        const canRE = canPlayerReEnter(name, state);
+        const wasIn = state.totals[name] !== undefined;
+        // If they were in, they can rejoin ONLY if they have re-entries left
+        if (wasIn) {
+            return !isCurrentlyIn && canRE;
+        }
+        return !isCurrentlyIn;
+    });
+    document.getElementById('midGameSelect').innerHTML = `<option value="">-- Select --</option>` + avail.map(p => {
+        const inHistory = state.totals[p.fullName] !== undefined ? " (Re-Join)" : "";
+        return `<option value="${p.fullName}">${p.fullName}${inHistory}</option>`;
+    }).join('');
+    document.getElementById('addMidGameModal').style.display='flex';
+}
+async function confirmAddMidGame() {
+    let name = document.getElementById('midGameSelect').value; if(!name) return;
+    const exitLimit = getExitLimitFor(state);
+    let act = state.players.filter(p => !state.eliminated[p] && state.totals[p] < exitLimit).map(p => state.totals[p]);
+    let es = (act.length > 0 ? Math.max(...act) : 0) + 1;
+    if (es > exitLimit) es = exitLimit;
+    
+    const previouslyInGame = state.totals[name] !== undefined;
+
+    if (!state.players.includes(name)) {
+        state.players.push(name); 
+        state.totals[name] = es; 
+        state.eliminated[name] = false;
+        
+        // Track the mid-game player join score for bulletproof recalculations
+        if (!state.midGamePlayerEntries) state.midGamePlayerEntries = {};
+        state.midGamePlayerEntries[name] = es;
+
+        if (previouslyInGame) {
+            if(!state.reEntries) state.reEntries = {};
+            const currentCount = state.reEntries[name] ? (state.reEntries[name] === true ? 1 : state.reEntries[name]) : 0;
+            state.reEntries[name] = currentCount + 1; 
+        }
+    } else {
+        state.totals[name] = es;
+        state.eliminated[name] = false;
+    }
+    
+    state.roundScores[name] = null; 
+    if(!state.roundTactics) state.roundTactics = {};
+    state.roundTactics[name] = null;
+    if(!state.lastDropRound) state.lastDropRound = {};
+    if(state.lastDropRound[name] === undefined) state.lastDropRound[name] = -1;
+    if(!state.actionStats[name]) state.actionStats[name] = {shows:0,fcs:0,drops:0,mds:0};
+    
+    await db.collection('eliteGames').doc(state.id).set(state);
+    document.getElementById('addMidGameModal').style.display='none';
+    renderActive();
+}
+
+function renderStats() {
+    let sortedPlayers = playersDb.map(p => {
+        const name = p.fullName;
+        const games = savedGames.filter(g => g.winner && g.players.includes(name) && !g.isAborted && !g.isDeleted);
+        const wins = games.filter(g => g.winner === name).length;
+        return { ...p, wins, totalGames: games.length };
+    }).sort((a, b) => b.wins - a.wins);
+
+    document.getElementById('mainPane').innerHTML = `
+        <h2 style="text-align: center; color: var(--accent); margin-bottom: 25px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            Hall of Fame 
+            <span onclick="showMedalInfo()" style="font-size: 16px; background: rgba(255,255,255,0.1); width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer;" title="Medal Info">ⓘ</span>
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding-bottom: 50px;">
+            ${sortedPlayers.map(p => {
+                const wins = p.wins;
+                let medalTitle = "ROOKIE";
+                let medalIcon = "🌱";
+                let medalColor = "#95a5a6";
+                
+                if (wins >= 10) { medalTitle = "ULTRA PRO MAX"; medalIcon = "👑"; medalColor = "#f1c40f"; }
+                else if (wins >= 6) { medalTitle = "ULTRA PRO"; medalIcon = "🏆"; medalColor = "#f39c12"; }
+                else if (wins >= 3) { medalTitle = "PRO"; medalIcon = "🏅"; medalColor = "#e67e22"; }
+
+                const pName = p.fullName || "Player";
+                const pPhoto = p.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(pName)}&background=2c3e50&color=fff&size=200`;
+
+                return `
+                <div onclick="viewProfile('${p.id}')" style="background: rgba(255,255,255,0.08); border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+                    <div style="position: absolute; top: 15px; left: 15px; display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                        <span class="status-dot ${p.isOnline ? 'online-dot' : 'offline-dot'}" style="margin:0;"></span>
+                        <span style="font-size: 8px; font-weight: bold; color: ${p.isOnline ? '#2ecc71' : '#95a5a6'}; text-transform: uppercase;">${p.isOnline ? 'Online' : 'Offline'}</span>
+                    </div>
+                    <img src="${pPhoto}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid ${medalColor}; margin-bottom: 12px; background: #000; margin-top: 5px;">
+                    <div style="font-size: 32px; font-weight: 800; color: #fff; line-height: 1;">${wins}</div>
+                    <div style="font-size: 10px; opacity: 0.6; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">Games Recorded</div>
+                    
+                    <div style="font-weight: 700; font-size: 14px; margin-bottom: 2px;">${pName}</div>
+                    <div style="font-size: 9px; font-weight: 900; color: ${medalColor}; letter-spacing: 0.5px; opacity: 0.8;">${medalTitle}</div>
+                    
+                    <div onclick="event.stopPropagation(); showMedalInfo()" style="position: absolute; top: 10px; right: 10px; font-size: 18px; cursor: help;" title="Medal criteria: 3, 6, 10 wins">${medalIcon}</div>
+                </div>`;
+            }).join('')}
+        </div>
+    `;
+}
+
+function renderContinue() {
+    let act = savedGames.filter(g => !g.winner && !g.isDeleted);
+    const now = Date.now();
+    document.getElementById('mainPane').innerHTML = `<h2>Manage Matches</h2>` + (act.map(g => {
+        const isLive = (now - (g.lastActivity || 0)) < 15000;
+        return `
+        <div style="background:rgba(255,255,255,0.05); padding:15px; margin-bottom:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-left: 5px solid ${isLive ? 'var(--danger)' : 'var(--accent)'}; position:relative;">
+            <div style="flex:1; min-width:150px;">
+                <div style="font-size:18px; font-weight:bold;">${g.name}</div>
+                ${isLive ? `
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                        <span style="width:10px; height:10px; background:red; border-radius:50%; box-shadow: 0 0 10px red; animation: tv-blink 1.5s infinite;"></span>
+                        <span style="font-size:11px; color:#e74c3c; font-weight:900; letter-spacing:1px; text-transform:uppercase;">Live Match in Progress</span>
+                    </div>` : ''}
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                ${isLive ? `
+                    <button onclick="resume('${g.id}')" style="background:var(--danger); animation: pulse-red 2s infinite; font-weight:950; font-size:14px; padding: 12px 25px; border:none; text-transform:uppercase; letter-spacing:1px;">Resume</button>
+                ` : `
+                    <button onclick="resume('${g.id}')" style="background:var(--accent); font-weight:bold; padding: 10px 20px;">Resume</button>
+                    <button onclick="endGameManually('${g.id}')" style="background:rgba(255,255,255,0.05); color:var(--danger); border:1px solid var(--danger); font-size:11px; font-weight:900; text-transform:uppercase; height:35px; border-radius:8px;">End Game</button>
+                `}
+            </div>
+        </div>`;
+    }).join('') || `<p style="opacity:0.6; font-size:14px;">No active matches found.</p>`);
+}
+function resume(id) { state=savedGames.find(g => g.id === id); if(state) showScreen('activeGame'); }
+
+async function endGameManually(id) {
+    let g = (state && state.id === id) ? state : savedGames.find(x => x.id === id);
+    if(!g) return alert("Game not found.");
+    
+    if(!confirm(`Terminate this game?`)) return;
+
+    try {
+        const updateData = {
+            winner: 'Abandoned',
+            endTime: formatEliteDate(new Date()),
+            isAborted: true
+        };
+        await db.collection('eliteGames').doc(id).update(updateData);
+        
+        if (state && state.id === id) {
+            state = null;
+        }
+        showScreen('continue');
+    } catch (err) {
+        console.error("EndGame error:", err);
+        alert("Failed to terminate game.");
+    }
+}
+
+function renderHistory() {
+    let fin = savedGames.filter(g => g.winner && !g.isDeleted).sort((a,b) => parseInt(b.id) - parseInt(a.id));
+    let deletedGames = savedGames.filter(g => g.isDeleted).sort((a,b) => parseInt(b.id) - parseInt(a.id));
+    let h = `<h2>Game History</h2>`;
+    
+    if (fin.length === 0) {
+        h += `<p style="opacity:0.6; font-size:14px; margin-bottom: 25px;">No active game history found.</p>`;
+    } else {
+        let latest = fin.slice(0, 5);
+        let older = fin.slice(5);
+
+        h += `<div style="margin-bottom: 25px;">
+                <div style="font-size: 14px; color: var(--accent); margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Latest 5 Games</div>
+                ${latest.map(renderHistoryItem).join('')}
+              </div>`;
+
+        if (older.length > 0) {
+            h += `<div style="font-size: 14px; color: var(--accent); margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Game Archive</div>`;
+            
+            // Grouping: { year: { month: [games] } }
+            let archive = {};
+            older.forEach(g => {
+                const d = new Date(parseInt(g.id));
+                const year = d.getFullYear();
+                const month = d.toLocaleString('default', { month: 'long' });
+                if (!archive[year]) archive[year] = {};
+                if (!archive[year][month]) archive[year][month] = [];
+                archive[year][month].push(g);
+            });
+
+            const years = Object.keys(archive).sort((a,b) => b-a);
+            years.forEach(year => {
+                const months = archive[year];
+                const monthNames = ["December", "November", "October", "September", "August", "July", "June", "May", "April", "March", "February", "January"];
+                const sortedMonths = Object.keys(months).sort((a,b) => monthNames.indexOf(a) - monthNames.indexOf(b));
+                
+                // If we have data for many months or many years, show Year folder
+                if (years.length > 1 || sortedMonths.length >= 12) {
+                    h += `
+                    <div style="margin-bottom:12px; border:1px solid var(--glass-border); border-radius:8px; overflow:hidden; background: rgba(255,255,255,0.03);">
+                        <div onclick="toggleArchive('year-${year}')" style="padding:12px 15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05);">
+                            <span style="font-weight:bold; color:var(--warning);">${year} Full Archive</span>
+                            <span id="icon-year-${year}" style="transition:0.3s">▼</span>
+                        </div>
+                        <div id="year-${year}" style="display:none; padding:10px;">
+                            ${renderMonthArchive(months, year, sortedMonths)}
+                        </div>
+                    </div>`;
+                } else {
+                    // Just Monthly Folders at top level for current year
+                    h += renderMonthArchive(months, year, sortedMonths);
+                }
+            });
+        }
+    }
+
+    // Collapsible Deleted Games Section at the bottom
+    if (deletedGames.length > 0) {
+        h += `
+        <div style="margin-top:30px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 20px;">
+            <div style="margin-bottom:12px; border:1px solid var(--danger); border-radius:12px; overflow:hidden; background: rgba(231, 76, 60, 0.03); box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                <div onclick="toggleArchive('deleted-archive')" style="padding:12px 15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:rgba(231, 76, 60, 0.12); border-bottom: 1px solid rgba(231, 76, 60, 0.2);">
+                    <span style="font-weight:bold; color:var(--danger); display:flex; align-items:center; gap:8px;">
+                        <span>🗑️</span> Deleted Games (${deletedGames.length})
+                    </span>
+                    <span id="icon-deleted-archive" style="transition:0.3s; color:var(--danger)">▶</span>
+                </div>
+                <div id="deleted-archive" style="display:none; padding:15px 12px 5px 12px;">
+                    ${deletedGames.map(renderDeletedHistoryItem).join('')}
+                </div>
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('mainPane').innerHTML = h;
+}
+
+function renderMonthArchive(monthsObj, year, sortedMonths) {
+    let mh = '';
+    sortedMonths.forEach(month => {
+        const id = `month-${year}-${month.replace(/\s/g, '')}`;
+        mh += `
+        <div style="margin-bottom:8px; border:1px solid rgba(255,255,255,0.05); border-radius:8px; overflow:hidden;">
+            <div onclick="toggleArchive('${id}')" style="padding:10px 15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:13px; background:rgba(255,255,255,0.02);">
+                <span style="color:var(--info); font-weight:600;">${month} ${year}</span>
+                <span id="icon-${id}" style="transition:0.3s">▶</span>
+            </div>
+            <div id="${id}" style="display:none; padding:10px 5px 0 5px;">
+                ${monthsObj[month].map(renderHistoryItem).join('')}
+            </div>
+        </div>`;
+    });
+    return mh;
+}
+
+function renderHistoryItem(g) {
+    return `<div style="background:rgba(255,255,255,0.05); padding:12px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.03);">
+        <div style="flex:1; cursor:pointer;" onclick="openHistoryScoreboard('${g.id}')" onmouseover="this.style.opacity='0.85'; this.querySelector('.hist-title').style.textDecoration='underline';" onmouseout="this.style.opacity='1'; this.querySelector('.hist-title').style.textDecoration='none';">
+            <div class="hist-title" style="font-weight:bold; margin-bottom:4px;">${g.name} ${g.isAborted ? '<span style="color:var(--danger); font-size:9px; border:1px solid var(--danger); padding:1px 3px; border-radius:3px; margin-left:5px;">ABANDONED</span>' : ''}</div>
+            <div style="font-size:12px; opacity:0.7;">Winner: <span style="color:var(--accent); font-weight:600;">${g.winner}</span></div>
+            <div style="font-size:10px; opacity:0.4; margin-top:2px;">${g.endTime || g.startTime}</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+             <button onclick="delGame('${g.id}')" style="background:rgba(231, 76, 60, 0.2); color:var(--danger); border:1px solid var(--danger); padding:5px 10px; font-size:11px;">Delete</button>
+        </div>
+    </div>`;
+}
+
+function renderDeletedHistoryItem(g) {
+    return `<div style="background:rgba(255,255,255,0.03); padding:12px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.01);">
+        <div style="flex:1;">
+            <div style="font-weight:bold; margin-bottom:4px; opacity:0.8;">${g.name} ${g.isAborted ? '<span style="color:var(--danger); font-size:9px; border:1px solid var(--danger); padding:1px 3px; border-radius:3px; margin-left:5px;">ABANDONED</span>' : ''}</div>
+            <div style="font-size:12px; opacity:0.6;">Winner: <span style="color:var(--accent);">${g.winner || 'Active'}</span></div>
+            <div style="font-size:10px; opacity:0.3; margin-top:2px;">${g.endTime || g.startTime}</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+             <button onclick="restoreGame('${g.id}')" style="background:#27ae60; color:white; padding:5px 10px; font-size:11px; border:none; border-radius:4px; font-weight:bold;">Restore</button>
+             <button onclick="deletePermanently('${g.id}')" style="background:rgba(231, 76, 60, 0.2); color:var(--danger); border:1px solid var(--danger); padding:5px 10px; font-size:11px; border-radius:4px; font-weight:bold;">Delete Permanently</button>
+        </div>
+    </div>`;
+}
+
+function toggleArchive(id) {
+    const el = document.getElementById(id);
+    const icon = document.getElementById('icon-' + id);
+    if (el) {
+        const isHidden = el.style.display === 'none';
+        el.style.display = isHidden ? 'block' : 'none';
+        if (icon) icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+}
+
+async function delGame(id) {
+    if(confirm("Move this game to Deleted Games?")) {
+        try {
+            await db.collection('eliteGames').doc(id).update({ isDeleted: true });
+        } catch (err) {
+            console.error("Error soft-deleting game", err);
+            alert("Failed to delete game.");
+        }
+    }
+}
+
+async function restoreGame(id) {
+    if(confirm("Restore this game back to History?")) {
+        try {
+            await db.collection('eliteGames').doc(id).update({ isDeleted: false });
+        } catch (err) {
+            console.error("Error restoring game", err);
+            alert("Failed to restore game.");
+        }
+    }
+}
+
+async function deletePermanently(id) {
+    if(confirm("Are you sure you want to permanently delete this game? This cannot be undone.")) {
+        try {
+            await db.collection('eliteGames').doc(id).delete();
+        } catch (err) {
+            console.error("Error permanently deleting game", err);
+            alert("Failed to delete game permanently.");
+        }
+    }
+}
+
+function renderReports() {
+    let fin = savedGames.filter(g => g.winner && !g.isDeleted).sort((a,b) => parseInt(b.id) - parseInt(a.id));
+    let h = `<h2>Game Reports</h2>`;
+    
+    if (fin.length === 0) {
+        h += `<p style="opacity:0.6; font-size:14px;">No reports available.</p>`;
+        document.getElementById('mainPane').innerHTML = h;
+        return;
+    }
+
+    let latest = fin.slice(0, 5);
+    let older = fin.slice(5);
+
+    h += `<div style="margin-bottom: 25px;">
+            <div style="font-size: 14px; color: var(--accent); margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Latest 5 Reports</div>
+            ${latest.map(renderReportItem).join('')}
+          </div>`;
+
+    if (older.length > 0) {
+        h += `<div style="font-size: 14px; color: var(--accent); margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Report Archive</div>`;
+        
+        // Grouping: { year: { month: [games] } }
+        let archive = {};
+        older.forEach(g => {
+            const d = new Date(parseInt(g.id));
+            const year = d.getFullYear();
+            const month = d.toLocaleString('default', { month: 'long' });
+            if (!archive[year]) archive[year] = {};
+            if (!archive[year][month]) archive[year][month] = [];
+            archive[year][month].push(g);
+        });
+
+        const years = Object.keys(archive).sort((a,b) => b-a);
+        years.forEach(year => {
+            const months = archive[year];
+            const monthNames = ["December", "November", "October", "September", "August", "July", "June", "May", "April", "March", "February", "January"];
+            const sortedMonths = Object.keys(months).sort((a,b) => monthNames.indexOf(a) - monthNames.indexOf(b));
+            
+            const folderId = `rep-year-${year}`;
+            if (years.length > 1 || sortedMonths.length >= 12) {
+                h += `
+                <div style="margin-bottom:12px; border:1px solid var(--glass-border); border-radius:8px; overflow:hidden; background: rgba(255,255,255,0.03);">
+                    <div onclick="toggleArchive('${folderId}')" style="padding:12px 15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05);">
+                        <span style="font-weight:bold; color:var(--warning);">${year} Full Archive</span>
+                        <span id="icon-${folderId}" style="transition:0.3s">▼</span>
+                    </div>
+                    <div id="${folderId}" style="display:none; padding:10px;">
+                        ${renderReportMonthArchive(months, year, sortedMonths)}
+                    </div>
+                </div>`;
+            } else {
+                h += renderReportMonthArchive(months, year, sortedMonths);
+            }
+        });
+    }
+
+    document.getElementById('mainPane').innerHTML = h;
+}
+
+function renderReportMonthArchive(monthsObj, year, sortedMonths) {
+    let mh = '';
+    sortedMonths.forEach(month => {
+        const id = `rep-month-${year}-${month.replace(/\s/g, '')}`;
+        mh += `
+        <div style="margin-bottom:8px; border:1px solid rgba(255,255,255,0.05); border-radius:8px; overflow:hidden;">
+            <div onclick="toggleArchive('${id}')" style="padding:10px 15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:13px; background:rgba(255,255,255,0.02);">
+                <span style="color:var(--info); font-weight:600;">${month} ${year}</span>
+                <span id="icon-${id}" style="transition:0.3s">▶</span>
+            </div>
+            <div id="${id}" style="display:none; padding:10px 5px 0 5px;">
+                ${monthsObj[month].map(renderReportItem).join('')}
+            </div>
+        </div>`;
+    });
+    return mh;
+}
+
+function renderReportItem(g) {
+    return `<div style="background:rgba(255,255,255,0.05); padding:12px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.03);">
+        <div style="flex:1;">
+            <div style="font-weight:bold; margin-bottom:4px; font-size:14px;">${g.name} ${g.isAborted ? '<span style="color:var(--danger); font-size:9px; border:1px solid var(--danger); padding:1px 3px; border-radius:3px; margin-left:5px;">ABANDONED</span>' : ''}</div>
+            <div style="font-size:11px; opacity:0.4;">${formatEliteDate(g.endTime || g.startTime)}</div>
+            <div style="font-size:11px; opacity:0.6; margin-top:2px;">Winner: <span style="color:var(--accent)">${g.winner}</span></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; gap:6px;">
+                <button onclick="viewTableReport('${g.id}')" style="background:var(--accent); font-size:10px; padding:4px 10px; border-radius:4px; font-weight:600;">Table</button>
+                <button onclick="genPDF('${g.id}')" style="background:var(--info); font-size:10px; padding:4px 10px; border-radius:4px; font-weight:600;">PDF</button>
+            </div>
+            ${!g.isAborted ? `<button onclick="viewCertificate('${g.id}')" style="background:#f1c40f; color:#000; font-size:10px; padding:4px 10px; border-radius:4px; font-weight:600;">Certificate</button>` : ''}
+        </div>
+    </div>`;
+}
+
+function viewTableReport(id, backToScreen = 'reports') {
+    const g = savedGames.find(x => x.id === id);
+    if(!g) return;
+
+    // Helper to get first name
+    const getFirstName = (fullName) => fullName.split(' ')[0];
+
+    const allPlayerNames = Array.from(new Set([...(g.startingPlayers || []), ...Object.keys(g.totals)]));
+
+    let h = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">Report View</h3>
+            <button onclick="showScreen('${backToScreen}')" class="pause-btn">Back</button>
+        </div>
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid var(--glass-border);">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+                <div><span style="opacity:0.6">Game Name:</span><br><b>${g.name}</b></div>
+                <div><span style="opacity:0.6">Start Time:</span><br><b>${formatEliteDate(g.startTime)}</b></div>
+                <div><span style="opacity:0.6">End Time:</span><br><b>${formatEliteDate(g.endTime)}</b></div>
+                <div><span style="opacity:0.6">Tournament Winner:</span><br><b style="color:var(--accent)">${getFirstName(g.winner || '')}</b></div>
+            </div>
+            ${g.isAborted ? '<div style="margin-top:10px; color:var(--danger); font-weight:bold; font-size:12px; text-align:center; padding:5px; background:rgba(231, 76, 60, 0.1); border-radius:4px;">GAME ABORTED</div>' : ''}
+        </div>
+        <div style="overflow-x:auto; background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)), url('https://images.unsplash.com/photo-1511193311914-0346f16efe90?q=80&w=2073&auto=format&fit=crop'); background-size: cover; background-position: center; padding:15px; border-radius:12px; border:1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top:10px;">
+            <table style="min-width:400px; color: #111; border-collapse: collapse; border: 1px solid #ddd; background: transparent;">
+                <thead>
+                    <tr style="background:#f1f8f4;">
+                        <th style="width:50px; color:#27ae60; border: 1px solid #ddd; padding:12px 8px; text-align: center;">Rnd</th>
+                        ${allPlayerNames.map(p => `<th style="color:#27ae60; border: 1px solid #ddd; padding:12px 8px; text-align: center;">${getFirstName(p)}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody style="color: #333;">
+    `;
+
+    // Filter out rounds that have at least one score
+    const validHistory = g.history.filter(r => {
+        return Object.values(r.scores).some(v => v !== null && v !== undefined && v !== "");
+    });
+
+    validHistory.forEach((r, idx) => {
+        h += `<tr>
+            <td style="color:#27ae60; font-weight:bold; padding:12px 8px; border: 1px solid #ddd; text-align: center;">${r.round}</td>
+            ${allPlayerNames.map(p => {
+                let s = r.scores[p];
+                let t = r.totals[p];
+                let re = (r.reentries && r.reentries[p] !== undefined) ? r.reentries[p] : null;
+                let busted = (r.bustedTotals && r.bustedTotals[p] !== undefined) ? r.bustedTotals[p] : null;
+                
+                const exitLimitVal = getExitLimitFor(g);
+                // Fallback for older games without bustedTotals field
+                if (re !== null && busted === null && idx > 0) {
+                    const prevT = validHistory[idx - 1].totals[p] || 0;
+                    const scoreVal = (s === 'S') ? 0 : (parseInt(s) || 0);
+                    if (prevT + scoreVal >= exitLimitVal) {
+                        busted = prevT + scoreVal;
+                    }
+                }
+                
+                // Detection if player had not joined yet
+                let notJoined = (t === undefined);
+                let isOut = (t >= exitLimitVal && re === null);
+                
+                let val = "";
+                let subVal = "";
+                
+                if (notJoined) {
+                    val = `<span style="opacity:0.4; font-size:10px; color:#999;">Not Played</span>`;
+                    subVal = ""; // No total shown
+                } else if (isOut) {
+                    val = `<span style="color:#e74c3c; font-weight:bold;">OUT</span>`;
+                    subVal = `<div style="font-size:11px; color:#e74c3c; font-weight:bold;">Total: ${t}</div>`;
+                } else {
+                    if (s === 'S') val = `<span style="color:#27ae60; font-weight:bold;">Show</span>`;
+                    else if (re !== null) val = `<span style="color:#f39c12; font-weight:bold;">${s}</span>`;
+                    else val = (s !== null && s !== undefined) ? `<span style="color:#111; font-weight:500;">${s}</span>` : '-';
+                    
+                    if (re !== null && busted !== null) {
+                        subVal = `<div style="font-size:11px; color:#e01111; font-weight:bold;">Busted: ${busted}</div>`;
+                        subVal += `<div style="font-size:11px; color:#f39c12; font-weight:bold; margin-top:2px;">Re-entered at ${re}</div>`;
+                    } else if (re !== null) {
+                        subVal = `<div style="font-size:11px; color:#f39c12; font-weight:bold;">Total: ${t}</div>`;
+                        subVal += `<div style="font-size:10px; color:#f39c12; font-weight:bold; margin-top:2px;">RE-ENTERED @ ${re}</div>`;
+                    } else {
+                        subVal = `<div style="font-size:10px; opacity:0.9; color:#444;">Total: ${t}</div>`;
+                    }
+                }
+
+                return `<td style="padding:12px 8px; border: 1px solid #ddd; text-align: center;">
+                    <div style="font-size:14px; font-weight:600;">${val}</div>
+                    ${subVal}
+                </td>`;
+            }).join('')}
+        </tr>`;
+    });
+
+    const reportTotals = validHistory.length > 0 ? validHistory[validHistory.length - 1].totals : g.totals;
+
+    h += `
+                <tr style="background:#f8f9fa;">
+                    <td style="color:#f39c12; font-weight:bold; padding:15px 8px; border: 1px solid #ddd; text-align: center;">TOTAL</td>
+                    ${allPlayerNames.map(p => {
+                        let isWinner = g.winner && (g.winner === p || g.winner.split(' & ').includes(p));
+                        const t = reportTotals[p] !== undefined ? reportTotals[p] : (g.totals[p] || 0);
+                        return `<td style="color:#f39c12; font-weight:bold; padding:15px 8px; border: 1px solid #ddd; text-align: center;">
+                            <span style="font-size:16px;">${t}</span>
+                            ${isWinner ? '<div style="color:#27ae60; font-size:10px; margin-top:2px;">WINNER</div>' : ''}
+                        </td>`;
+                    }).join('')}
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    document.getElementById('mainPane').innerHTML = h;
+}
+
+function genPDF(id) {
+    const g = savedGames.find(x => x.id === id);
+    const doc = new jspdf.jsPDF();
+    
+    // Helper to get first name
+    const getFirstName = (fullName) => fullName.split(' ')[0];
+
+    doc.setFontSize(18);
+    doc.text(`Game Report: ${g.name}`, 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Start: ${g.startTime || '-'}  |  End: ${g.endTime || '-'}`, 14, 28);
+    doc.text(`Winner: ${getFirstName(g.winner || '')}`, 14, 34);
+    if (g.isAborted) {
+        doc.setTextColor(231, 76, 60);
+        doc.text("GAME ABORTED", 14, 40);
+        doc.setTextColor(0, 0, 0);
+    }
+
+    const sigHistory = g.history.filter(r => {
+        return Object.values(r.scores).some(v => v !== null && v !== undefined && v !== "");
+    });
+    
+    const allPdfPlayers = Array.from(new Set([...(g.startingPlayers || []), ...Object.keys(g.totals)]));
+    const headNames = allPdfPlayers.map(p => getFirstName(p));
+    const pdfTotals = sigHistory.length > 0 ? sigHistory[sigHistory.length - 1].totals : g.totals;
+
+    const body = sigHistory.map((r, idx) => [
+        r.round, 
+        ...allPdfPlayers.map(p => {
+            let s = r.scores[p];
+            let t = r.totals[p];
+            let re = (r.reentries && r.reentries[p] !== undefined) ? r.reentries[p] : null;
+            let busted = (r.bustedTotals && r.bustedTotals[p] !== undefined) ? r.bustedTotals[p] : null;
+            
+            const exitLimitVal = getExitLimitFor(g);
+            // Fallback for older games
+            if (re !== null && busted === null && idx > 0) {
+                const prevT = sigHistory[idx-1].totals[p] || 0;
+                const scoreVal = (s === 'S') ? 0 : (parseInt(s) || 0);
+                if (prevT + scoreVal >= exitLimitVal) busted = prevT + scoreVal;
+            }
+
+            let tactic = (r.tactics && r.tactics[p]) ? r.tactics[p] : null;
+            if (t === undefined) return 'Not Played';
+            if (t >= exitLimitVal && re === null) return `OUT (Total: ${t})`;
+            if (re !== null) {
+                let bustedStr = busted !== null ? ` (Busted: ${busted})` : "";
+                return `${s} (RE@${re}${bustedStr})`;
+            }
+            
+            let val = s;
+            if (s === 'S') val = 0;
+            if (s === null) val = '-';
+            
+            return tactic ? tactic : val;
+        })
+    ]);
+    
+    body.push(['TOTAL', ...allPdfPlayers.map(p => {
+        let isWinner = g.winner && (g.winner === p || g.winner.split(' & ').includes(p));
+        const t = pdfTotals[p] !== undefined ? pdfTotals[p] : (g.totals[p] || 0);
+        return t + (isWinner ? ' (Winner)' : '');
+    })]);
+
+    doc.autoTable({ 
+        head:[['Rnd', ...headNames]], 
+        body: body, 
+        startY: 40,
+        didParseCell: function(data) {
+            if (data.row.index < sigHistory.length) {
+                const round = sigHistory[data.row.index];
+                const player = allPdfPlayers[data.column.index - 1]; // -1 because first col is 'Rnd'
+                if (round && round.reentries && round.reentries[player]) {
+                    data.cell.styles.textColor = [243, 156, 18]; // --warning color
+                }
+            }
+        }
+    });
+    doc.save(`${g.name}.pdf`);
+}
+
+</script>
+</body>
+</html>

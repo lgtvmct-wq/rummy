@@ -1,0 +1,21 @@
+{
+  "name": "Elite Rummy Circle",
+  "short_name": "Elite Rummy",
+  "description": "Professional Rummy Game Management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a252f",
+  "theme_color": "#27ae60",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

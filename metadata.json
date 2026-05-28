@@ -1,0 +1,8 @@
+{
+  "name": "Elite Rummy Circle",
+  "description": "A professional Rummy game management tool with Hall of Fame, Digital Certificates, and Real-Time TV View.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
