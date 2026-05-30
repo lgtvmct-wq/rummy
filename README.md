@@ -18,4 +18,4 @@ View your app in AI Studio: https://ai.studio/apps/739c5631-7cf5-4373-b2ce-b9e9a
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
-TEST FIREBASE DEPLOY
+TEST FIREBASE DEPLOY 2
