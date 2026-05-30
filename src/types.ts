@@ -48,7 +48,7 @@ export interface GameState {
   history: GameHistoryEntry[];
   creatorId?: string;
   creatorName?: string;
-  ruleset?: 'standard' | 'custom';
+  ruleset?: 'standard' | 'custom' | 'tournament';
   admin?: string;
   midGamePlayerEntries?: Record<string, number>;
   lastActivity?: number;

@@ -8,9 +8,11 @@ import {
   getPlayerReEntriesCount, 
   canPlayerReEnter, 
   getDealerForState, 
-  formatEliteDate 
+  formatEliteDate,
+  isPlayerExceededLimit
 } from '../game/gameLogic';
 import { Scoreboard } from '../components/Scoreboard';
+import { SeatCutModal } from '../components/SeatCutModal';
 
 interface ActiveGameProps {
   gameState: GameState | null;
@@ -26,6 +28,9 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
   // Mid game modal
   const [isMidGameOpen, setIsMidGameOpen] = useState(false);
   const [selectedMidPlayer, setSelectedMidPlayer] = useState('');
+
+  // Seat Cut protocols
+  const [isSeatCutOpen, setIsSeatCutOpen] = useState(false);
 
   // Edit Round modal
   const [isEditRoundOpen, setIsEditRoundOpen] = useState(false);
@@ -237,7 +242,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
     // Check if score is missing
     for (let p of (state.players || [])) {
       const sc = state.roundScores?.[p];
-      const isNotOut = !state.eliminated?.[p] && (state.totals?.[p] || 0) < exitLimit;
+      const isNotOut = !state.eliminated?.[p] && !isPlayerExceededLimit(p, state);
       if (isNotOut && (sc === undefined || sc === null || sc === '')) {
         alert(`Score is missing for ${p}. Please select standard tactics, enter a score, or mark OUT.`);
         return;
@@ -278,7 +283,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
 
         if (!isOutThisRound) {
           nextTotals[p] = (nextTotals[p] || 0) + n;
-          if (nextTotals[p] >= exitLimit) {
+          if (isPlayerExceededLimit(p, { ...state, totals: nextTotals })) {
             entry.bustedTotals[p] = nextTotals[p];
           }
         }
@@ -296,7 +301,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
     });
 
     // 2. Queue re-entries
-    const activeSurvivors = (state.players || []).filter(p => (nextTotals[p] || 0) < exitLimit && !nextEliminated[p]);
+    const activeSurvivors = (state.players || []).filter(p => !isPlayerExceededLimit(p, { ...state, totals: nextTotals }) && !nextEliminated[p]);
     let entryScore = Math.round(exitLimit * 0.73);
     if (activeSurvivors.length > 0) {
       const maxScore = Math.max(...activeSurvivors.map(p => nextTotals[p] || 0));
@@ -309,7 +314,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
 
     for (let p of (state.players || [])) {
       const canReEnter = canPlayerReEnter(p, updatedState);
-      if ((nextTotals[p] || 0) >= exitLimit && !nextEliminated[p]) {
+      if (isPlayerExceededLimit(p, { ...state, totals: nextTotals }) && !nextEliminated[p]) {
         if (canReEnter) {
           queue.push({ player: p, score: entryScore });
         } else {
@@ -385,14 +390,14 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
     updated.round++;
 
     // Remove eliminated
-    updated.players = (updated.players || []).filter(p => !updated.eliminated?.[p] && (updated.totals?.[p] || 0) < exitLimit);
+    updated.players = (updated.players || []).filter(p => !updated.eliminated?.[p] && !isPlayerExceededLimit(p, updated));
 
     updated.players.forEach(p => {
       updated.roundScores[p] = null;
       if (updated.roundTactics) updated.roundTactics[p] = null;
     });
 
-    const currentSurvivors = (updated.players || []).filter(p => !updated.eliminated?.[p] && (updated.totals?.[p] || 0) < exitLimit);
+    const currentSurvivors = (updated.players || []).filter(p => !updated.eliminated?.[p] && !isPlayerExceededLimit(p, updated));
     
     if (currentSurvivors.length === 1) {
       updated.winner = currentSurvivors[0];
@@ -423,7 +428,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
   // Add Mid game player logic
   const handleAddMidGame = async () => {
     if (!selectedMidPlayer || !state) return;
-    const activeInRound = (state.players || []).filter(p => !state.eliminated?.[p] && (state.totals?.[p] || 0) < exitLimit);
+    const activeInRound = (state.players || []).filter(p => !state.eliminated?.[p] && !isPlayerExceededLimit(p, state));
     const survivorTotals = activeInRound.map(p => state.totals?.[p] || 0);
     
     let es = (survivorTotals.length > 0 ? Math.max(...survivorTotals) : 0) + 1;
@@ -719,7 +724,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
 
   const lobbyInGameCandidate = playersDb.filter(p => {
     const name = p.fullName;
-    const isCurrentlyIn = state.players?.includes(name) && !state.eliminated?.[name] && (state.totals?.[name] || 0) < exitLimit;
+    const isCurrentlyIn = state.players?.includes(name) && !state.eliminated?.[name] && !isPlayerExceededLimit(name, state);
     const canRE = canPlayerReEnter(name, state);
     const wasIn = state.totals?.[name] !== undefined;
 
@@ -740,6 +745,14 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
             className="bg-gradient-to-b from-[var(--accent)] to-emerald-700 hover:opacity-90 min-w-20 h-8 flex items-center justify-center font-bold text-xs rounded border border-white/20 shadow shadow-emerald-500/10 cursor-pointer"
           >
             TV Board
+          </button>
+          
+          <button 
+            type="button" 
+            onClick={() => setIsSeatCutOpen(true)}
+            className="bg-gradient-to-b from-amber-600 to-yellow-500 hover:brightness-110 min-w-20 h-8 flex items-center justify-center font-bold text-xs rounded border border-white/20 shadow shadow-amber-500/10 text-slate-900 cursor-pointer"
+          >
+            Seat Cut 🃏
           </button>
           
           <div className="flex flex-col flex-1 min-w-[150px]">
@@ -802,9 +815,9 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
             </tr>
           </thead>
           <tbody>
-            {(isGameOver ? state.players : state.players?.filter(p => !state.eliminated?.[p] && (state.totals?.[p] || 0) < exitLimit))?.map(p => {
+            {(isGameOver ? state.players : state.players?.filter(p => !state.eliminated?.[p] && !isPlayerExceededLimit(p, state)))?.map(p => {
               const rs = state.roundScores?.[p];
-              const isOut = state.eliminated?.[p] || (state.totals?.[p] || 0) >= exitLimit;
+              const isOut = state.eliminated?.[p] || isPlayerExceededLimit(p, state);
               const dLock = state.lastDropRound?.[p] === (state.round - 1);
               const tactic = state.roundTactics?.[p] || null;
 
@@ -938,12 +951,12 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
       )}
 
       {/* PAST PLAYERS SUMMARY TABLE */}
-      {Object.keys(state.totals || {}).filter(p => !state.players?.includes(p) || state.eliminated?.[p] || (state.totals?.[p] || 0) >= exitLimit).length > 0 && (
+      {Object.keys(state.totals || {}).filter(p => !state.players?.includes(p) || state.eliminated?.[p] || isPlayerExceededLimit(p, state)).length > 0 && (
         <div className="mt-4 border-t border-white/10 pt-3 text-xs opacity-75 leading-relaxed text-slate-300">
           <strong>PAST COMPLIANT EXITS:</strong>
           <p className="mt-1 flex flex-wrap gap-2 text-[10px] text-slate-400">
             {Object.keys(state.totals || {})
-              .filter(p => !state.players?.includes(p) || state.eliminated?.[p] || (state.totals?.[p] || 0) >= exitLimit)
+              .filter(p => !state.players?.includes(p) || state.eliminated?.[p] || isPlayerExceededLimit(p, state))
               .map(p => {
                 const count = getPlayerReEntriesCount(p, state);
                 return (
@@ -978,7 +991,8 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
                         const tac = r.tactics?.[pName] || null;
 
                         const displayStr = tac ? String(tac) : (scoreVal === undefined || scoreVal === null ? '-' : String(scoreVal));
-                        if (scoreVal === 'OUT' || (playerTotalVal && playerTotalVal >= exitLimit && !wasRE)) {
+                        const isExceeded = playerTotalVal !== undefined && isPlayerExceededLimit(pName, { ...state, totals: r.totals });
+                        if (scoreVal === 'OUT' || (isExceeded && !wasRE)) {
                           return (
                             <span key={pName} className="text-[#e74c3c]">
                               {pName}{wasRE ? '(RE)' : ''}: OUT ({exitLimit})
@@ -1027,7 +1041,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
           <div className="modal-card bg-[#1a252f] w-full max-w-[340px] p-6 rounded-2xl border border-white/5 text-center shadow-2xl">
             <h3 className="text-yellow-500 font-extrabold text-lg mb-2 uppercase">Re-entry Prompt</h3>
             
-            {activeReEntry.score >= exitLimit ? (
+            {isPlayerExceededLimit(activeReEntry.player, { ...state, totals: { [activeReEntry.player]: activeReEntry.score } }) ? (
               <div className="text-xs text-slate-300 leading-normal mb-6 flex flex-col gap-2">
                 <span className="text-red-500 font-black text-sm">NO POINTS AVAILABLE TO RE-ENTRY</span>
                 <span><strong>{activeReEntry.player}</strong> reached <strong>{exitLimit}+</strong> and is eliminated automatically.</span>
@@ -1041,7 +1055,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
             )}
 
             <div className="flex gap-2">
-              {activeReEntry.score < exitLimit ? (
+              {!isPlayerExceededLimit(activeReEntry.player, { ...state, totals: { [activeReEntry.player]: activeReEntry.score } }) ? (
                 <>
                   <button 
                     onClick={() => handleReEntryDecision(false)}
@@ -1183,6 +1197,38 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
         onClose={() => setIsTVOpen(false)} 
         state={state} 
         playersDb={playersDb} 
+      />
+
+      {/* SEAT CUT PROTOCOL OVERLAY */}
+      <SeatCutModal
+        isOpen={isSeatCutOpen}
+        onClose={() => setIsSeatCutOpen(false)}
+        players={state.startingPlayers || state.players || []}
+        gameId={state.id}
+        tableName={state.name}
+        onFinalize={async (results) => {
+          try {
+            const docRef = doc(db, 'eliteGames', state.id);
+            await updateDoc(docRef, {
+              players: results.shuffledPlayers,
+              startingPlayers: results.shuffledPlayers,
+              seatCutOutcome: results
+            });
+            setState(prev => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                players: results.shuffledPlayers,
+                startingPlayers: results.shuffledPlayers,
+                seatCutOutcome: results
+              };
+            });
+            alert('Seat Cut protocols successfully completed, clockwise positions structured, and starting dealer selected!');
+          } catch (e) {
+            console.error('Failed to update game sequence:', e);
+            alert('Failed to apply Seat Cut outcomes to the active game. Verify active connection.');
+          }
+        }}
       />
     </div>
   );

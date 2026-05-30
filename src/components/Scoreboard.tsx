@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GameState, Player } from '../types';
 import { getExitLimitFor, getPlayerReEntriesCount, getDealerForState } from '../game/gameLogic';
+import { jsPDF } from 'jspdf';
 
 interface ScoreboardProps {
   isOpen: boolean;
@@ -13,6 +14,119 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ isOpen, onClose, state, 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wakeLockRef = useRef<any>(null);
   const animationFrameIdRef = useRef<number | null>(null);
+  const [showRuleset, setShowRuleset] = useState(false);
+
+  const downloadRulesetPDF = () => {
+    try {
+      const docPdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      docPdf.setFillColor(253, 251, 243); // warm light paper beige
+      docPdf.rect(0, 0, 210, 297, 'F');
+
+      // Borders
+      docPdf.setDrawColor(165, 124, 0); 
+      docPdf.setLineWidth(3);
+      docPdf.rect(8, 8, 194, 281);
+
+      docPdf.setDrawColor(33, 47, 61);
+      docPdf.setLineWidth(0.5);
+      docPdf.rect(11, 11, 188, 275);
+
+      // Header
+      docPdf.setTextColor(33, 47, 61);
+      docPdf.setFont("helvetica", "bold");
+      docPdf.setFontSize(26);
+      docPdf.text("THERUMMY.ME TOURNAMENT RULESET", 105, 28, { align: "center" });
+
+      docPdf.setTextColor(165, 124, 0);
+      docPdf.setFontSize(13);
+      docPdf.text("OFFICIAL SEAT CUT & CHAMPIONSHIP MANUAL", 105, 36, { align: "center" });
+
+      docPdf.setDrawColor(165, 124, 0);
+      docPdf.setLineWidth(0.5);
+      docPdf.line(40, 41, 170, 41);
+
+      // Body text
+      docPdf.setTextColor(30, 30, 30);
+      docPdf.setFontSize(10.5);
+      docPdf.setFont("helvetica", "normal");
+
+      let yPos = 52;
+      const addSection = (title: string, bulletPoints: string[]) => {
+        docPdf.setFont("helvetica", "bold");
+        docPdf.setTextColor(165, 124, 0);
+        docPdf.setFontSize(11);
+        docPdf.text(title.toUpperCase(), 18, yPos);
+        yPos += 5.5;
+
+        docPdf.setFont("helvetica", "normal");
+        docPdf.setTextColor(30, 30, 30);
+        docPdf.setFontSize(9.5);
+        bulletPoints.forEach(bullet => {
+          // Wrap text if needed
+          const lines = docPdf.splitTextToSize(bullet, 170);
+          lines.forEach((line: string) => {
+            docPdf.text(line, 22, yPos);
+            yPos += 4.5;
+          });
+        });
+        yPos += 3.5;
+      };
+
+      addSection("1. Core Purpose and Intent", [
+        "This official ruleset governs the registration, seating protocols, and initial card deal routines for all official Rummy tournaments hosted via therummy.me platform services.",
+        "These guidelines ensure fair play, prevent seating/dealer assignment disputes, and automate calculations through standard algebraic priority checks."
+      ]);
+
+      addSection("2. Card Ranking Rules", [
+        "Card values rank in strict descending alphabetical and numerical priority: Ace (highest) > King > Queen > Jack > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2 > Joker (lowest).",
+        "Jokers always rank lower than any valid numerical or pictorial cards (even the 2 of Clubs)."
+      ]);
+
+      addSection("3. Suit Ranking & Suit Tie-breakers", [
+        "When duplicate card values are picked, suit ranks decide the seating priority.",
+        "Suits rank in descending alphabetical standard: Spades (♠) > Hearts (♥) > Diamonds (♦) > Clubs (♣)."
+      ]);
+
+      addSection("4. Joker Entry & Multiple Jokers Rule", [
+        "Choosing a Joker yields the absolute lowest priority rank.",
+        "Any Joker automatically makes the respective player the Dealer unless another Joker is entered.",
+        "If multiple Jokers are picker, priority is resolved in strict order of entry timestamps: the earliest entered Joker gets the lowest rank among all."
+      ]);
+
+      addSection("5. Seating and Dealer Assignments", [
+        "Once card entries are completed, the highest-ranked player chooses Seat Position 1.",
+        "Other players are seated clockwise in descending rank order, with the lowest-ranked occupying the last position.",
+        "The lowest-ranked player (earliest Joker, if any) is designated the official Dealer of the active table."
+      ]);
+
+      addSection("6. Card Distribution Order", [
+        "The Dealer shuffles and distributes cards clockwise.",
+        "The highest-ranked Seat Cut player receives the first card.",
+        "The Dealer (lowest-ranked) receives the final card of the deal rotation."
+      ]);
+
+      addSection("7. Tournament Integrity & Audit trail", [
+        "For total dispute immunity, calculations are computed entirely on the server side.",
+        "Calculated rankings, matching seat assignments, dealer vectors, timestamps, and matching cards are locked to the audit registry database."
+      ]);
+
+      // Footer
+      docPdf.setTextColor(120, 120, 120);
+      docPdf.setFontSize(8.5);
+      docPdf.setFont("helvetica", "italic");
+      docPdf.text("therummy.me Official Tournament Protocol Manual • System Certified Audit", 105, 283, { align: "center" });
+
+      docPdf.save("therummy_Tournament_Official_Ruleset.pdf");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download Ruleset PDF. Verify local workspace memory.");
+    }
+  };
 
   // Request Wake Lock
   useEffect(() => {
@@ -407,13 +521,21 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ isOpen, onClose, state, 
         padding: isGameOver ? '0' : `${pTop}vh 3vw ${pBottom}vh 3vw`
       }}
     >
-      {/* TV Close Button */}
-      <button 
-        onClick={onClose}
-        className="absolute top-4 right-4 z-[7000] bg-slate-800/80 hover:bg-slate-700 hover:text-red-400 text-xs text-white/70 py-1 px-4 rounded border border-white/10 transition cursor-pointer"
-      >
-        Close Screen
-      </button>
+      {/* TV Close and Ruleset Buttons */}
+      <div className="absolute top-4 right-4 z-[7000] flex gap-2">
+        <button 
+          onClick={() => setShowRuleset(true)}
+          className="bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold text-xs py-1 px-4 rounded border border-yellow-600 transition cursor-pointer"
+        >
+          Ruleset 📜
+        </button>
+        <button 
+          onClick={onClose}
+          className="bg-slate-800/80 hover:bg-slate-700 hover:text-red-400 text-xs text-white/70 py-1 px-4 rounded border border-white/10 transition cursor-pointer"
+        >
+          Close Screen
+        </button>
+      </div>
 
       {isGameOver ? (
         <div className="relative flex flex-col items-center justify-center h-full w-full text-center overflow-hidden">
@@ -666,6 +788,91 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ isOpen, onClose, state, 
             </div>
           )}
         </>
+      )}
+
+      {showRuleset && (
+        <div className="fixed inset-0 z-[8500] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 text-left">
+          <div className="bg-[#16222f] w-full max-w-xl p-6 rounded-2xl border border-white/10 shadow-2xl flex flex-col max-h-[85vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-white/5 pb-3 font-sans">
+              <h3 className="text-md md:text-lg font-black text-yellow-500 uppercase tracking-wider">
+                Official Tournament Ruleset
+              </h3>
+              <div className="flex gap-2">
+                <button 
+                  onClick={downloadRulesetPDF}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[11px] py-1 px-3 rounded cursor-pointer leading-tight uppercase"
+                >
+                  Download PDF 📜
+                </button>
+                <button 
+                  onClick={() => setShowRuleset(false)}
+                  className="text-slate-400 hover:text-white text-xs font-bold cursor-pointer underline"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 text-xs mt-4 text-slate-300 font-sans leading-relaxed">
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">1. Seat Cut Rules & Ranking</h4>
+                <p>
+                  Calculated automatically before table startup using strict priorities to prevent disputes.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">2. Card Ranking Rules</h4>
+                <p>
+                  Cards sorted descending: Ace (highest) &gt; King &gt; Queen &gt; Jack &gt; 10 &gt; 9 &gt; 8 &gt; 7 &gt; 6 &gt; 5 &gt; 4 &gt; 3 &gt; 2 &gt; Joker (lowest).
+                </p>
+              </div>
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">3. Suit Ranking</h4>
+                <p>
+                  To break equal value duplicate cards, suits determine ranks: Spades (♠) &gt; Hearts (♥) &gt; Diamonds (♦) &gt; Clubs (♣).
+                </p>
+              </div>
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">4. Joker Rules</h4>
+                <p>
+                  Joker is always the lowest possible rank. The player with Joker shifts directly as the Dealer unless another Joker exists. 
+                  If multiple players select Joker, the earliest chronological entry timestamp becomes the lowest ranked.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">5. Seating Clockwise Allocation</h4>
+                <p>
+                  Rank 1 chooses Seat 1. Ranks 2 down to N are seated sequentially clockwise around the tabletop.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">6. Dealer Assignment</h4>
+                <p>
+                  The lowest-ranked player (last seated clockwise position) is designated the official Dealer of the table.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">7. Card Distribution Sequence</h4>
+                <p>
+                  Dealer deals clockwise starting with the Highest-ranked seat cut player receiving first and the Dealer receiving their cards last.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-yellow-500 font-bold uppercase tracking-wider mb-1">8. Tournament Integrity & Audit Trail</h4>
+                <p>
+                  Full audit logs featuring timestamp, player choices, corresponding seats, and dealer vectors are securely recorded to Firestore.
+                </p>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setShowRuleset(false)}
+              className="mt-6 w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded font-bold cursor-pointer text-xs uppercase font-sans"
+            >
+              Back to Scoreboard
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<title>Elite Rummy Circle - v91.6</title>
+<title>Elite Rummy Circle - v94.0</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" sizes="152x152" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
@@ -204,584 +204,6 @@
   @media print {
     #fullscreenOverlay { display: none !important; }
   }
-
-  /* --- ELITE ESC CASINO MUSIC DOCK STYLES --- */
-  :root {
-    --emp-accent: #27ae60;
-    --emp-glass-bg: rgba(10, 16, 26, 0.75);
-    --emp-glass-blur: blur(20px) saturate(160%);
-    --emp-border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .emp-container {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 8000; /* Floats on top, even over full screen video/TV (z: 6000) */
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    user-select: none;
-    transition: opacity 0.3s, transform 0.3s;
-    touch-action: none; /* Prevents default scroll drag behaviors on mobile touch */
-  }
-
-  .emp-card {
-    width: 330px;
-    background: var(--emp-glass-bg);
-    backdrop-filter: var(--emp-glass-blur);
-    -webkit-backdrop-filter: var(--emp-glass-blur);
-    border: var(--emp-border);
-    border-radius: 16px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                0 0 15px rgba(39, 174, 96, 0.05);
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  /* Grabbing cursor for title area drag */
-  .emp-header {
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    cursor: grab;
-  }
-
-  .emp-header:active {
-    cursor: grabbing;
-  }
-
-  .emp-logo-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .emp-dot-live {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #e74c3c;
-    box-shadow: 0 0 8px #e74c3c;
-    position: relative;
-  }
-
-  .emp-dot-live::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 50%;
-    border: 1px solid #e74c3c;
-    animation: emp-ping 1.5s infinite;
-  }
-
-  @keyframes emp-ping {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(2.2); opacity: 0; }
-  }
-
-  .emp-badge-live {
-    background: rgba(231, 76, 60, 0.15);
-    color: #e74c3c;
-    border: 1px solid rgba(231, 76, 60, 0.25);
-    padding: 1px 4px;
-    border-radius: 4px;
-    font-size: 8px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .emp-header-title {
-    font-size: 11px;
-    font-weight: 800;
-    color: #888;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-  }
-
-  .emp-header-controls {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .emp-header-btn {
-    background: none;
-    border: none;
-    padding: 4px;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.2s, transform 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .emp-header-btn:hover {
-    color: #fff;
-    transform: scale(1.1);
-  }
-
-  /* Vinyl Album Art */
-  .emp-body {
-    padding: 18px 20px 14px 20px;
-  }
-
-  .emp-station-display {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-
-  .emp-vinyl-wrapper {
-    position: relative;
-    width: 72px;
-    height: 72px;
-    flex-shrink: 0;
-  }
-
-  .emp-vinyl {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle, #2c3e50 0%, #111e29 35%, #0d0d10 80%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-    position: relative;
-    animation: emp-spin 20s linear infinite;
-    animation-play-state: paused;
-  }
-
-  .emp-vinyl-art {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: bold;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .emp-vinyl::before {
-    content: '';
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #a1b0cb;
-    z-index: 2;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
-  }
-
-  @keyframes emp-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .emp-metadata-block {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .emp-meta-freq {
-    font-size: 10px;
-    font-weight: bold;
-    color: var(--emp-accent);
-    letter-spacing: 0.8px;
-    margin-bottom: 2px;
-    text-transform: uppercase;
-  }
-
-  .emp-meta-name {
-    font-size: 16px;
-    font-weight: 800;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 2px;
-  }
-
-  .emp-meta-genre {
-    font-size: 11px;
-    color: #7f8c9d;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Premium Equalizer Animation */
-  .emp-equalizer {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 24px;
-  }
-
-  .emp-eq-bar {
-    width: 3px;
-    height: 3px;
-    background-color: var(--emp-accent);
-    border-radius: 2px;
-    transition: height 0.1s ease;
-  }
-
-  .emp-playing .emp-eq-bar {
-    animation: emp-eq-bounce 1s infinite alternate ease-in-out;
-  }
-
-  .emp-playing .emp-eq-bar:nth-child(1) { animation-delay: 0.1s; animation-duration: 0.8s; }
-  .emp-playing .emp-eq-bar:nth-child(2) { animation-delay: 0.3s; animation-duration: 1.2s; }
-  .emp-playing .emp-eq-bar:nth-child(3) { animation-delay: 0.5s; animation-duration: 0.9s; }
-  .emp-playing .emp-eq-bar:nth-child(4) { animation-delay: 0.2s; animation-duration: 1.1s; }
-  .emp-playing .emp-eq-bar:nth-child(5) { animation-delay: 0.4s; animation-duration: 0.7s; }
-  .emp-playing .emp-eq-bar:nth-child(6) { animation-delay: 0.6s; animation-duration: 1.0s; }
-
-  @keyframes emp-eq-bounce {
-    0% { height: 3px; }
-    100% { height: 20px; }
-  }
-
-  /* Controls Block */
-  .emp-playback-deck {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-
-  .emp-btn-control {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #a0aec0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    padding: 6px;
-  }
-
-  .emp-btn-control:hover {
-    color: #fff;
-    transform: scale(1.1);
-  }
-
-  .emp-btn-control:active {
-    transform: scale(0.95);
-  }
-
-  .emp-btn-play-pause {
-    background: var(--emp-accent);
-    color: #fff;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .emp-btn-play-pause:hover {
-    background: #2ecc71;
-    color: #fff;
-    transform: scale(1.08);
-    box-shadow: 0 4px 20px rgba(39, 174, 96, 0.6);
-  }
-
-  /* Volume Slider Overlay */
-  .emp-utility-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: rgba(255,255,255,0.03);
-    padding: 8px 12px;
-    border-radius: 10px;
-    margin-bottom: 14px;
-    border: 1px solid rgba(255,255,255,0.02);
-  }
-
-  .emp-volume-dock {
-    display: flex;
-    padding: 0;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-  }
-
-  .emp-slider-volume {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.15);
-    outline: none;
-    cursor: pointer;
-  }
-
-  .emp-slider-volume::-webkit-slider-value {
-    background: var(--emp-accent);
-  }
-
-  .emp-slider-volume::-webkit-slider-runnable-track {
-    height: 4px;
-  }
-
-  .emp-slider-volume::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    transition: transform 0.1s;
-  }
-
-  .emp-slider-volume::-webkit-slider-thumb:hover {
-    transform: scale(1.25);
-    background: var(--emp-accent);
-  }
-
-  .emp-slider-volume::-moz-range-thumb {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-  }
-
-  /* Spotify List Group */
-  .emp-station-group {
-    max-height: 154px;
-    overflow-y: auto;
-    padding-right: 4px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    margin-top: 12px;
-    padding-top: 8px;
-  }
-
-  /* Beautiful custom scrollbar for stream selection list */
-  .emp-station-group::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .emp-station-group::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .emp-station-group::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 2px;
-  }
-
-  .emp-station-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 4px;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .emp-station-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .emp-station-item.active-station {
-    background: rgba(39, 174, 96, 0.12);
-    border-left: 3px solid var(--emp-accent);
-  }
-
-  .emp-item-photo {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    font-size: 8px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    line-height: 1.1;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  .emp-item-metablock {
-    flex: 1;
-    margin-left: 10px;
-    min-width: 0;
-  }
-
-  .emp-item-text-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .emp-item-text-desc {
-    font-size: 10px;
-    color: #7f8c9d;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .emp-item-status-equalizer {
-    display: flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 10px;
-    margin-left: 8px;
-    width: 14px;
-  }
-
-  .emp-mini-eq-b {
-    width: 2px;
-    height: 2px;
-    background: var(--emp-accent);
-    border-radius: 1px;
-  }
-
-  .active-station .emp-mini-eq-b {
-    animation: emp-mini-eq-bounce 0.8s infinite alternate ease-in-out;
-  }
-
-  .active-station .emp-mini-eq-b:nth-child(1) { animation-delay: 0.1s; }
-  .active-station .emp-mini-eq-b:nth-child(2) { animation-delay: 0.3s; animation-duration: 0.6s; }
-  .active-station .emp-mini-eq-b:nth-child(3) { animation-delay: 0.5s; }
-
-  @keyframes emp-mini-eq-bounce {
-    0% { height: 1px; }
-    100% { height: 10px; }
-  }
-
-  /* MINIMIZED PLAYER INTERFACE */
-  .emp-circle-pill {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--emp-glass-bg);
-    backdrop-filter: var(--emp-glass-blur);
-    -webkit-backdrop-filter: var(--emp-glass-blur);
-    border: var(--emp-border);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                0 0 12px rgba(39, 174, 96, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .emp-circle-pill:hover {
-    transform: scale(1.08);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 
-                0 0 18px rgba(39, 174, 96, 0.4);
-  }
-
-  .emp-circle-art {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 8px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  }
-
-  /* Orbiting play status glow */
-  .emp-playing .emp-circle-pill {
-    border-color: rgba(39, 174, 96, 0.4);
-  }
-
-  .emp-playing .emp-circle-art {
-    animation: emp-spin 20s linear infinite;
-  }
-
-  .emp-floating-eq-anchor {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #111e29;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-  }
-
-  /* Layout hiding toggles */
-  .emp-hide {
-    display: none !important;
-  }
-
-  /* Connect error alerts */
-  .emp-alert-connecting {
-    font-size: 9px;
-    background: rgba(243, 156, 18, 0.15);
-    color: #f39c12;
-    border: 1px solid rgba(243, 156, 18, 0.3);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: bold;
-    animation: tv-blink 1.5s infinite;
-  }
-
-  /* Adjustments for mobile viewports */
-  @media (max-width: 500px) {
-    .emp-container {
-      bottom: 16px;
-      right: 16px;
-      z-index: 8500;
-    }
-    .emp-card {
-      width: 295px;
-    }
-    .emp-station-group {
-      max-height: 120px;
-    }
-  }
 </style>
 </head>
 <body>
@@ -851,10 +273,31 @@
     </div>
 
     <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v91.6</span>
+        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v94.0</span>
         <div style="font-size: 10px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
     </div>
   </div>
+</div>
+
+<div id="newGameModeSelectionModal" class="modal-overlay" style="display:-none;">
+    <div class="modal-card" style="max-width:400px; padding:25px; background:#1b252f; border:1px solid rgba(255,255,255,0.15); border-radius:16px; font-family:'Inter', sans-serif; text-align: left;">
+        <h2 style="color:#27ae60; font-size:20px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-top:0; margin-bottom:8px; text-align: center;">Choose Game Mode</h2>
+        <p style="font-size:12px; color:#aaa; margin-bottom:20px; line-height:1.4; text-align: center;">Select the format of the rummy game you wish to configure.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <button onclick="selectNewGameSetupType('regular')" style="background:linear-gradient(135deg, #27ae60, #1e8449); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#fff; padding:15px; text-align:left; display:flex; flex-direction:column; gap:4px; box-shadow:0 4px 10px rgba(39,174,96,0.15); transition: 0.2s; width: 100%; cursor: pointer;">
+                <span style="font-weight:900; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Regular Game</span>
+                <span style="font-size:11px; font-weight:normal; opacity:0.8; line-height:1.3;">Select standard Elite rules or define Custom exit scores and re-entries.</span>
+            </button>
+            
+            <button onclick="selectNewGameSetupType('tournament')" style="background:linear-gradient(135deg, #8e44ad, #6c3483); border:1px solid #a569bd; border-radius:10px; color:#fff; padding:15px; text-align:left; display:flex; flex-direction:column; gap:4px; box-shadow:0 4px 12px rgba(142,68,173,0.25); transition: 0.2s; width: 100%; cursor: pointer;">
+                <span style="font-weight:900; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Tournament Game</span>
+                <span style="font-size:11px; font-weight:normal; opacity:0.8; line-height:1.3;">Championship Match Configuration with mandatory seat cut.</span>
+            </button>
+        </div>
+        
+        <button class="navBtn" style="background:rgba(255,255,255,0.05); color:#ccc; margin-top:15px; height:40px; font-size:12px; font-weight:bold; width:100%; text-align:center; border:1px solid rgba(255,255,255,0.1); border-radius:8px; display: block; cursor: pointer;" onclick="closeNewGameModeSelection()">Cancel</button>
+    </div>
 </div>
 
 <div id="reentryModal" class="modal-overlay">
@@ -928,6 +371,15 @@
     <div class="modal-card" style="text-align: left; max-width: 400px;">
          <h2 style="color:var(--accent); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-top:0;">Release Notes</h2>
          <div style="margin-bottom: 20px;">
+             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v94.0 - Upgraded Seat Cut & Multi-Deck Alignment Protocol</b>
+             <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                 • <b>Enlarged Touch Screen Suit Targets:</b> Drastic scale increase of suit symbols and value selectors to optimize tactical finger navigation.<br>
+                 • <b>Cancel / Edit Selection:</b> Tap another suit to instantly wipe any outstanding rank parameters and editing preferences for effortless correction.<br>
+                 • <b>Tied Seat Re-Draw System:</b> Fully aligned with multiple decks. If duplicate cards are drawn, the protocol flags them and triggers a localized re-seat cut for those tied players only.<br>
+                 • <b>Admin Manual Override Dropdowns:</b> Interactive alignment dropdowns added directly to the outcome confirmations enabling immediate custom seat realignment and manual dealer swaps.<br>
+                 • <b>Vivid Keypad Coloring:</b> Ranks keypad buttons now dynamically reflect their actual suit colorations (Red for Hearts/Diamonds and Black for Spades/Clubs).<br>
+             </div>
+             <hr style="margin: 10px 0; opacity: 0.2;">
              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v91.6 - Custom Tactic Separation & Manual Keypad Decoupling</b>
              <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
                  • <b>Manual Entry Separation:</b> Manually entered scores (like 20 or 40 points) on the keyboard/keypad no longer auto-click or highlight the Drop (D) or Middle Drop (MD) buttons.<br>
@@ -1191,6 +643,87 @@
     </div>
 </div>
 
+<div id="seatCutModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; padding:15px; overflow-y:auto; z-index:9000;">
+    <div class="modal-card" style="max-width:600px; width:95%; background:#16222f; border-radius:15px; border:1px solid rgba(255,255,255,0.1); padding:20px; box-shadow:0 15px 30px rgba(0,0,0,0.5); text-align:left;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px; margin-bottom:15px;">
+            <div>
+                <h3 style="margin:0; color:#2ecc71; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                    <span>🃏 Seat Cut Protocol</span>
+                </h3>
+                <span id="seatCutGameName" style="font-size:10px; opacity:0.6; text-transform:uppercase; font-family:monospace; margin-top:2px; display:block;"></span>
+            </div>
+            <button onclick="closeSeatCutModal()" style="background:none; border:none; color:#aaa; font-size:20px; cursor:pointer;" title="Cancel">✕</button>
+        </div>
+
+        <div id="seatCutStepEntry">
+            <p style="font-size:11px; opacity:0.7; margin-top:0; margin-bottom:12px; line-height:1.4;">
+                Select a card for each player to determine seeding ranks, dealer assignment, and distribution order. Duplicate cards are automatically prevented.
+            </p>
+
+            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:8px; overflow:hidden; margin-bottom:15px;">
+                <table style="width:100%; border-collapse:collapse; margin-top:0;">
+                    <thead>
+                        <tr style="background:rgba(0,0,0,0.4);">
+                            <th style="padding:10px; font-size:10px; color:#aaa; border-bottom:1px solid rgba(255,255,255,0.1); text-align:left;">Player</th>
+                            <th style="padding:10px; font-size:10px; color:#aaa; border-bottom:1px solid rgba(255,255,255,0.1); text-align:center;">Card Selector</th>
+                            <th style="padding:10px; font-size:10px; color:#aaa; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">Selected Card</th>
+                        </tr>
+                    </thead>
+                    <tbody id="seatCutPlayersTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="seatCutKeypad" style="display:none; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; margin-bottom:15px; animation:fadeIn 0.2s;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
+                    <span id="seatCutKeypadTitle" style="font-size:11px; font-weight:bold; color:#2ecc71;"></span>
+                    <button onclick="cancelCardValueSelection()" style="background:none; border:none; color:var(--danger); font-size:11px; cursor:pointer; text-decoration:underline;">Cancel</button>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px;" id="seatCutKeypadButtons">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+                <button class="actionBtn" style="background:#555; flex:1; height:40px; font-size:13px; margin:0; padding:0;" onclick="closeSeatCutModal()">Cancel</button>
+                <button id="btnSeatCutCalculate" class="actionBtn" style="background:var(--accent); flex:1; height:40px; font-size:13px; margin:0; padding:0;" onclick="calculateSeatCutResults()">Calculate Results 🧮</button>
+            </div>
+        </div>
+
+        <div id="seatCutStepResults" style="display:none;">
+            <h4 style="margin:0 0 10px 0; color:#f1c40f; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">🏁 Calculated Seating & Dealer Outcomes</h4>
+            
+            <div style="display:grid; grid-template-columns:1fr; gap:15px; margin-bottom:15px;">
+                <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:12px;">
+                    <span style="font-size:10px; font-weight:bold; color:#aaa; text-transform:uppercase; display:block; margin-bottom:8px; letter-spacing:0.5px;">Seating Ranks (Clockwise)</span>
+                    <div id="seatCutSeatingList" style="display:flex; flex-direction:column; gap:8px;">
+                    </div>
+                </div>
+
+                <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <span style="font-size:10px; font-weight:bold; color:#aaa; text-transform:uppercase; display:block; margin-bottom:5px; letter-spacing:0.5px;">Assigned Dealer</span>
+                        <div id="seatCutDealerResult" style="font-size:13px; font-weight:900; color:#e74c3c; background:rgba(231,76,96,0.1); border:1px solid rgba(231,76,96,0.2); padding:8px 12px; border-radius:8px; display:inline-block; font-family:'Inter', sans-serif; text-transform:uppercase;"></div>
+                    </div>
+                    <div>
+                        <span style="font-size:10px; font-weight:bold; color:#aaa; text-transform:uppercase; display:block; margin-bottom:5px; letter-spacing:0.5px;">Clockwise Card Distribution Sequence</span>
+                        <div id="seatCutDistributionList" style="font-size:13px; line-height:1.5; font-family:'Inter', sans-serif; color:#ccc; display:flex; flex-direction:column; gap:6px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.2); border-radius:8px; padding:12px; font-size:11px; color:#aaa; line-height:1.4; margin-bottom:15px; font-family:'Inter', sans-serif;">
+                <strong style="color:#2ecc71;">INTEGRITY AUDIT LOG CREATED:</strong> The automatic seating rankings, card parameters, and clock distribution sequences are locked and will be archived on the Firestore database under 'seatCutAudits' collection to enforce complete game compliance.
+            </div>
+
+            <div style="display:flex; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+                <button class="actionBtn" style="background:#555; width:120px; height:40px; font-size:13px; margin:0; padding:0;" onclick="goBackToSeatCutEntry()">← Modify</button>
+                <button class="actionBtn" style="background:linear-gradient(to right, #27ae60, #2ecc71); flex:1; height:40px; font-size:13px; margin:0; padding:0;" onclick="applySeatCutAndStartGame()">Apply & Start Game 🏁</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="app-wrapper" id="mainApp">
   <div class="left-sidebar">
     <h2 style="color:var(--accent); margin-bottom:15px; margin-top:0;">Elite Circle</h2>
@@ -1213,7 +746,7 @@
       <div class="tv-close" id="tvCloseBtn" onclick="closeFullScreen()">Close</div>
   </div>
   <div style="position: fixed; bottom: 8px; left: 12px; z-index: 4000; text-align: left; pointer-events: auto;">
-      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v91.6</div>
+      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v94.0</div>
       <div style="font-size: 9px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
   </div>
 </div>
@@ -1250,6 +783,21 @@ function getExitLimitFor(g) {
     const target = g || state;
     return (target && target.exitScoreLimit !== undefined) ? parseInt(target.exitScoreLimit) : 240;
 }
+function isExceededLimitForScore(score, sObj) {
+    const target = sObj || state;
+    if (!target) return false;
+    const limit = getExitLimitFor(target);
+    if (!target.ruleset || target.ruleset === 'standard' || target.ruleset === 'tournament') {
+        return score > 240;
+    }
+    return score >= limit;
+}
+function isPlayerExceededLimit(p, targetState) {
+    const sObj = targetState || state;
+    if (!sObj) return false;
+    const score = (sObj.totals && sObj.totals[p] !== undefined) ? sObj.totals[p] : 0;
+    return isExceededLimitForScore(score, sObj);
+}
 function getMaxReEntriesFor(g) {
     const target = g || state;
     return (target && target.maxReEntries !== undefined) ? parseInt(target.maxReEntries) : 1;
@@ -1273,8 +821,7 @@ function getDealerForState(sObj) {
     const targetState = sObj || state;
     if (!targetState || targetState.winner) return null;
     
-    const exitLimit = getExitLimitFor(targetState);
-    const activeInRound = targetState.players.filter(p => !targetState.eliminated[p] && (targetState.totals[p] || 0) < exitLimit);
+    const activeInRound = targetState.players.filter(p => !targetState.eliminated[p] && !isPlayerExceededLimit(p, targetState));
     if (activeInRound.length === 0) return null;
     
     const roster = targetState.startingPlayers || targetState.players;
@@ -1291,7 +838,7 @@ function getDealerForState(sObj) {
             const scoreInLastRound = lastEntry.scores && lastEntry.scores[dealer];
             const wasBusted = (lastEntry.bustedTotals && lastEntry.bustedTotals[dealer] !== undefined) || (scoreInLastRound === 'OUT');
             const hasReentered = (lastEntry.reentries && lastEntry.reentries[dealer] !== undefined) || 
-                                 (!targetState.eliminated[dealer] && (targetState.totals[dealer] || 0) < exitLimit);
+                                 (!targetState.eliminated[dealer] && !isPlayerExceededLimit(dealer, targetState));
             
             if (wasBusted && hasReentered) {
                 forceReenteredDealer = true;
@@ -1299,16 +846,16 @@ function getDealerForState(sObj) {
         }
     }
     
-    if (forceReenteredDealer && !targetState.eliminated[dealer] && (targetState.totals[dealer] || 0) < exitLimit) {
+    if (forceReenteredDealer && !targetState.eliminated[dealer] && !isPlayerExceededLimit(dealer, targetState)) {
         return dealer;
     }
     
     // Standard rotation: If dealer is OUT, the previous active player repeats.
-    if (targetState.eliminated[dealer] || (targetState.totals[dealer] || 0) >= exitLimit) {
+    if (targetState.eliminated[dealer] || isPlayerExceededLimit(dealer, targetState)) {
         for (let i = 1; i <= roster.length; i++) {
             let prevIdx = (dIdx - i + roster.length) % roster.length;
             let prevP = roster[prevIdx];
-            if (!targetState.eliminated[prevP] && (targetState.totals[prevP] || 0) < exitLimit && targetState.players.includes(prevP)) {
+            if (!targetState.eliminated[prevP] && !isPlayerExceededLimit(prevP, targetState) && targetState.players.includes(prevP)) {
                 dealer = prevP;
                 break;
             }
@@ -1458,13 +1005,73 @@ function showReleaseNotes() {
 }
 
 // --- DATA LISTENER ---
+function syncGamesForDeletedPlayers(currentPlayers) {
+    const validNames = currentPlayers.map(p => (p.fullName || '').trim().toUpperCase()).filter(Boolean);
+    if (!validNames || validNames.length === 0) return;
+    
+    savedGames.forEach(async (g) => {
+        if (g.winner) return; // Ignore completed games
+        const invalidInGame = g.players.filter(p => !validNames.includes((p || '').trim().toUpperCase()));
+        if (invalidInGame && invalidInGame.length > 0) {
+            console.log("Removing deleted players from active game:", g.name, invalidInGame);
+            const cleanPlayers = g.players.filter(p => validNames.includes((p || '').trim().toUpperCase()));
+            const cleanStartingPlayers = (g.startingPlayers || g.players).filter(p => validNames.includes((p || '').trim().toUpperCase()));
+            
+            if (cleanPlayers.length === 0) {
+                await db.collection('eliteGames').doc(g.id).delete();
+                if (state && state.id === g.id) {
+                    state = null;
+                    showScreen('newGame');
+                }
+                return;
+            }
+            
+            const updateObj = {
+                players: cleanPlayers,
+                startingPlayers: cleanStartingPlayers
+            };
+            
+            invalidInGame.forEach(defunct => {
+                updateObj[`totals.${defunct}`] = firebase.firestore.FieldValue.delete();
+                updateObj[`roundScores.${defunct}`] = firebase.firestore.FieldValue.delete();
+                updateObj[`roundTactics.${defunct}`] = firebase.firestore.FieldValue.delete();
+                updateObj[`eliminated.${defunct}`] = firebase.firestore.FieldValue.delete();
+                updateObj[`reEntries.${defunct}`] = firebase.firestore.FieldValue.delete();
+                updateObj[`actionStats.${defunct}`] = firebase.firestore.FieldValue.delete();
+            });
+            
+            if (state && state.id === g.id) {
+                state.players = cleanPlayers;
+                state.startingPlayers = cleanStartingPlayers;
+                invalidInGame.forEach(defunct => {
+                    delete state.totals[defunct];
+                    delete state.roundScores[defunct];
+                    if (state.roundTactics) delete state.roundTactics[defunct];
+                    if (state.eliminated) delete state.eliminated[defunct];
+                    if (state.reEntries) delete state.reEntries[defunct];
+                    if (state.actionStats) delete state.actionStats[defunct];
+                    if (state.midGamePlayerEntries) delete state.midGamePlayerEntries[defunct];
+                });
+            }
+            
+            try {
+                await db.collection('eliteGames').doc(g.id).update(updateObj);
+            } catch (err) {
+                console.error("Failed to perform complete atomic player-sync purge:", err);
+            }
+        }
+    });
+}
+
 function loadData() {
   db.collection('players').onSnapshot(snap => { 
     playersDb =[]; snap.forEach(doc => playersDb.push({id: doc.id, ...doc.data()})); 
+    if (savedGames && savedGames.length > 0) syncGamesForDeletedPlayers(playersDb);
     if(currentScreen === 'stats') showScreen('stats');
   });
-    db.collection('eliteGames').onSnapshot(snap => {
+  db.collection('eliteGames').onSnapshot(snap => {
     savedGames =[]; snap.forEach(d => savedGames.push(d.data()));
+    if (playersDb && playersDb.length > 0) syncGamesForDeletedPlayers(playersDb);
     if(currentScreen === 'activeGame' && state && !isPromptingReEntry) {
         let s = savedGames.find(g => g.id === state.id);
         if(s) {
@@ -1493,7 +1100,58 @@ function loadData() {
 }
 
 // --- NAVIGATION ---
+let previousScreen = 'continue';
+let newGameSetupType = 'regular'; // 'regular' or 'tournament'
+
+function clickNewGame() {
+    openNewGameModeSelectionModal();
+}
+
+function openNewGameModeSelectionModal() {
+    document.getElementById('newGameModeSelectionModal').style.display = 'flex';
+}
+
+function closeNewGameModeSelection() {
+    document.getElementById('newGameModeSelectionModal').style.display = 'none';
+    const backTo = previousScreen || 'continue';
+    currentScreen = backTo;
+    window.location.hash = backTo;
+    document.querySelectorAll('.navBtn').forEach(b => b.classList.remove('active-nav'));
+    const btnId = 'nav' + backTo.charAt(0).toUpperCase() + backTo.slice(1);
+    const btn = document.getElementById(btnId);
+    if(btn) btn.classList.add('active-nav');
+    
+    if(backTo==='players') renderPlayers();
+    if(backTo==='stats') renderStats();
+    if(backTo==='continue') renderContinue();
+    if(backTo==='history') renderHistory();
+    if(backTo==='reports') renderReports();
+    if(backTo==='activeGame') renderActive();
+}
+
+function selectNewGameSetupType(type) {
+    newGameSetupType = type;
+    document.getElementById('newGameModeSelectionModal').style.display = 'none';
+    
+    currentScreen = 'newGame';
+    window.location.hash = 'newGame';
+    document.querySelectorAll('.navBtn').forEach(b => b.classList.remove('active-nav'));
+    const btn = document.getElementById('navNewGame');
+    if(btn) btn.classList.add('active-nav');
+    
+    renderNewGame();
+}
+
 function showScreen(s) {
+  if (s !== 'newGame' && s !== 'activeGame') {
+      previousScreen = s;
+  }
+  
+  if (s === 'newGame') {
+      openNewGameModeSelectionModal();
+      return;
+  }
+
   currentScreen = s;
   // Update Hash for URL Persistence
   if (s === 'activeGame' && state) {
@@ -1508,7 +1166,6 @@ function showScreen(s) {
   const btn = document.getElementById(btnId);
   if(btn) btn.classList.add('active-nav');
   
-  if(s==='newGame') renderNewGame();
   if(s==='players') renderPlayers();
   if(s==='stats') renderStats();
   if(s==='continue') renderContinue();
@@ -1521,76 +1178,140 @@ function showScreen(s) {
 function setRulesetMode(mode) {
     const stdBtn = document.getElementById('ruleStandardBtn');
     const custBtn = document.getElementById('ruleCustomBtn');
+    const tourneyBtn = document.getElementById('ruleTourneyBtn');
     const customBlock = document.getElementById('customRulesBlock');
+    const tourneyBlock = document.getElementById('tourneyBlock');
     
+    // Deselect and clear
+    if (stdBtn) {
+        stdBtn.style.background = 'rgba(255,255,255,0.08)';
+        stdBtn.style.border = 'none';
+        stdBtn.style.color = 'white';
+        stdBtn.classList.remove('active-rule');
+    }
+    if (custBtn) {
+        custBtn.style.background = 'rgba(255,255,255,0.08)';
+        custBtn.style.border = 'none';
+        custBtn.style.color = 'white';
+        custBtn.classList.remove('active-rule');
+    }
+    if (tourneyBtn) {
+        tourneyBtn.style.background = 'rgba(255,255,255,0.08)';
+        tourneyBtn.style.border = 'none';
+        tourneyBtn.style.color = 'white';
+        tourneyBtn.classList.remove('active-rule');
+    }
+    if (customBlock) customBlock.style.display = 'none';
+    if (tourneyBlock) tourneyBlock.style.display = 'none';
+
     if (mode === 'standard') {
         if (stdBtn) {
             stdBtn.style.background = 'var(--accent)';
-            stdBtn.style.border = 'none';
-            stdBtn.style.color = 'white';
             stdBtn.classList.add('active-rule');
         }
-        if (custBtn) {
-            custBtn.style.background = '#8a3c00';
-            custBtn.style.border = 'none';
-            custBtn.style.color = 'white';
-            custBtn.classList.remove('active-rule');
-        }
-        if (customBlock) customBlock.style.display = 'none';
-    } else {
-        if (stdBtn) {
-            stdBtn.style.background = 'rgba(255,255,255,0.08)';
-            stdBtn.style.border = 'none';
-            stdBtn.style.color = 'white';
-            stdBtn.classList.remove('active-rule');
-        }
+        const startBtn = document.getElementById('btnStartGame');
+        if (startBtn) startBtn.style.background = 'var(--accent)';
+    } else if (mode === 'custom') {
         if (custBtn) {
             custBtn.style.background = '#e67e22';
-            custBtn.style.border = 'none';
-            custBtn.style.color = 'white';
             custBtn.classList.add('active-rule');
         }
         if (customBlock) customBlock.style.display = 'block';
+        const startBtn = document.getElementById('btnStartGame');
+        if (startBtn) startBtn.style.background = '#e67e22';
+    } else if (mode === 'tournament') {
+        if (tourneyBtn) {
+            tourneyBtn.style.background = '#8e44ad';
+            tourneyBtn.classList.add('active-rule');
+        }
+        if (tourneyBlock) tourneyBlock.style.display = 'block';
+        const startBtn = document.getElementById('btnStartGame');
+        if (startBtn) startBtn.style.background = '#8e44ad';
     }
 }
 
 function renderNewGame() {
-  document.getElementById('mainPane').innerHTML = `
-    <h2>New Game Setup</h2>
-    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
-        <input id="gName" class="std-input" placeholder="Enter Game Name">
-        <button onclick="appendDT()" style="background:var(--warning); width:100%; color:#111; margin-bottom:15px;">🕒 Insert Date/Time</button>
-        
-        <div style="margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-            <label style="display:block; font-size:12px; font-weight:bold; color:var(--accent); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Ruleset Selection</label>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <button id="ruleStandardBtn" class="active-rule" onclick="setRulesetMode('standard')" style="flex:1; background:var(--accent); color:white; font-size:13px; font-weight:bold; height:38px; border:none; border-radius:6px; cursor:pointer; padding:0 8px; transition: all 0.2s;">Standard Game</button>
-                <button id="ruleCustomBtn" onclick="setRulesetMode('custom')" style="flex:1; background:#8a3c00; color:white; font-size:13px; font-weight:bold; height:38px; border:none; border-radius:6px; cursor:pointer; padding:0 8px; transition: all 0.2s;">Custom Rules</button>
-            </div>
-            
-            <div id="customRulesBlock" style="display:none; background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--glass-border); margin-top:10px;">
-                <div style="margin-bottom: 12px;">
-                    <label style="display:block; font-size:11px; margin-bottom:5px; opacity:0.8; font-weight:600;">Exit Score (Total score that will exit a player):</label>
-                    <input id="exitScoreInput" type="text" inputmode="numeric" pattern="[0-9]*" class="std-input" value="0" style="margin-bottom:0; height:36px; padding:0 10px; font-size:13px;" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value.trim()==='')this.value='0';">
-                </div>
-                <div>
-                    <label style="display:block; font-size:11px; margin-bottom:5px; opacity:0.8; font-weight:600;">Number of Re-entries allowed:</label>
-                    <input id="maxReentriesInput" type="text" inputmode="numeric" pattern="[0-9]*" class="std-input" value="0" style="margin-bottom:0; height:36px; padding:0 10px; font-size:13px;" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value.trim()==='')this.value='0';">
-                </div>
-            </div>
-        </div>
-
-        <div id="playerList"></div>
-        <button class="navBtn" style="background:rgba(255,255,255,0.1); width:100%; border:1px dashed var(--glass-border); margin-bottom:15px;" onclick="addPlayerField()">+ Add Player</button>
-        
-        <div id="adminSelectionWrapper" style="display:none; margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-            <label style="display:block; font-size:12px; font-weight:bold; color:var(--accent); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Authorize Game Admin</label>
-            <select id="gameAdminSelect" class="std-input" style="margin-bottom:0;"></select>
-            <div style="font-size:10px; opacity:0.5; margin-top:4px;">The Admin has the sole authority to rename games and correct scores for ended rounds.</div>
-        </div>
-
-        <button class="actionBtn" onclick="startGame()">Start Game (with Seat Cut)</button>
-    </div>`;
+  if (newGameSetupType === 'tournament') {
+    document.getElementById('mainPane').innerHTML = `
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; font-family:'Inter', sans-serif;">
+          <span style="font-size:28px;">🏆</span>
+          <div style="display:flex; flex-direction:column;">
+              <h2 style="color:#a569bd; font-family:'Inter', sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin:0; line-height:1.2;">Tournament Setup</h2>
+              <span style="font-size:11px; color:#c59bf6; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Championship Arena Initialization</span>
+          </div>
+      </div>
+      <div style="background:linear-gradient(135deg, rgba(142,68,173,0.1), rgba(108,52,131,0.15)); border:2.5px solid #8e44ad; box-shadow:0 6px 25px rgba(110, 52, 131, 0.4); padding:20px; border-radius:15px; font-family:'Inter', sans-serif;">
+          <input id="gName" class="std-input" placeholder="Enter Game Name" style="border-color: rgba(142,68,173,0.5); font-weight:700;">
+          <button onclick="appendDT()" style="background:#8e44ad; border:1px solid #a569bd; width:100%; color:#fff; margin-bottom:15px; font-weight:800; cursor:pointer;">🕒 Insert Date/Time</button>
+          
+          <div style="margin-bottom: 20px; border-top: 1px solid rgba(142,68,173,0.3); padding-top: 15px;">
+              <label style="display:block; font-size:11px; font-weight:900; color:#a569bd; text-transform:uppercase; margin-bottom:8px; letter-spacing:1px;">Active Protocol</label>
+              <div style="background:#5b2c80; border: 1.5px solid #a569bd; color: white; font-size: 13px; font-weight: 900; text-transform: uppercase; padding: 12px; border-radius: 8px; text-align: center; letter-spacing: 1px; box-shadow: 0 0 10px rgba(142,68,173,0.3);">
+                  🏆 TOURNAMENT RULES LOCKED
+              </div>
+              
+              <div id="tourneyBlock" style="background:rgba(142,68,173,0.18); border:1.5px dashed rgba(165,105,189,0.5); padding:14px; border-radius:8px; margin-top:12px; font-size:11.5px; color:#e0bdfa; line-height:1.5; text-align:left;">
+                  <strong style="color:#f1c40f; font-size:13px; display:block; margin-bottom:6px; font-weight:900; text-transform:uppercase;">🏁 CHAMPIONSHIP MODE PROTOCOL</strong>
+                  <p style="margin:4px 0;">• Mandatory Seat Cut to automate seating order, dealer, and clockwise distribution sequences.</p>
+                  <p style="margin:4px 0;">• Strictly <strong style="color:#ff6b6b; font-weight:900;">NO RE-ENTRY</strong>. Standard cutoff is &gt;240.</p>
+              </div>
+          </div>
+  
+          <div id="playerList"></div>
+          <button class="navBtn" style="background:rgba(142,68,173,0.08); width:100%; border:1px dashed #a569bd; margin-bottom:15px; color:#c59bf6;" onclick="addPlayerField()">+ Add Player</button>
+          
+          <div id="adminSelectionWrapper" style="display:none; margin-bottom: 20px; border-top: 1px solid rgba(142,68,173,0.3); padding-top: 15px;">
+              <label style="display:block; font-size:11px; font-weight:900; color:#a569bd; text-transform:uppercase; margin-bottom:8px; letter-spacing:1px;">Authorize Game Admin</label>
+              <select id="gameAdminSelect" class="std-input" style="margin-bottom:0; border-color: rgba(142,68,173,0.5);"></select>
+              <div style="font-size:10px; opacity:0.6; color:#c59bf6; margin-top:6px; line-height:1.3;">The Admin has the sole authority to rename games and correct scores for ended rounds.</div>
+          </div>
+  
+          <button id="btnStartGame" class="actionBtn" style="background:linear-gradient(135deg, #8e44ad, #6c3483); border:1.5px solid #a569bd; color:white; font-size:16px; font-weight:900; letter-spacing:0.5px; box-shadow:0 4px 15px rgba(142,68,173,0.5); text-transform:uppercase; cursor: pointer;" onclick="startGame()">Start Game (with Seat Cut) 🏁</button>
+      </div>`;
+  } else {
+    document.getElementById('mainPane').innerHTML = `
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; font-family:'Inter', sans-serif;">
+          <span style="font-size:28px;">🟢</span>
+          <div style="display:flex; flex-direction:column;">
+              <h2 style="color:#27ae60; font-family:'Inter', sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin:0; line-height:1.2;">Regular Setup</h2>
+              <span style="font-size:11px; color:#58d68d; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Standard / Custom Game Configuration</span>
+          </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
+          <input id="gName" class="std-input" placeholder="Enter Game Name">
+          <button onclick="appendDT()" style="background:var(--warning); width:100%; color:#111; margin-bottom:15px;">🕒 Insert Date/Time</button>
+          
+          <div style="margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+              <label style="display:block; font-size:12px; font-weight:bold; color:var(--accent); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Ruleset Selection</label>
+              <div style="display:flex; gap:10px; margin-bottom:10px;">
+                  <button id="ruleStandardBtn" class="active-rule" onclick="setRulesetMode('standard')" style="flex:1; background:var(--accent); color:white; font-size:12px; font-weight:bold; height:38px; border:none; border-radius:6px; cursor:pointer; padding:0 4px; transition: all 0.2s;">Elite</button>
+                  <button id="ruleCustomBtn" onclick="setRulesetMode('custom')" style="flex:1; background:#8a3c00; color:white; font-size:12px; font-weight:bold; height:38px; border:none; border-radius:6px; cursor:pointer; padding:0 4px; transition: all 0.2s;">Custom Rules</button>
+              </div>
+              
+              <div id="customRulesBlock" style="display:none; background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--glass-border); margin-top:10px;">
+                  <div style="margin-bottom: 12px;">
+                      <label style="display:block; font-size:11px; margin-bottom:5px; opacity:0.8; font-weight:600;">Exit Score (Total score that will exit a player):</label>
+                      <input id="exitScoreInput" type="text" inputmode="numeric" pattern="[0-9]*" class="std-input" value="0" style="margin-bottom:0; height:36px; padding:0 10px; font-size:13px;" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value.trim()==='')this.value='0';">
+                  </div>
+                  <div>
+                      <label style="display:block; font-size:11px; margin-bottom:5px; opacity:0.8; font-weight:600;">Number of Re-entries allowed:</label>
+                      <input id="maxReentriesInput" type="text" inputmode="numeric" pattern="[0-9]*" class="std-input" value="0" style="margin-bottom:0; height:36px; padding:0 10px; font-size:13px;" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value.trim()==='')this.value='0';">
+                  </div>
+              </div>
+          </div>
+  
+          <div id="playerList"></div>
+          <button class="navBtn" style="background:rgba(255,255,255,0.1); width:100%; border:1px dashed var(--glass-border); margin-bottom:15px;" onclick="addPlayerField()">+ Add Player</button>
+          
+          <div id="adminSelectionWrapper" style="display:none; margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+              <label style="display:block; font-size:12px; font-weight:bold; color:var(--accent); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">Authorize Game Admin</label>
+              <select id="gameAdminSelect" class="std-input" style="margin-bottom:0;"></select>
+              <div style="font-size:10px; opacity:0.5; margin-top:4px;">The Admin has the sole authority to rename games and correct scores for ended rounds.</div>
+          </div>
+  
+          <button id="btnStartGame" class="actionBtn" style="cursor: pointer;" onclick="startGame()">Start Game 🏁</button>
+      </div>`;
+  }
   updateAdminSelect();
 }
 
@@ -1634,14 +1355,443 @@ function formatEliteDate(dateObj) {
     return `${dd}-${mm}-${yy} ${hours}:${minutes} ${ampm}`;
 }
 
+// Global Seat Cut State
+let seatCutPlayers = [];
+let seatCutVisiblePlayers = [];
+let seatCutSelections = {}; // { playerName: { player, suit, value, entryTime } }
+let activeSeatCutKeypad = null; // { player, suit }
+let seatCutCalculatedResults = null;
+
+function openSeatCutModal(pList) {
+    seatCutPlayers = pList;
+    seatCutVisiblePlayers = [...pList];
+    seatCutSelections = {};
+    activeSeatCutKeypad = null;
+    seatCutCalculatedResults = null;
+    
+    pList.forEach(p => {
+        seatCutSelections[p] = { player: p, suit: null, value: null, entryTime: 0 };
+    });
+    
+    document.getElementById('seatCutModal').style.display = 'flex';
+    document.getElementById('seatCutStepEntry').style.display = 'block';
+    document.getElementById('seatCutStepResults').style.display = 'none';
+    document.getElementById('seatCutKeypad').style.display = 'none';
+    document.getElementById('seatCutGameName').innerText = "Game: " + (document.getElementById('gName').value || "Game");
+    
+    renderSeatCutPlayersTable();
+    updateSeatCutCalculateButtonState();
+}
+
+function closeSeatCutModal() {
+    document.getElementById('seatCutModal').style.display = 'none';
+}
+
+function renderSeatCutPlayersTable() {
+    const tbody = document.getElementById('seatCutPlayersTableBody');
+    tbody.innerHTML = seatCutVisiblePlayers.map(p => {
+        const sel = seatCutSelections[p];
+        const hasCard = sel && sel.suit !== null;
+        let cardDisplay = '<span style="font-size:10px; opacity:0.5; font-style:italic;">None</span>';
+        if (hasCard) {
+            const isJoker = sel.suit === 'Joker';
+            const colorClass = isJoker ? 'color:#f1c40f;' : (['♥', '♦'].includes(sel.suit) ? 'color:#e74c3c;' : 'color:#111111;');
+            const badgeBg = isJoker ? 'background:#8e44ad;' : 'background:#ffffff;';
+            const displayValue = sel.value === null ? sel.suit : (isJoker ? '🃏 Joker' : (sel.value + sel.suit));
+            cardDisplay = `<span style="font-weight:900; font-size:14px; border:1px solid rgba(0,0,0,0.25); padding:4px 8px; border-radius:4px; ${badgeBg} ${colorClass}">${displayValue}</span>`;
+        }
+
+        const suits = ['♠', '♥', '♦', '♣', 'Joker'];
+        const getSuitBtnStyle = (suit, isSelected) => {
+            let bg, color, border;
+            if (suit === '♠' || suit === '♣') {
+                bg = isSelected ? '#ffffff' : 'rgba(240, 240, 240, 0.9)';
+                color = '#111111';
+                border = isSelected ? '3px solid #2ecc71' : '1px solid rgba(255,255,255,0.3)';
+            } else if (suit === '♥' || suit === '♦') {
+                bg = isSelected ? '#ffffff' : 'rgba(250, 240, 240, 0.9)';
+                color = '#e74c3c';
+                border = isSelected ? '3px solid #2ecc71' : '1px solid rgba(255,255,255,0.3)';
+            } else {
+                bg = isSelected ? '#f1c40f' : '#8e44ad';
+                color = isSelected ? '#8e44ad' : '#f1c40f';
+                border = isSelected ? '3px solid #2ecc71' : '1px solid rgba(255,255,255,0.3)';
+            }
+            
+            const size = isSelected ? '56px' : '48px';
+            const fontSize = isSelected ? '28px' : '22px';
+            const shadow = isSelected ? 'box-shadow:0 0 10px rgba(46,204,113,0.5); font-weight:900;' : 'font-weight:bold;';
+            return `background:${bg}; border:${border}; color:${color}; ${shadow} cursor:pointer; font-size:${fontSize}; width:${size}; height:${size}; border-radius:8px; margin-right:6px; transition:0.15s; display:inline-flex; align-items:center; justify-content:center;`;
+        };
+
+        const buttonsHtml = suits.map(suit => {
+            const isSelected = sel && sel.suit === suit;
+            return `<button type="button" style="${getSuitBtnStyle(suit, isSelected)}" onclick="handleSeatCutSuitPress('${p.replace(/'/g, "\\'")}', '${suit}')">${suit === 'Joker' ? 'J' : suit}</button>`;
+        }).join('');
+
+        return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <td style="padding:10px; font-weight:bold; color:#fff; vertical-align:middle;">${p}</td>
+            <td style="padding:10px; text-align:center; vertical-align:middle;">
+                <div style="display:inline-flex; justify-content:center; align-items:center;">
+                    ${buttonsHtml}
+                </div>
+            </td>
+            <td style="padding:10px; text-align:right; vertical-align:middle;">
+                ${cardDisplay}
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function handleSeatCutSuitPress(player, suit) {
+    if (suit === 'Joker') {
+        seatCutSelections[player] = { player, suit: 'Joker', value: 'Joker', entryTime: Date.now() };
+        document.getElementById('seatCutKeypad').style.display = 'none';
+        activeSeatCutKeypad = null;
+        renderSeatCutPlayersTable();
+        updateSeatCutCalculateButtonState();
+    } else {
+        seatCutSelections[player] = { player, suit: suit, value: null, entryTime: Date.now() };
+        renderSeatCutPlayersTable();
+        updateSeatCutCalculateButtonState();
+        
+        activeSeatCutKeypad = { player, suit };
+        document.getElementById('seatCutKeypad').style.display = 'block';
+        document.getElementById('seatCutKeypadTitle').innerHTML = `Select Rank for <strong style="color:#f39c12;">${player}</strong> with suit <strong style="color:#2ecc71;">${suit}</strong>`;
+        
+        const ranks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+        const keypadContainer = document.getElementById('seatCutKeypadButtons');
+        
+        const isRed = ['♥', '♦'].includes(suit);
+        const textColor = isRed ? '#e74c3c' : '#111111';
+        
+        keypadContainer.innerHTML = ranks.map(rank => {
+            const btnStyle = `background:#ffffff; color:${textColor}; border:2px solid ${textColor}; cursor:pointer; padding:10px 0; font-size:14px; font-weight:900; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.15); transition:transform 0.1s; display:flex; align-items:center; justify-content:center; gap:2px;`;
+                
+            return `<button type="button" style="${btnStyle}" onclick="handleSeatCutRankSelection('${rank}')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${rank}${suit}</button>`;
+        }).join('');
+    }
+}
+
+function handleSeatCutRankSelection(rank) {
+    if (!activeSeatCutKeypad) return;
+    const { player, suit } = activeSeatCutKeypad;
+    
+    seatCutSelections[player] = { player, suit, value: rank, entryTime: Date.now() };
+    document.getElementById('seatCutKeypad').style.display = 'none';
+    activeSeatCutKeypad = null;
+    
+    renderSeatCutPlayersTable();
+    updateSeatCutCalculateButtonState();
+}
+
+function cancelCardValueSelection() {
+    document.getElementById('seatCutKeypad').style.display = 'none';
+    activeSeatCutKeypad = null;
+}
+
+function updateSeatCutCalculateButtonState() {
+    const isAllEntered = seatCutVisiblePlayers.every(p => {
+        const sel = seatCutSelections[p];
+        return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
+    });
+    const btn = document.getElementById('btnSeatCutCalculate');
+    if (btn) {
+        btn.disabled = !isAllEntered;
+        btn.style.opacity = isAllEntered ? '1' : '0.4';
+        btn.style.cursor = isAllEntered ? 'pointer' : 'not-allowed';
+    }
+}
+
+function renderEditableSeatCutResults() {
+    const results = seatCutCalculatedResults;
+    
+    const seatingHtml = results.seatingOrder.map((s) => {
+        return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:10px 14px; border-radius:8px; font-family:'Inter', 'Segoe UI', sans-serif; font-size:13px;">
+            <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                <span style="color:#2ecc71; font-weight:800; width:65px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">Seat ${s.seat}:</span>
+                <span style="color:#fff; font-weight:700; font-size:14px;">${s.player}</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span style="background:#ffffff; border:1px solid rgba(0,0,0,0.2); padding:4px 10px; border-radius:6px; font-weight:900; color:#111111; font-size:13px; font-family:'Inter', sans-serif;">${s.card}</span>
+                <span style="background:rgba(230,126,34,0.15); border:1.5px solid rgba(230,126,34,0.3); padding:4px 8px; border-radius:6px; color:#e67e22; font-size:11px; font-weight:800; font-family:'Inter', sans-serif;">Rank ${s.rank}</span>
+            </div>
+        </div>`;
+    }).join('');
+    
+    document.getElementById('seatCutSeatingList').innerHTML = seatingHtml;
+    
+    document.getElementById('seatCutDealerResult').innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; font-family:'Inter', 'Segoe UI', sans-serif;">
+            <span style="font-weight:900; color:#e74c3c; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-right:4px;">👑 ASSIGNED DEALER:</span>
+            <span style="color:#ffffff; font-weight:800; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">${results.dealer}</span>
+        </div>
+    `;
+    
+    const distributionOrder = results.seatingOrder.map(s => s.player);
+    const dealer = results.dealer;
+    
+    document.getElementById('seatCutDistributionList').innerHTML = distributionOrder.map((p, idx) => {
+        const isFirst = idx === 0;
+        const isDealerText = p === dealer;
+        let suffix = '';
+        if (isFirst) suffix = ' <span style="color:#2ecc71; font-size:11px; font-weight:bold;">(Receives First Clock-one)</span>';
+        else if (isDealerText) suffix = ' <span style="color:#e74c3c; font-size:11px; font-weight:bold;">(Dealer Last)</span>';
+        
+        const textStyle = isFirst ? 'color:#2ecc71; font-weight:800;' : (isDealerText ? 'color:#e74c3c; font-weight:800;' : 'color:#eee; font-weight:600;');
+        return `<div style="padding:4px 8px; background:rgba(255,255,255,0.02); border-radius:6px; border:1px solid rgba(255,255,255,0.03); display:flex; justify-content:space-between; align-items:center; font-family:'Inter', 'Segoe UI', sans-serif; font-size:13px; ${textStyle}">
+            <span>${idx + 1}. ${p}</span>
+            <span>${suffix}</span>
+        </div>`;
+    }).join('');
+}
+
+function handleManualSeatChange(seatIndex, newPlayer) {
+    if (!seatCutCalculatedResults) return;
+    const oldPlayer = seatCutCalculatedResults.seatingOrder[seatIndex].player;
+    if (oldPlayer === newPlayer) return;
+    
+    const swappedSeatIdx = seatCutCalculatedResults.seatingOrder.findIndex(s => s.player === newPlayer);
+    if (swappedSeatIdx !== -1) {
+        seatCutCalculatedResults.seatingOrder[swappedSeatIdx].player = oldPlayer;
+    }
+    
+    seatCutCalculatedResults.seatingOrder[seatIndex].player = newPlayer;
+    seatCutCalculatedResults.distributionOrder = seatCutCalculatedResults.seatingOrder.map(s => s.player);
+    
+    renderEditableSeatCutResults();
+    triggerSeatCutAuditLogUpdate();
+}
+
+function handleManualDealerChange(newDealer) {
+    if (!seatCutCalculatedResults) return;
+    seatCutCalculatedResults.dealer = newDealer;
+    
+    renderEditableSeatCutResults();
+    triggerSeatCutAuditLogUpdate();
+}
+
+async function triggerSeatCutAuditLogUpdate() {
+    try {
+        const gameId = Date.now().toString();
+        const gName = document.getElementById('gName').value || "Game";
+        const logDateTime = formatEliteDate(new Date());
+        
+        const records = seatCutCalculatedResults.seatingOrder.map(s => ({
+            player: s.player,
+            card: s.card,
+            rank: s.rank,
+            seat: s.seat,
+            isDealer: s.player === seatCutCalculatedResults.dealer
+        }));
+        
+        await db.collection('seatCutAudits').doc(gameId + '_amended_' + Date.now().toString()).set({
+            tableName: gName + " (Amended)",
+            dateTime: logDateTime,
+            records,
+            dealer: seatCutCalculatedResults.dealer,
+            timestamp: Date.now()
+        });
+        console.log("Firestore Seatcut Amended Log logged successfully!");
+    } catch (e) {
+        console.error("Firestore Amended save failed:", e);
+    }
+}
+
+async function calculateSeatCutResults() {
+    const isAllEntered = seatCutVisiblePlayers.every(p => {
+        const sel = seatCutSelections[p];
+        return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
+    });
+    if (!isAllEntered) return alert('Enter a card selection for all active players!');
+    
+    const cards = Object.values(seatCutSelections).filter(sel => sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null));
+    const cardCounts = {};
+    cards.forEach(c => {
+        const key = c.suit === 'Joker' ? 'Joker' : `${c.value}${c.suit}`;
+        cardCounts[key] = (cardCounts[key] || 0) + 1;
+    });
+    
+    const duplicateCards = Object.keys(cardCounts).filter(k => cardCounts[k] > 1);
+    
+    if (duplicateCards.length > 0) {
+        const dupPlayers = cards.filter(c => {
+            const key = c.suit === 'Joker' ? 'Joker' : `${c.value}${c.suit}`;
+            return duplicateCards.includes(key);
+        }).map(c => c.player);
+        
+        alert(`⚠️ DUPLICATE DRAW DETECTED!\n\nThe card (${duplicateCards.join(', ')}) was drawn by multiple players: ${dupPlayers.join(', ')}.\n\nA Re-Seat Cut is required for these players. Their card parameters have been cleared. Please draw again for them.`);
+        
+        dupPlayers.forEach(p => {
+            seatCutSelections[p] = { player: p, suit: null, value: null, entryTime: Date.now() };
+        });
+        
+        seatCutVisiblePlayers = dupPlayers;
+        
+        document.getElementById('seatCutKeypad').style.display = 'none';
+        activeSeatCutKeypad = null;
+        
+        renderSeatCutPlayersTable();
+        updateSeatCutCalculateButtonState();
+        return;
+    }
+    
+    const VALUE_ORDER = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+    const SUIT_ORDER = { '♠': 0, '♥': 1, '♦': 2, '♣': 3 };
+    
+    const rankedCards = [...cards].sort((a, b) => {
+        const isAJoker = a.suit === 'Joker';
+        const isBJoker = b.suit === 'Joker';
+        
+        if (isAJoker && isBJoker) {
+            return b.entryTime - a.entryTime;
+        }
+        if (isAJoker) return 1;
+        if (isBJoker) return -1;
+        
+        const aValIdx = VALUE_ORDER.indexOf(a.value);
+        const bValIdx = VALUE_ORDER.indexOf(b.value);
+        if (aValIdx !== bValIdx) {
+            return aValIdx - bValIdx;
+        }
+        
+        const aSuitIdx = SUIT_ORDER[a.suit];
+        const bSuitIdx = SUIT_ORDER[b.suit];
+        return aSuitIdx - bSuitIdx;
+    });
+    
+    const seatingOrder = rankedCards.map((c, idx) => ({
+        seat: idx + 1,
+        player: c.player,
+        card: c.suit === 'Joker' ? '🃏 Joker' : `${c.value}${c.suit}`,
+        rank: idx + 1
+    }));
+    
+    const dealer = rankedCards[rankedCards.length - 1].player;
+    const distributionOrder = seatingOrder.map(s => s.player);
+    
+    seatCutCalculatedResults = {
+        seatingOrder,
+        dealer,
+        distributionOrder
+    };
+    
+    renderEditableSeatCutResults();
+    
+    try {
+        const gameId = Date.now().toString();
+        const gName = document.getElementById('gName').value || "Game";
+        const logDateTime = formatEliteDate(new Date());
+        
+        const records = seatingOrder.map(s => ({
+            player: s.player,
+            card: s.card,
+            rank: s.rank,
+            seat: s.seat,
+            isDealer: s.player === dealer
+        }));
+        
+        await db.collection('seatCutAudits').doc(gameId + '_' + Date.now().toString()).set({
+            tableName: gName,
+            dateTime: logDateTime,
+            records,
+            dealer: dealer,
+            timestamp: Date.now()
+        });
+        console.log("Firestore Seatcut audit logged successfully!");
+    } catch (e) {
+        console.error("Firestore Seatcut Audit saving failed:", e);
+    }
+    
+    document.getElementById('seatCutStepEntry').style.display = 'none';
+    document.getElementById('seatCutStepResults').style.display = 'block';
+}
+
+function goBackToSeatCutEntry() {
+    seatCutVisiblePlayers = [...seatCutPlayers];
+    renderSeatCutPlayersTable();
+    updateSeatCutCalculateButtonState();
+    document.getElementById('seatCutStepEntry').style.display = 'block';
+    document.getElementById('seatCutStepResults').style.display = 'none';
+}
+
+function applySeatCutAndStartGame() {
+    if (!seatCutCalculatedResults) return alert("Calculate outcomes first!");
+    
+    const results = seatCutCalculatedResults;
+    const dealerName = results.dealer;
+    const dealersIndex = results.distributionOrder.indexOf(dealerName);
+    
+    const orderedPlayers = [];
+    orderedPlayers.push(dealerName); // Dealer is index 0
+    
+    for (let i = 1; i < results.distributionOrder.length; i++) {
+        const nextIdx = (dealersIndex + i) % results.distributionOrder.length;
+        orderedPlayers.push(results.distributionOrder[nextIdx]);
+    }
+    
+    console.log("Ordered Seating from SeatCut (Dealer-First-Clockwise):", orderedPlayers);
+    
+    let rulesetMode = 'tournament';
+    let exitLimit = 240;
+    let maxRE = 0;
+    const selectedAdmin = document.getElementById('gameAdminSelect')?.value || orderedPlayers[0];
+    
+    state = {
+        id: Date.now().toString(),
+        name: document.getElementById('gName').value || "Game",
+        startTime: formatEliteDate(new Date()),
+        players: orderedPlayers,
+        startingPlayers: [...orderedPlayers],
+        totals: {},
+        roundScores: {},
+        roundTactics: {},
+        lastDropRound: {},
+        eliminated: {},
+        reEntries: {},
+        actionStats: {},
+        round: 1,
+        history: [],
+        winner: null,
+        endTime: null,
+        ruleset: rulesetMode,
+        exitScoreLimit: exitLimit,
+        maxReEntries: maxRE,
+        admin: selectedAdmin,
+        seatCutOutcome: results
+    };
+    
+    orderedPlayers.forEach(p => {
+        state.totals[p] = 0;
+        state.roundScores[p] = null;
+        state.roundTactics[p] = null;
+        state.lastDropRound[p] = -1;
+        state.actionStats[p] = { shows: 0, fcs: 0, drops: 0, mds: 0 };
+    });
+    
+    db.collection('eliteGames').doc(state.id).set(state);
+    closeSeatCutModal();
+    showScreen('activeGame');
+}
+
 function startGame() {
   let pList = Array.from(document.querySelectorAll('#playerList select')).map(s => s.value).filter(v => v !== "");
   if(pList.length < 2) return alert("Select at least 2 players");
+  
+  let rulesetMode = 'standard';
+  if (newGameSetupType === 'tournament') {
+      rulesetMode = 'tournament';
+  } else if (document.getElementById('ruleCustomBtn') && document.getElementById('ruleCustomBtn').classList.contains('active-rule')) {
+      rulesetMode = 'custom';
+  }
+  
+  if (rulesetMode === 'tournament') {
+      openSeatCutModal(pList);
+      return;
+  }
+  
   for(let i=pList.length-1; i>0; i--){ let j=Math.floor(Math.random()*(i+1)); [pList[i],pList[j]]=[pList[j],pList[i]]; }
   
-  // Grab ruleset configurations
-  const isCustomMode = document.getElementById('ruleCustomBtn') && document.getElementById('ruleCustomBtn').classList.contains('active-rule');
-  const rulesetMode = isCustomMode ? 'custom' : 'standard';
   let exitLimit = 240;
   let maxRE = 1;
 
@@ -1656,6 +1806,9 @@ function startGame() {
           alert("Please enter a valid number of re-entries (min 0).");
           return;
       }
+  } else if (rulesetMode === 'tournament') {
+      exitLimit = 240;
+      maxRE = 0;
   }
 
   const selectedAdmin = document.getElementById('gameAdminSelect')?.value || pList[0];
@@ -1705,9 +1858,27 @@ function renderActive(focusPlayer = null) {
       </div>`;
   }
 
-  let h = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px; flex-wrap:wrap; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+  let h = '';
+  if (state.ruleset === 'tournament') {
+      h += `
+        <div style="background: linear-gradient(135deg, #8e44ad, #6c3483); border: 2.5px solid #a569bd; border-radius: 8px; padding: 12px 16px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 4px 15px rgba(110, 52, 131, 0.45); font-family: 'Inter', sans-serif;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">🏆</span>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 900; color: #fff; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Championship Tournament Match</span>
+                    <span style="font-size: 10px; color: rgba(255,255,255,0.75); font-weight: bold; letter-spacing: 0.5px;">Points Cap: ${exitLimit} | Real-Time Audit Integrity Enabled</span>
+                </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; box-shadow: 0 0 10px rgba(165,105,189,0.3);">
+                LIVE ARENA
+            </div>
+        </div>
+      `;
+  }
+
+  h += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px; flex-wrap:wrap; border-bottom: 2px solid ${state.ruleset === 'tournament' ? '#8e44ad' : 'rgba(255,255,255,0.05)'}; padding-bottom:10px;">
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex-grow: 1;">
-        <button onclick="toggleFullScreen()" class="pause-btn" style="background: linear-gradient(to bottom, var(--accent), #1e8449); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 10px rgba(39, 174, 96, 0.3); width:80px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">Full Screen</button>
+        <button onclick="toggleFullScreen()" class="pause-btn" style="background: ${state.ruleset === 'tournament' ? 'linear-gradient(to bottom, #9b59b6, #6c3483)' : 'linear-gradient(to bottom, var(--accent), #1e8449)'}; border: 1px solid rgba(255,255,255,0.4); box-shadow: ${state.ruleset === 'tournament' ? '0 0 10px rgba(142, 68, 173, 0.4)' : '0 0 10px rgba(39, 174, 96, 0.3)'}; width:80px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">Full Screen</button>
         ${titleHtml}
     </div>
     <div style="display:flex; gap:5px; flex-shrink: 0; margin-left: auto;">
@@ -1715,11 +1886,11 @@ function renderActive(focusPlayer = null) {
     </div>
   </div>`;
 
-  const pastPlayers = Object.keys(state.totals).filter(p => !state.players.includes(p) || state.eliminated[p] || state.totals[p] >= exitLimit);
+  const pastPlayers = Object.keys(state.totals).filter(p => !state.players.includes(p) || state.eliminated[p] || isPlayerExceededLimit(p));
 
   const renderPlayerRow = (p) => {
     let rs = state.roundScores[p];
-    let isOut = state.eliminated[p] || state.totals[p] >= exitLimit;
+    let isOut = state.eliminated[p] || isPlayerExceededLimit(p);
     let dLock = state.lastDropRound[p] === (state.round-1);
     let tactic = state.roundTactics ? state.roundTactics[p] : null;
     
@@ -1755,9 +1926,15 @@ function renderActive(focusPlayer = null) {
     </tr>`;
   };
 
+  const thStyle = state.ruleset === 'tournament' ? 'color:#a569bd; border-bottom: 2px solid #8e44ad;' : '';
+
   h += `<table style="table-layout: fixed;">
         <colgroup><col style="width:32%"><col style="width:48%"><col style="width:20%"></colgroup>
-        <tr><th>Player</th><th>Tactics</th><th>Total</th></tr>`;
+        <tr style="${state.ruleset === 'tournament' ? 'background: rgba(142,68,173,0.06);' : ''}">
+            <th style="${thStyle}">Player</th>
+            <th style="${thStyle}">Tactics</th>
+            <th style="${thStyle}">Total</th>
+        </tr>`;
 
   activePlayers.forEach(p => h += renderPlayerRow(p));
 
@@ -1765,7 +1942,7 @@ function renderActive(focusPlayer = null) {
 
   if(!state.winner) {
       const isRoundInProgress = Object.keys(state.roundScores).some(p => {
-          const isNotOut = !state.eliminated[p] && (state.totals[p] || 0) < exitLimit;
+          const isNotOut = !state.eliminated[p] && !isPlayerExceededLimit(p);
           return isNotOut && state.roundScores[p] !== null;
       });
       h += `<button id="endBtn" class="actionBtn" style="margin-top:15px;" onclick="nextRound()">Next Round (${state.round + 1})</button>
@@ -2036,7 +2213,7 @@ function updateRoundScoresUI() {
     const midGameBtn = Array.from(document.querySelectorAll('.actionBtn')).find(b => b.innerText.includes('Add Player Mid-Game'));
     if (midGameBtn) {
         const isRoundInProgress = Object.keys(state.roundScores).some(p => {
-            const isNotOut = !state.eliminated[p] && (state.totals[p] || 0) < 240;
+            const isNotOut = !state.eliminated[p] && !isPlayerExceededLimit(p);
             return isNotOut && state.roundScores[p] !== null;
         });
         midGameBtn.style.background = isRoundInProgress ? '#333' : '#555';
@@ -2049,7 +2226,7 @@ function focusNext(p) {
     for (let i = 1; i < state.players.length; i++) {
         const nextIdx = (idx + i) % state.players.length;
         const nextP = state.players[nextIdx];
-        if (!state.eliminated[nextP] && state.totals[nextP] < 240) {
+        if (!state.eliminated[nextP] && !isPlayerExceededLimit(nextP)) {
             const nextInput = document.getElementById(`input-${nextP}`);
             if (nextInput) {
                 // Use a tiny delay to ensure keyboard stays up on all devices
@@ -2081,7 +2258,7 @@ function validateEndBtn() {
         if (rs === 'OUT') return false;
         if (rs === 'S') return true;
         let n = parseInt(rs) || 0;
-        return ((state.totals[p] || 0) + n) < 240;
+        return !isExceededLimitForScore(((state.totals[p] || 0) + n));
     });
     
     let shows = participants.filter(p => state.roundScores[p] === 'S');
@@ -2145,10 +2322,9 @@ async function nextRound() {
         let entry = { round: state.round, players: allParticipants, scores: scores, tactics: tactics, totals: {}, reentries: {}, bustedTotals: {} };
         
         // Ensure all roundScores have a value before proceeding
-        const exitLimit = getExitLimitFor(state);
         for (let p of state.players) {
             const sc = state.roundScores[p];
-            if ((sc === undefined || sc === null || sc === "") && !state.eliminated[p] && (state.totals[p] || 0) < exitLimit) {
+            if ((sc === undefined || sc === null || sc === "") && !state.eliminated[p] && !isPlayerExceededLimit(p)) {
                  alert(`Score missing for ${p}. Please enter a score or mark as OUT.`);
                  isPromptingReEntry = false;
                  return;
@@ -2163,14 +2339,14 @@ async function nextRound() {
                 let n = 0;
                 if (val === 'S') n = 0;
                 else if (val === 'OUT') {
-                    state.totals[p] = exitLimit;
+                    state.totals[p] = getExitLimitFor(state);
                     state.eliminated[p] = true; // Mark as eliminated for next check
                     n = 0; 
                 } else {
                     n = (parseInt(val) === 0 ? 0 : (parseInt(val) || 0));
                     if (state.totals[p] === undefined) state.totals[p] = n;
                     else state.totals[p] += n;
-                    if (state.totals[p] >= exitLimit) entry.bustedTotals[p] = state.totals[p];
+                    if (isPlayerExceededLimit(p)) entry.bustedTotals[p] = state.totals[p];
                 }
 
                 let tactic = tactics[p];
@@ -2185,8 +2361,9 @@ async function nextRound() {
         });
 
         // 2. Process Re-entries
-        let activeSurvivors = state.players.filter(p => state.totals[p] < exitLimit && !state.eliminated[p]);
+        let activeSurvivors = state.players.filter(p => !isPlayerExceededLimit(p) && !state.eliminated[p]);
         let reEntryQueue = [];
+        const exitLimit = getExitLimitFor(state);
         
         // Calculate re-entry score: highest survivor score + 1
         let entryScore = Math.round(exitLimit * 0.73);
@@ -2199,7 +2376,7 @@ async function nextRound() {
         for(let p of state.players) {
             const canReEnter = canPlayerReEnter(p, state);
             // Only players who reached exitLimit+ via scores (not manually marked OUT) get a chance
-            if(state.totals[p] >= exitLimit && !state.eliminated[p]) {
+            if(isPlayerExceededLimit(p) && !state.eliminated[p]) {
                 if(canReEnter) {
                     reEntryQueue.push({player: p, score: entryScore});
                 } else {
@@ -2212,10 +2389,10 @@ async function nextRound() {
             await processReEntryQueue(reEntryQueue, entry, allParticipants);
         } else {
             // Check if game should continue or end
-            let nextSurvivors = state.players.filter(p => !state.eliminated[p] && state.totals[p] < exitLimit);
+            let nextSurvivors = state.players.filter(p => !state.eliminated[p] && !isPlayerExceededLimit(p));
             if (nextSurvivors.length === 0) {
                 // Everyone is eliminated or over exitLimit - Game Ends!
-                let allInRound = state.players.filter(p => !state.eliminated[p] || state.totals[p] >= exitLimit);
+                let allInRound = state.players.filter(p => !state.eliminated[p] || isPlayerExceededLimit(p));
                 let minScore = Math.min(...allInRound.map(p => state.totals[p]));
                 let winners = allInRound.filter(p => state.totals[p] === minScore);
                 state.winner = (winners.length > 1 ? winners.join(' & ') : winners[0]) || "Tie";
@@ -3179,11 +3356,15 @@ function renderTVContent() {
     }
 
     // Esports Arena Header
+    const tvTitleDivider = state.ruleset === 'tournament' ? 'border-bottom: 4px solid #8e44ad; filter: drop-shadow(0 0 10px rgba(142,68,173,0.7));' : 'border-bottom: 2px solid rgba(255,255,255,0.12);';
+    const tvSubtitleColor = state.ruleset === 'tournament' ? 'color: #c39bd3;' : 'color: rgba(255,255,255,0.5);';
+    const tvSubtitleText = state.ruleset === 'tournament' ? '🏆 CHAMPIONSHIP TOURNAMENT PLAY' : 'Elite Rummy Circle Tournament';
+
     let h = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5vh; border-bottom: 2px solid rgba(255,255,255,0.12); padding-bottom: 1.5vh; height: 13.5vh; box-sizing: border-box;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5vh; ${tvTitleDivider} padding-bottom: 1.5vh; height: 13.5vh; box-sizing: border-box;">
             <div style="display: flex; flex-direction: column; gap: 0.5vh; max-width: 70%;">
                 <h1 style="font-size: 6.5vh; margin:0; color: #fff; font-weight: 900; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; letter-spacing: -0.5px; text-shadow: 0 0 15px rgba(255,255,255,0.25);">${state.name}</h1>
-                <div style="font-size: 2.0vh; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Elite Rummy Circle Tournament</div>
+                <div style="font-size: 2.0vh; font-weight: 600; ${tvSubtitleColor} text-transform: uppercase; letter-spacing: 1px;">${tvSubtitleText}</div>
             </div>
             <div style="display: flex; align-items: center; gap: 3vh;">
                 <div style="text-align: right; display: flex; flex-direction: column; gap: 0.3vh;">
@@ -4228,1181 +4409,6 @@ function genPDF(id) {
     });
     doc.save(`${g.name}.pdf`);
 }
-
-// --- PREMIUM MUSIC & RADIO SYSTEM IMPLEMENTATION ---
-(function() {
-  const STORAGE_KEY = 'elite_rummy_bgm_state_yt';
-  
-  const MUSIC_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M12 3v10.55c-.59-.34-1.34-.55-2.15-.55-2.3 0-4.15 1.61-4.15 3.6s1.85 3.6 4.15 3.6 4.15-1.61 4.15-3.6V8.56l8-1.6v6.59c-.59-.34-1.34-.55-2.15-.55-2.3 0-4.15 1.61-4.15 3.6s1.85 3.6 4.15 3.6 4.15-1.61 4.15-3.6V3H12z"/></svg>`;
-  
-  // High-availability curated YouTube live streams and playlists
-  const CHANNELS = [
-    {
-      id: 'uae_malayalam',
-      name: 'Home 92.2 FM UAE',
-      freq: '92.2 FM Dubai',
-      genre: 'Live UAE Malayalam Broadcast',
-      type: 'iframe',
-      targetId: 'https://922homefm.ae/',
-      fallbackUrl: 'https://stream.zeno.fm/tvx68z2z2feuv',
-      theme: 'linear-gradient(135deg, #27ae60, #11998e)',
-      abbr: MUSIC_ICON_SVG
-    }
-  ];
-
-  // Load configuration or set defaults
-  let state = {
-    channelIndex: 0,
-    volume: 80,
-    isMuted: false,
-    isMinimized: true,
-    wasPlaying: false,
-    showVideoMonitor: false,
-    forceDirectAudio: false,
-    positions: {
-      desktop: { x: window.innerWidth - 360, y: window.innerHeight - 100 },
-      isSet: false
-    }
-  };
-
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (data) {
-      const parsed = JSON.parse(data);
-      state = Object.assign(state, parsed);
-    }
-  } catch (err) {
-    console.error("Failed to load local BGM settings:", err);
-  }
-
-  // Ensure channelIndex is valid for the modified CHANNELS array
-  if (state.channelIndex < 0 || state.channelIndex >= CHANNELS.length) {
-    state.channelIndex = 0;
-  }
-
-  let isPlaying = false;
-  let isConnecting = false;
-  let player = null;
-  let playerReady = false;
-  
-  // Safe lazy-initialized direct audio stream fallback support
-  let nativeAudio = null;
-  let ytPlaybackTimeout = null;
-
-  // DOM Elements
-  let container, card, miniPlayer;
-  let playPauseBtn, prevBtn, nextBtn, muteBtn, volumeSlider, minimizeBtn, toggleVideoBtn;
-  let playIcon, pauseIcon, muteIcon, volumeHighIcon;
-  let brandName, brandFreq, brandGenre, discVinyl, discVinylArt, loadingIndicator;
-  let miniArt, miniEq;
-  let videoMonitorWrapper, videoLoader, btnDirectToggle, badgeDirectMode;
-
-  function initPlayerElements() {
-    container = document.getElementById('eliteMusicContainer');
-    card = document.getElementById('eliteMusicCard');
-    miniPlayer = document.getElementById('eliteMusicMini');
-    
-    playPauseBtn = document.getElementById('empBtnPlayPause');
-    prevBtn = document.getElementById('empBtnPrev');
-    nextBtn = document.getElementById('empBtnNext');
-    muteBtn = document.getElementById('empBtnMute');
-    volumeSlider = document.getElementById('empVolumeSlider');
-    minimizeBtn = document.getElementById('empBtnMinimize');
-    toggleVideoBtn = document.getElementById('empBtnToggleVideo');
-    btnDirectToggle = document.getElementById('empBtnDirectToggle');
-    badgeDirectMode = document.getElementById('empDirectBadgeMode');
-    
-    playIcon = document.getElementById('empPlayIcon');
-    pauseIcon = document.getElementById('empPauseIcon');
-    muteIcon = document.getElementById('empMuteIcon');
-    volumeHighIcon = document.getElementById('empVolumeHighIcon');
-    
-    brandName = document.getElementById('empCurrentName');
-    brandFreq = document.getElementById('empCurrentFreq');
-    brandGenre = document.getElementById('empCurrentGenre');
-    discVinyl = document.getElementById('empVinyl');
-    discVinylArt = document.getElementById('empVinylArt');
-    loadingIndicator = document.getElementById('empLoadingState');
-    
-    miniArt = document.getElementById('empMiniArt');
-    miniEq = document.getElementById('empMiniEq');
-    
-    videoMonitorWrapper = document.getElementById('empVideoMonitorWrapper');
-    videoLoader = document.getElementById('empVideoLoader');
-
-    restoreLayoutPositions();
-    renderStationSelector();
-    updateUIStates();
-    attachInteractionEvents();
-    loadYouTubeIframeAPI();
-  }
-
-  function saveCurrentState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      console.warn("Could not save BGM state to localStorage", e);
-    }
-  }
-
-  function restoreLayoutPositions() {
-    if (state.positions.isSet) {
-      let boundX = Math.max(10, Math.min(state.positions.desktop.x, window.innerWidth - 65));
-      let boundY = Math.max(10, Math.min(state.positions.desktop.y, window.innerHeight - 65));
-      
-      container.style.left = boundX + 'px';
-      container.style.top = boundY + 'px';
-      container.style.bottom = 'auto';
-      container.style.right = 'auto';
-    } else {
-      container.style.bottom = '24px';
-      container.style.right = '24px';
-      container.style.left = 'auto';
-      container.style.top = 'auto';
-    }
-
-    if (state.isMinimized) {
-      card.classList.add('emp-hide');
-      miniPlayer.classList.remove('emp-hide');
-    } else {
-      card.classList.remove('emp-hide');
-      miniPlayer.classList.add('emp-hide');
-    }
-
-    // Restore video monitor expanded status
-    toggleVideoMonitorDisplay(state.showVideoMonitor);
-  }
-
-  function toggleVideoMonitorDisplay(show) {
-    state.showVideoMonitor = show;
-    saveCurrentState();
-    if (show) {
-      videoMonitorWrapper.style.maxHeight = '180px';
-      videoMonitorWrapper.style.opacity = '1';
-      toggleVideoBtn.classList.add('emp-header-btn-active');
-    } else {
-      videoMonitorWrapper.style.maxHeight = '1px';
-      videoMonitorWrapper.style.opacity = '0.01';
-      toggleVideoBtn.classList.remove('emp-header-btn-active');
-    }
-  }
-
-  function renderStationSelector() {
-    const listContainer = document.getElementById('empStationList');
-    if (!listContainer) return;
-
-    let html = '';
-    CHANNELS.forEach((channel, idx) => {
-      const isSelected = idx === state.channelIndex;
-      html += `
-        <button class="emp-tab-btn ${isSelected ? 'active-tab' : ''}" data-index="${idx}">
-          <div class="emp-tab-abbr-wrap">
-            <span class="emp-tab-abbr" style="color: ${isSelected ? 'var(--emp-accent)' : '#a0aec0'}">${channel.abbr}</span>
-            ${isSelected && isPlaying ? '<span class="emp-live-pulse-ring"></span>' : ''}
-          </div>
-          <div class="emp-tab-title">${channel.name}</div>
-          <div class="emp-tab-desc">${channel.genre}</div>
-        </button>
-      `;
-    });
-    listContainer.innerHTML = html;
-
-    const items = listContainer.querySelectorAll('.emp-tab-btn');
-    items.forEach(item => {
-      item.addEventListener('click', function() {
-        const index = parseInt(this.getAttribute('data-index'));
-        selectChannel(index);
-      });
-    });
-  }
-
-  function updateUIStates() {
-    const ch = CHANNELS[state.channelIndex];
-    if (!ch) return;
-
-    brandName.innerText = ch.name;
-    brandFreq.innerText = ch.freq;
-    brandGenre.innerText = ch.genre;
-
-    miniArt.style.background = ch.theme;
-    miniArt.innerHTML = ch.abbr;
-    discVinylArt.style.background = ch.theme;
-    discVinylArt.innerHTML = ch.abbr;
-
-    volumeSlider.value = state.volume;
-
-    if (state.isMuted) {
-      muteIcon.classList.remove('emp-hide');
-      volumeHighIcon.classList.add('emp-hide');
-    } else {
-      muteIcon.classList.add('emp-hide');
-      volumeHighIcon.classList.remove('emp-hide');
-    }
-
-    if (isPlaying) {
-      playIcon.classList.add('emp-hide');
-      pauseIcon.classList.remove('emp-hide');
-      discVinyl.style.animationPlayState = 'running';
-      container.classList.add('emp-playing');
-      miniEq.classList.remove('emp-hide');
-    } else {
-      playIcon.classList.remove('emp-hide');
-      pauseIcon.classList.add('emp-hide');
-      discVinyl.style.animationPlayState = 'paused';
-      container.classList.remove('emp-playing');
-      miniEq.classList.add('emp-hide');
-    }
-
-    if (isConnecting) {
-      loadingIndicator.classList.remove('emp-hide');
-      if (videoLoader) videoLoader.classList.remove('emp-hide');
-    } else {
-      loadingIndicator.classList.add('emp-hide');
-      if (videoLoader) videoLoader.classList.add('emp-hide');
-    }
-
-    if (badgeDirectMode) {
-      if (state.forceDirectAudio) {
-        badgeDirectMode.innerText = "Direct Stream ⚡";
-        badgeDirectMode.style.color = "var(--emp-accent)";
-      } else {
-        badgeDirectMode.innerText = "Auto (YouTube) 📺";
-        badgeDirectMode.style.color = "#cbd5e0";
-      }
-    }
-  }
-
-  function selectChannel(index) {
-    if (index < 0 || index >= CHANNELS.length) return;
-    state.channelIndex = index;
-    saveCurrentState();
-    
-    renderStationSelector();
-    updateUIStates();
-
-    playCurrentChannel();
-  }
-
-  function loadYouTubeIframeAPI() {
-    if (window.YT && window.YT.Player) {
-      onYouTubeIframeAPIReady();
-      return;
-    }
-    
-    // Global callback defined first to bypass strict browser script load race conditions
-    window.onYouTubeIframeAPIReady = function() {
-      player = new window.YT.Player('empYoutubePlayer', {
-        height: '100%',
-        width: '100%',
-        videoId: '',
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          rel: 0,
-          modestbranding: 1,
-          iv_load_policy: 3,
-          playsinline: 1,
-          enablejsapi: 1,
-          origin: window.location.origin || '*'
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange,
-          'onError': onPlayerError
-        }
-      });
-    };
-
-    // Inject script second
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-  }
-
-  function onPlayerReady() {
-    playerReady = true;
-    console.log("YouTube Radio Player Engine Initialized.");
-    
-    if (player && player.setVolume) {
-      player.setVolume(state.isMuted ? 0 : state.volume);
-    }
-
-    // Auto load last playing channel state if queued to play
-    if (state.wasPlaying || isPlaying) {
-      playCurrentChannel();
-    }
-  }
-
-  function onPlayerStateChange(event) {
-    // Skip YouTube states if active channel uses an iframe layout element
-    const ch = CHANNELS[state.channelIndex];
-    if (ch && ch.type === 'iframe') return;
-
-    // 1 Playing, 2 Paused, 3 Buffering, 5 Cued, 0 Ended
-    if (event.data === window.YT.PlayerState.PLAYING) {
-      isPlaying = true;
-      isConnecting = false;
-      if (ytPlaybackTimeout) {
-        clearTimeout(ytPlaybackTimeout);
-        ytPlaybackTimeout = null;
-      }
-    } else if (event.data === window.YT.PlayerState.BUFFERING) {
-      isConnecting = true;
-    } else if (event.data === window.YT.PlayerState.PAUSED) {
-      isPlaying = false;
-      isConnecting = false;
-      if (ytPlaybackTimeout) {
-        clearTimeout(ytPlaybackTimeout);
-        ytPlaybackTimeout = null;
-      }
-    } else if (event.data === window.YT.PlayerState.ENDED) {
-      if (isPlaying) {
-        nextChannel();
-      }
-    }
-    updateUIStates();
-    renderStationSelector();
-  }
-
-  function onPlayerError(e) {
-    const ch = CHANNELS[state.channelIndex];
-    if (ch && ch.type === 'iframe') return;
-
-    console.warn("YouTube Stream API warning or blockage, error code " + e.data + ". Activating direct stream fallback.");
-    
-    if (ch && ch.fallbackUrl) {
-      activateDirectAudioFallback(ch);
-    } else {
-      isConnecting = true;
-      updateUIStates();
-      setTimeout(() => {
-        if (isPlaying) {
-          playCurrentChannel();
-        }
-      }, 4000);
-    }
-  }
-
-  function playCurrentChannel() {
-    // Safely stop background-running fallback streams first
-    stopNativeAudio();
-
-    const ch = CHANNELS[state.channelIndex];
-    if (!ch) return;
-
-    isConnecting = true;
-    isPlaying = true;
-    updateUIStates();
-    renderStationSelector();
-
-    const ytPlayerEl = document.getElementById('empYoutubePlayer');
-    const iframeContainer = document.getElementById('empIframePlayerContainer');
-
-    // Instantly use high-fidelity direct audio streams if manual select direct audio mode is enabled
-    if (state.forceDirectAudio && ch.fallbackUrl) {
-      ytPlayerEl.classList.add('emp-hide');
-      iframeContainer.classList.add('emp-hide');
-      activateDirectAudioFallback(ch);
-      state.wasPlaying = true;
-      saveCurrentState();
-      return;
-    }
-
-    if (ch.type === 'iframe') {
-      // Pause YouTube if it's currently streaming audio
-      if (player && playerReady && player.pauseVideo) {
-        try { player.pauseVideo(); } catch(err) {}
-      }
-
-      ytPlayerEl.classList.add('emp-hide');
-      iframeContainer.classList.remove('emp-hide');
-
-      // Inject the Home 92.2 FM official iframe!
-      iframeContainer.innerHTML = `
-        <iframe id="empIframe" src="${ch.targetId}" 
-          style="width: 100%; height: 100%; border: none; background: #000;" 
-          allow="autoplay; encrypted-media"></iframe>
-      `;
-
-      const iframe = document.getElementById('empIframe');
-      let loaded = false;
-      
-      const timeoutId = setTimeout(() => {
-        if (!loaded) {
-          console.warn("Direct site loader timed out. Launching robust custom audio player fallback.");
-          showFallbackUI();
-        }
-      }, 7000);
-
-      iframe.onload = function() {
-        loaded = true;
-        clearTimeout(timeoutId);
-        isConnecting = false;
-        isPlaying = true;
-        updateUIStates();
-        // Force slide down the visualiser bento monitor to show live official controls!
-        toggleVideoMonitorDisplay(true);
-      };
-
-      state.wasPlaying = true;
-      saveCurrentState();
-      return;
-    }
-
-    // Standard YouTube channels
-    ytPlayerEl.classList.remove('emp-hide');
-    iframeContainer.classList.add('emp-hide');
-    iframeContainer.innerHTML = ''; // Safely clear memory references
-
-    // If API/Player has not loaded yet, instantly activate direct stream audio fallback
-    if (!player || !playerReady) {
-      if (ch.fallbackUrl) {
-        console.log("YouTube player not ready yet. Booting direct stream fallback.");
-        activateDirectAudioFallback(ch);
-      } else {
-        console.warn("Player engine booting up, queuing current requested channel.");
-      }
-      return;
-    }
-
-    // Direct audio watchdog: if YouTube doesn't start playing within 4.5 seconds, fall back beautifully to streaming audio!
-    if (ch.fallbackUrl) {
-      ytPlaybackTimeout = setTimeout(() => {
-        if (isPlaying && isConnecting) {
-          console.warn("YouTube streaming blocked or throttled by browser. Loading high-fidelity direct fallback...");
-          activateDirectAudioFallback(ch);
-        }
-      }, 4500);
-    }
-
-    if (ch.type === 'live') {
-      player.loadVideoById({
-        videoId: ch.targetId,
-        suggestedQuality: 'small'
-      });
-    } else {
-      player.loadPlaylist({
-        list: ch.targetId,
-        listType: 'playlist',
-        index: 0,
-        suggestedQuality: 'small'
-      });
-      player.setLoop(true);
-      player.setShuffle(true);
-    }
-
-    if (state.isMuted) {
-      player.mute();
-    } else {
-      player.unMute();
-      player.setVolume(state.volume);
-    }
-
-    state.wasPlaying = true;
-    saveCurrentState();
-  }
-
-  function togglePlayPause() {
-    const ch = CHANNELS[state.channelIndex];
-    if (isPlaying) {
-      isPlaying = false;
-      isConnecting = false;
-      state.wasPlaying = false;
-      saveCurrentState();
-
-      if (ch && ch.type === 'iframe') {
-        const iframe = document.getElementById('empIframe');
-        if (iframe) {
-          iframe.src = 'about:blank'; // Mutes any running iframe playback sounds perfectly
-        }
-      } else {
-        if (player && playerReady) {
-          try { player.pauseVideo(); } catch (err) {}
-        }
-      }
-      stopNativeAudio();
-      updateUIStates();
-      renderStationSelector();
-    } else {
-      playCurrentChannel();
-    }
-  }
-
-  function nextChannel() {
-    let nextIdx = state.channelIndex + 1;
-    if (nextIdx >= CHANNELS.length) nextIdx = 0;
-    selectChannel(nextIdx);
-  }
-
-  function prevChannel() {
-    let prevIdx = state.channelIndex - 1;
-    if (prevIdx < 0) prevIdx = CHANNELS.length - 1;
-    selectChannel(prevIdx);
-  }
-
-  function toggleMute() {
-    state.isMuted = !state.isMuted;
-    if (player && playerReady) {
-      if (state.isMuted) {
-        player.mute();
-      } else {
-        player.unMute();
-        player.setVolume(state.volume);
-      }
-    }
-    if (nativeAudio) {
-      nativeAudio.muted = state.isMuted;
-    }
-    saveCurrentState();
-    updateUIStates();
-  }
-
-  function handleVolumeInput(e) {
-    state.volume = parseInt(e.target.value);
-    if (state.volume > 0) {
-      state.isMuted = false;
-    }
-    if (player && playerReady) {
-      player.setVolume(state.isMuted ? 0 : state.volume);
-      if (state.isMuted) {
-        player.mute();
-      } else {
-        player.unMute();
-      }
-    }
-    if (nativeAudio) {
-      nativeAudio.volume = state.isMuted ? 0 : state.volume / 100;
-      nativeAudio.muted = state.isMuted;
-    }
-    saveCurrentState();
-    updateUIStates();
-  }
-
-  function showFallbackUI() {
-    isConnecting = false;
-    updateUIStates();
-    
-    const iframeContainer = document.getElementById('empIframePlayerContainer');
-    iframeContainer.innerHTML = `
-      <div class="emp-fallback-player-ui">
-        <div class="emp-fallback-text" style="color: #e74c3c;">FRAME WORK BLOCK</div>
-        <div class="emp-tab-desc" style="white-space: normal; text-align: center; margin-bottom: 12px; font-size: 9px; line-height: 1.3; max-width: 220px;">
-          Website headers restricting embedding in some browser environments. Try direct audio or open the official live tab.
-        </div>
-        <button id="empBtnDirectPlay" class="emp-direct-play-btn">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <span id="empDirectPlayStateText">Play Direct Audio</span>
-        </button>
-        <a href="https://922homefm.ae/" target="_blank" class="emp-direct-link-btn" style="margin-top: 4px;">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:2px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-          Launch Live Website Player
-        </a>
-      </div>
-    `;
-
-    const btnDirectPlay = document.getElementById('empBtnDirectPlay');
-    if (btnDirectPlay) {
-      btnDirectPlay.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleNativeAudioDirect();
-      });
-    }
-  }
-
-  function toggleNativeAudioDirect() {
-    if (!nativeAudio) {
-      // High-availability fall-back live direct Malayalam radio stream on stream.zeno.fm
-      nativeAudio = new Audio("https://stream.zeno.fm/tvx68z2z2feuv");
-      nativeAudio.volume = state.isMuted ? 0 : state.volume / 100;
-      nativeAudio.muted = state.isMuted;
-      
-      nativeAudio.addEventListener('playing', () => {
-        isConnecting = false;
-        isPlaying = true;
-        const textSpan = document.getElementById('empDirectPlayStateText');
-        if (textSpan) textSpan.innerText = "Mute Direct Audio";
-        updateUIStates();
-      });
-      
-      nativeAudio.addEventListener('waiting', () => {
-        isConnecting = true;
-        updateUIStates();
-      });
-      
-      nativeAudio.addEventListener('pause', () => {
-        isPlaying = false;
-        isConnecting = false;
-        const textSpan = document.getElementById('empDirectPlayStateText');
-        if (textSpan) textSpan.innerText = "Play Direct Audio";
-        updateUIStates();
-      });
-    }
-
-    if (nativeAudio.paused) {
-      if (player && playerReady && player.pauseVideo) {
-        try { player.pauseVideo(); } catch (err) {}
-      }
-      isConnecting = true;
-      updateUIStates();
-      nativeAudio.play().catch(err => {
-        console.warn("Direct stream load failed, attempting cold reload...", err);
-        nativeAudio.load();
-        nativeAudio.play();
-      });
-    } else {
-      nativeAudio.pause();
-    }
-  }
-
-  function activateDirectAudioFallback(ch) {
-    if (!ch || !ch.fallbackUrl) return;
-    
-    // Pause YouTube player if active
-    if (player && playerReady && player.pauseVideo) {
-      try { player.pauseVideo(); } catch(err) {}
-    }
-    
-    stopNativeAudio();
-    
-    console.log("Activating direct HTML5 fallback stream:", ch.fallbackUrl);
-    nativeAudio = new Audio(ch.fallbackUrl);
-    nativeAudio.volume = state.isMuted ? 0 : state.volume / 100;
-    nativeAudio.muted = state.isMuted;
-    
-    nativeAudio.addEventListener('playing', () => {
-      isConnecting = false;
-      isPlaying = true;
-      updateUIStates();
-    });
-    
-    nativeAudio.addEventListener('waiting', () => {
-      isConnecting = true;
-      updateUIStates();
-    });
-    
-    nativeAudio.addEventListener('pause', () => {
-      isPlaying = false;
-      isConnecting = false;
-      updateUIStates();
-    });
-    
-    nativeAudio.addEventListener('error', (err) => {
-      console.error("Direct HTML5 stream fallback error:", err);
-      isConnecting = false;
-      updateUIStates();
-    });
-
-    isConnecting = true;
-    updateUIStates();
-    
-    nativeAudio.play().catch(err => {
-      console.warn("Direct HTML5 stream playback failed or was blocked by autoplay policies:", err);
-      isConnecting = false;
-      updateUIStates();
-    });
-  }
-
-  function stopNativeAudio() {
-    if (ytPlaybackTimeout) {
-      clearTimeout(ytPlaybackTimeout);
-      ytPlaybackTimeout = null;
-    }
-    if (nativeAudio) {
-      try {
-        nativeAudio.pause();
-        nativeAudio = null;
-      } catch (err) {}
-    }
-  }
-
-  function minimizeToPill() {
-    state.isMinimized = true;
-    saveCurrentState();
-    
-    card.classList.add('emp-hide');
-    miniPlayer.classList.remove('emp-hide');
-  }
-
-  function expandToDeck() {
-    state.isMinimized = false;
-    saveCurrentState();
-    
-    card.classList.remove('emp-hide');
-    miniPlayer.classList.add('emp-hide');
-  }
-
-  function attachInteractionEvents() {
-    playPauseBtn.addEventListener('click', togglePlayPause);
-    prevBtn.addEventListener('click', prevChannel);
-    nextBtn.addEventListener('click', nextChannel);
-    muteBtn.addEventListener('click', toggleMute);
-    volumeSlider.addEventListener('input', handleVolumeInput);
-    
-    if (btnDirectToggle) {
-      btnDirectToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        state.forceDirectAudio = !state.forceDirectAudio;
-        saveCurrentState();
-        updateUIStates();
-        if (isPlaying) {
-          playCurrentChannel();
-        }
-      });
-    }
-    
-    toggleVideoBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleVideoMonitorDisplay(!state.showVideoMonitor);
-    });
-
-    minimizeBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      minimizeToPill();
-    });
-    
-    miniPlayer.addEventListener('click', function() {
-      expandToDeck();
-    });
-
-    // Make position draggable on desktop
-    const dragHeader = document.getElementById('eliteMusicHeader');
-    let isMoving = false;
-    let initialX, initialY;
-    let offsetX = 0, offsetY = 0;
-
-    dragHeader.addEventListener('pointerdown', function(e) {
-      if (e.target.closest('.emp-header-btn')) return;
-
-      isMoving = true;
-      dragHeader.style.cursor = 'grabbing';
-      
-      const rect = container.getBoundingClientRect();
-      initialX = e.clientX;
-      initialY = e.clientY;
-      offsetX = rect.left;
-      offsetY = rect.top;
-      
-      container.setPointerCapture(e.pointerId);
-    });
-
-    window.addEventListener('pointermove', function(e) {
-      if (!isMoving) return;
-      
-      const dx = e.clientX - initialX;
-      const dy = e.clientY - initialY;
-      
-      let newX = offsetX + dx;
-      let newY = offsetY + dy;
-      
-      newX = Math.max(10, Math.min(newX, window.innerWidth - 65));
-      newY = Math.max(10, Math.min(newY, window.innerHeight - 65));
-
-      state.positions.desktop = { x: newX, y: newY };
-      state.positions.isSet = true;
-      
-      container.style.left = newX + 'px';
-      container.style.top = newY + 'px';
-      container.style.right = 'auto';
-      container.style.bottom = 'auto';
-    });
-
-    const stopDragging = function(e) {
-      if (!isMoving) return;
-      isMoving = false;
-      dragHeader.style.cursor = 'grab';
-      
-      try {
-        container.releasePointerCapture(e.pointerId);
-      } catch (err) {}
-      
-      saveCurrentState();
-    };
-
-    window.addEventListener('pointerup', stopDragging);
-    window.addEventListener('pointercancel', stopDragging);
-
-    window.addEventListener('resize', function() {
-      if (state.positions.isSet) {
-        let nX = Math.max(10, Math.min(state.positions.desktop.x, window.innerWidth - container.offsetWidth));
-        let nY = Math.max(10, Math.min(state.positions.desktop.y, window.innerHeight - container.offsetHeight));
-        
-        container.style.left = nX + 'px';
-        container.style.top = nY + 'px';
-      }
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPlayerElements);
-  } else {
-    initPlayerElements();
-  }
-})();
 </script>
-
-<!-- ELITE PREMIUM RADIO & MUSIC DOCK styles local wrapper -->
-<style>
-  /* Local YouTube Radio Addons & Bento Grids */
-  .emp-tabs-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 12px;
-  }
-  
-  .emp-tab-btn {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 8px;
-    padding: 9px 10px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    min-height: 56px;
-    text-align: left;
-    outline: none;
-  }
-  
-  .emp-tab-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  }
-  
-  .emp-tab-btn.active-tab {
-    background: rgba(39, 174, 96, 0.12);
-    border-color: var(--emp-accent);
-    box-shadow: 0 0 12px rgba(39, 174, 96, 0.2);
-  }
-  
-  .emp-tab-abbr-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 3px;
-  }
-  
-  .emp-tab-abbr {
-    font-size: 8px;
-    font-weight: 900;
-    color: var(--emp-accent);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-family: monospace;
-  }
-
-  .emp-tab-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-  }
-  
-  .emp-tab-desc {
-    font-size: 8px;
-    color: #a0aec0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-    margin-top: 1px;
-  }
-  
-  .emp-live-pulse-ring {
-    width: 6px;
-    height: 6px;
-    background: #e74c3c;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #e74c3c;
-    animation: emp-live-pulse-glow 1.2s infinite alternate;
-  }
-
-  @keyframes emp-live-pulse-glow {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(1.4); opacity: 1; }
-  }
-
-  .emp-video-monitor-wrapper {
-    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-    overflow: hidden;
-    width: 100%;
-    max-height: 1px;
-    opacity: 0.01;
-  }
-
-  .emp-video-monitor {
-    position: relative;
-    width: 100%;
-    height: 144px;
-    background: #000;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.9) inset, 0 8px 16px rgba(0,0,0,0.5);
-  }
-  
-  .emp-video-monitor-loader {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, #101626 0%, #030508 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-  }
-  
-  .emp-v-spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(255,255,255,0.1);
-    border-top-color: var(--emp-accent);
-    border-radius: 50%;
-    animation: emp-spin 1s linear infinite;
-    margin-bottom: 8px;
-  }
-  
-  .emp-v-loader-text {
-    font-size: 8px;
-    color: #7f8c9d;
-    font-weight: bold;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .emp-header-btn-active {
-    color: var(--emp-accent) !important;
-    text-shadow: 0 0 8px var(--emp-accent);
-  }
-
-  /* Iframe and direct HTML5 state overlays */
-  .emp-vplayer-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  
-  .emp-fallback-player-ui {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    background: radial-gradient(circle, #201e2c 0%, #111019 100%);
-    padding: 16px;
-    text-align: center;
-    color: #fff;
-    border-radius: 8px;
-  }
-  
-  .emp-fallback-text {
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #cbd5e0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  .emp-direct-play-btn {
-    background: var(--emp-accent, #27ae60);
-    border: none;
-    border-radius: 20px;
-    color: #000;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 6px 16px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-    transition: all 0.2s;
-    outline: none;
-  }
-  
-  .emp-direct-play-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
-  }
-  
-  .emp-direct-link-btn {
-    color: #a0aec0;
-    font-size: 10px;
-    text-decoration: underline;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: color 0.2s;
-  }
-  
-  .emp-direct-link-btn:hover {
-    color: #fff;
-  }
-  
-  .emp-direct-toggle-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #cbd5e0;
-    font-size: 8px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    outline: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .emp-direct-toggle-btn:hover {
-    background: rgba(39, 174, 96, 0.15);
-    border-color: var(--emp-accent, #27ae60);
-    color: #fff;
-    box-shadow: 0 0 8px rgba(39, 174, 96, 0.25);
-  }
-</style>
-
-<!-- ELITE PREMIUM RADIO & MUSIC DOCK -->
-<div id="eliteMusicContainer" class="emp-container">
-  <!-- FULL DETAILED DECK MODULE -->
-  <div id="eliteMusicCard" class="emp-card emp-hide">
-    <!-- Header with Drag Grip -->
-    <div class="emp-header" id="eliteMusicHeader">
-      <div class="emp-logo-section">
-        <div class="emp-dot-live"></div>
-        <span class="emp-badge-live">Live Match BGM</span>
-      </div>
-      <div id="empLoadingState" class="emp-alert-connecting emp-hide">LOADING...</div>
-      <div class="emp-header-controls">
-        <!-- Interactive Video Monitor Toggle -->
-        <button id="empBtnToggleVideo" class="emp-header-btn" title="Toggle Live Player Visualizer">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-        </button>
-        <!-- Minimize toggle -->
-        <button id="empBtnMinimize" class="emp-header-btn" title="Minimize Radio">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        </button>
-      </div>
-    </div>
- 
-    <!-- Active Song Media Section -->
-    <div class="emp-body">
-      <!-- Collapsible Live Video Stream Viewfinder -->
-      <div id="empVideoMonitorWrapper" class="emp-video-monitor-wrapper">
-        <div class="emp-video-monitor">
-          <div id="empVideoLoader" class="emp-video-monitor-loader">
-            <div class="emp-v-spinner"></div>
-            <div class="emp-v-loader-text">Loading stream...</div>
-          </div>
-          <div id="empYoutubePlayer"></div>
-          <div id="empIframePlayerContainer" class="emp-vplayer-container emp-hide"></div>
-        </div>
-      </div>
-
-      <div class="emp-station-display">
-        <div class="emp-vinyl-wrapper">
-          <div id="empVinyl" class="emp-vinyl">
-            <div id="empVinylArt" class="emp-vinyl-art" style="background: linear-gradient(135deg, #27ae60, #11998e);">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M12 3v10.55c-.59-.34-1.34-.55-2.15-.55-2.3 0-4.15 1.61-4.15 3.6s1.85 3.6 4.15 3.6 4.15-1.61 4.15-3.6V8.56l8-1.6v6.59c-.59-.34-1.34-.55-2.15-.55-2.3 0-4.15 1.61-4.15 3.6s1.85 3.6 4.15 3.6 4.15-1.61 4.15-3.6V3H12z"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="emp-metadata-block">
-          <div id="empCurrentFreq" class="emp-meta-freq">Superhit Radio</div>
-          <div id="empCurrentName" class="emp-meta-name">Malayalam Hits</div>
-          <div id="empCurrentGenre" class="emp-meta-genre">Non-Stop Malayalam Melodies</div>
-        </div>
-        
-        <!-- Live Visualizing Equalizer -->
-        <div class="emp-equalizer">
-          <div class="emp-eq-bar"></div>
-          <div class="emp-eq-bar"></div>
-          <div class="emp-eq-bar"></div>
-          <div class="emp-eq-bar"></div>
-          <div class="emp-eq-bar"></div>
-          <div class="emp-eq-bar"></div>
-        </div>
-      </div>
-
-      <!-- Playback Controls Frame -->
-      <div class="emp-playback-deck">
-        <button id="empBtnPrev" class="emp-btn-control" title="Previous Radio Channel">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-        </button>
-        <button id="empBtnPlayPause" class="emp-btn-control emp-btn-play-pause" title="Play / Pause">
-          <!-- Play icon default -->
-          <svg id="empPlayIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <!-- Pause icon hidden by default -->
-          <svg id="empPauseIcon" class="emp-hide" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-        </button>
-        <button id="empBtnNext" class="emp-btn-control" title="Next Radio Channel">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-        </button>
-      </div>
-
-      <!-- Compact Utility volume row -->
-      <div class="emp-utility-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-        <div class="emp-volume-dock">
-          <button id="empBtnMute" class="emp-btn-control" style="padding: 2px" title="Toggle Mute">
-            <!-- Loudspeaker icon -->
-            <svg id="empVolumeHighIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-            <!-- Mute icon hidden by default -->
-            <svg id="empMuteIcon" class="emp-hide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-          </button>
-          <input type="range" id="empVolumeSlider" class="emp-slider-volume" min="0" max="100" value="80" title="Volume">
-        </div>
-        <button id="empBtnDirectToggle" class="emp-direct-toggle-btn" title="Click to toggle high fidelity direct HTML5 stream fallback">
-          <span id="empDirectBadgeMode">Auto Stream Mode</span>
-        </button>
-      </div>
-
-      <!-- curating responsive channels grid selector -->
-      <div id="empStationList" class="emp-tabs-grid">
-        <!-- Dyn selection buttons -->
-      </div>
-    </div>
-  </div>
-
-  <!-- MINIMIZED GLOWING VINYL BUBBLE -->
-  <div id="eliteMusicMini" class="emp-circle-pill">
-    <div id="empMiniArt" class="emp-circle-art" style="background: linear-gradient(135deg, #27ae60, #11998e);">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M12 3v10.55c-.59-.34-1.34-.55-2.15-.55-2.3 0-4.15 1.61-4.15 3.6s1.85 3.6 4.15 3.6 4.15-1.61 4.15-3.6V8.56l8-1.6v6.59c-.59-.34-1.34-.55-2.15-.55-2.3 0-4.15 1.61-4.15 3.6s1.85 3.6 4.15 3.6 4.15-1.61 4.15-3.6V3H12z"/></svg>
-    </div>
-    <div class="emp-floating-eq-anchor">
-      <div id="empMiniEq" class="emp-item-status-equalizer emp-hide">
-        <div class="emp-mini-eq-b"></div>
-        <div class="emp-mini-eq-b"></div>
-        <div class="emp-mini-eq-b"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>

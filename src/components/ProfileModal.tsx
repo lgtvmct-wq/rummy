@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Player, GameState } from '../types';
 import { auth, db } from '../services/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { formatEliteDate } from '../game/gameLogic';
 import { jsPDF } from 'jspdf';
 
@@ -27,6 +27,20 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const [editPhoto, setEditPhoto] = useState('');
 
   const p = playersDb.find(x => x.id === uid);
+
+  const handleDeletePlayer = async () => {
+    if (!uid || !p) return;
+    const name = p.fullName || 'Player';
+    if (!window.confirm(`Are you sure you want to permanently delete user "${name}"? This will immediately remove them from the Hall of fame list and seat selection.`)) return;
+    try {
+      await deleteDoc(doc(db, 'players', uid));
+      alert(`Player "${name}" was successfully removed.`);
+      onClose();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to delete player from database. Verify active network connection.');
+    }
+  };
 
   useEffect(() => {
     if (p) {
@@ -328,6 +342,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold text-sm py-2 px-4 rounded transition cursor-pointer"
               >
                 Edit My Profile
+              </button>
+            )}
+            {!isCurrentUser && (
+              <button 
+                onClick={handleDeletePlayer}
+                className="w-full bg-red-600 hover:bg-red-500 text-white font-semibold text-sm py-2 px-4 rounded transition cursor-pointer border border-red-700/50"
+              >
+                Delete / Clean-Up Player
               </button>
             )}
             <button 

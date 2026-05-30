@@ -27,7 +27,7 @@ export default function App() {
 
   // New Game values
   const [gName, setGName] = useState('');
-  const [rulesetMode, setRulesetMode] = useState<'standard' | 'custom'>('standard');
+  const [rulesetMode, setRulesetMode] = useState<'standard' | 'custom' | 'tournament'>('standard');
   const [exitScoreInput, setExitScoreInput] = useState('240');
   const [maxReentriesInput, setMaxReentriesInput] = useState('1');
   const [selectedGameAdmin, setSelectedGameAdmin] = useState('');
@@ -172,9 +172,8 @@ export default function App() {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
 
-    const isCustom = rulesetMode === 'custom';
-    const limit = isCustom ? parseInt(exitScoreInput) : 240;
-    const maxRE = isCustom ? parseInt(maxReentriesInput) : 1;
+    const limit = rulesetMode === 'custom' ? parseInt(exitScoreInput) : 240;
+    const maxRE = rulesetMode === 'custom' ? parseInt(maxReentriesInput) : (rulesetMode === 'tournament' ? 0 : 1);
 
     if (isNaN(limit) || limit <= 0) {
       alert("Please enter a valid exit score limit greater than 0.");
@@ -502,19 +501,36 @@ export default function App() {
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Ruleset Preset</label>
                 <div className="flex gap-2">
                   <button 
+                    type="button"
                     onClick={() => setRulesetMode('standard')}
                     className={`flex-1 py-2 text-xs font-extrabold rounded-lg cursor-pointer transition ${rulesetMode === 'standard' ? 'bg-[var(--accent)] text-white font-extrabold' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
                   >
-                    Standard Game
+                    Elite
                   </button>
                   <button 
+                    type="button"
                     onClick={() => setRulesetMode('custom')}
                     className={`flex-1 py-2 text-xs font-extrabold rounded-lg cursor-pointer transition ${rulesetMode === 'custom' ? 'bg-orange-600 text-white font-extrabold' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
                   >
                     Custom Rules
                   </button>
+                  <button 
+                    type="button"
+                    onClick={() => setRulesetMode('tournament')}
+                    className={`flex-1 py-2 text-xs font-extrabold rounded-lg cursor-pointer transition ${rulesetMode === 'tournament' ? 'bg-purple-600 text-white font-extrabold' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+                  >
+                    Tournament
+                  </button>
                 </div>
               </div>
+
+              {rulesetMode === 'tournament' && (
+                <div className="bg-purple-950/20 p-4 border border-purple-500/20 rounded-xl flex flex-col gap-1.5 animate-slideDown text-[11px] text-purple-300">
+                  <strong className="text-yellow-500 text-xs">🏁 CHAMPIONSHIP MODE PROTOCOL</strong>
+                  <p>• Mandatory Seat Cut to automate seating order, dealer, and clockwise distribution sequences.</p>
+                  <p>• Strictly <strong className="text-[#e74c3c]">NO RE-ENTRY</strong>. Standard cutoff is &gt;240.</p>
+                </div>
+              )}
 
               {rulesetMode === 'custom' && (
                 <div className="bg-black/20 p-4 border border-white/5 rounded-xl flex flex-col gap-3 animate-slideDown text-xs text-slate-300">

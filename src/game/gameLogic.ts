@@ -18,8 +18,19 @@ export function getPlayerReEntriesCount(p: string, g?: Partial<GameState> | null
   return 0;
 }
 
+export function isPlayerExceededLimit(p: string, g?: Partial<GameState> | null): boolean {
+  if (!g) return false;
+  const score = g.totals?.[p] ?? 0;
+  const limit = getExitLimitFor(g);
+  if (g.ruleset === 'standard' || g.ruleset === 'tournament') {
+    return score > 240;
+  }
+  return score >= limit;
+}
+
 export function canPlayerReEnter(p: string, g?: Partial<GameState> | null): boolean {
   if (!g) return false;
+  if (g.ruleset === 'tournament') return false;
   const currentCount = getPlayerReEntriesCount(p, g);
   const maxVal = getMaxReEntriesFor(g);
   return currentCount < maxVal;
@@ -28,8 +39,7 @@ export function canPlayerReEnter(p: string, g?: Partial<GameState> | null): bool
 export function getDealerForState(g?: Partial<GameState> | null): string | null {
   if (!g || g.winner) return null;
   
-  const exitLimit = getExitLimitFor(g);
-  const activeInRound = (g.players || []).filter(p => !g.eliminated?.[p] && (g.totals?.[p] || 0) < exitLimit);
+  const activeInRound = (g.players || []).filter(p => !g.eliminated?.[p] && !isPlayerExceededLimit(p, g));
   if (activeInRound.length === 0) return null;
   
   const roster = g.startingPlayers || g.players || [];
@@ -48,7 +58,7 @@ export function getDealerForState(g?: Partial<GameState> | null): string | null 
       const scoreInLastRound = lastEntry.scores?.[dealer];
       const wasBusted = (lastEntry.bustedTotals && lastEntry.bustedTotals[dealer] !== undefined) || (scoreInLastRound === 'OUT');
       const hasReentered = (lastEntry.reentries && lastEntry.reentries[dealer] !== undefined) || 
-                           (!g.eliminated?.[dealer] && (g.totals?.[dealer] || 0) < exitLimit);
+                           (!g.eliminated?.[dealer] && !isPlayerExceededLimit(dealer, g));
       
       if (wasBusted && hasReentered) {
         forceReenteredDealer = true;
@@ -56,16 +66,16 @@ export function getDealerForState(g?: Partial<GameState> | null): string | null 
     }
   }
   
-  if (forceReenteredDealer && g.eliminated && !g.eliminated[dealer] && (g.totals?.[dealer] || 0) < exitLimit) {
+  if (forceReenteredDealer && g.eliminated && !g.eliminated[dealer] && !isPlayerExceededLimit(dealer, g)) {
     return dealer;
   }
   
   // Standard rotation: If dealer is OUT, the previous active player repeats.
-  if (g.eliminated?.[dealer] || (g.totals?.[dealer] || 0) >= exitLimit) {
+  if (g.eliminated?.[dealer] || isPlayerExceededLimit(dealer, g)) {
     for (let i = 1; i <= roster.length; i++) {
       const prevIdx = (dIdx - i + roster.length) % roster.length;
       const prevP = roster[prevIdx];
-      if (!g.eliminated?.[prevP] && (g.totals?.[prevP] || 0) < exitLimit && g.players.includes(prevP)) {
+      if (!g.eliminated?.[prevP] && !isPlayerExceededLimit(prevP, g) && g.players.includes(prevP)) {
         dealer = prevP;
         break;
       }
