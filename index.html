@@ -347,10 +347,25 @@
 </div>
 
 <div id="releaseNotesModal" class="modal-overlay">
-    <div class="modal-card" style="text-align: left; max-width: 400px;">
-         <h2 style="color:var(--accent); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-top:0;">Release Notes</h2>
-         <div style="margin-bottom: 20px;">
-             <b style="color: var(--warning); display: block; margin-bottom: 5px;">v99.0 - Expandable Info Drawers & Elite Brand Cohesion</b>
+    <div class="modal-card" style="text-align: left; max-width: 440px; display: flex; flex-direction: column; max-height: 80vh; position: relative; overflow: hidden; padding: 25px 25px 15px 25px;">
+         <!-- Floating top-right X button -->
+         <button style="position: absolute; top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: bold; z-index: 10;" 
+                 onclick="document.getElementById('releaseNotesModal').style.display='none'"
+                 onmouseover="this.style.background='rgba(255,255,255,0.2)'" 
+                 onmouseout="this.style.background='rgba(255,255,255,0.08)'">✕</button>
+
+         <h2 style="color:var(--accent); border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-top:0; margin-bottom: 15px; padding-right: 35px; font-size: 1.5rem;">Release Notes</h2>
+         
+         <!-- Scrollable middle content -->
+         <div style="flex: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 8px;">
+              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v100.0 - Sports-Grade Weight-Based Seat Cut & Tie Breaker Logic</b>
+              <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                  • <b>Official Card Weight Mapping:</b> Implemented a strict weight structure (53 to 2) mapping from Ace down to Two, with suits ranked from Spades (♠) down to Clubs (♣) and Joker at 1.<br>
+                  • <b>Automated Seeding Layout:</b> Dynamic seat cut inputs now automatically evaluate, sort, and arrange competitors in descending rank order instantly.<br>
+                  • <b>Targeted Tie-Breakers:</b> Localized tie-breakers are triggered exclusively for exact initial card weight matching, letting admins resolve specific seating conflicts cleanly without a full list reset.<br>
+              </div>
+              <hr style="margin: 10px 0; opacity: 0.2;">
+              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v99.0 - Expandable Info Drawers & Elite Brand Cohesion</b>
               <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
                   • <b>Interactive Info Dropdown:</b> Designed a collapsible ⓘ panel for Championship configurations to conserve real estate on setups.<br>
                   • <b>Purple Brand Alignment:</b> Styled the tournament dashboard consistently with the Elite panel, showcasing full violet/purple highlights on active controls.<br>
@@ -652,8 +667,30 @@
                 <li>Adopted "Game" terminology platform-wide for professional consistency.</li>
                 <li>Developer: Elite IT</li>
             </ul>
+         </div>
+         <!-- Pinned bottom footer Close button -->
+         <div style="border-top: 1px solid var(--glass-border); padding-top: 15px; display: flex;">
+             <button class="actionBtn" style="width: 100%; margin: 0; height: 42px;" onclick="document.getElementById('releaseNotesModal').style.display='none'">Close</button>
+         </div>
+    </div>
+</div>
+
+<div id="tourneyInfoModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; padding:15px; overflow-y:auto; z-index:9000;">
+    <div class="modal-card" style="text-align: left; max-width: 420px; background: #16222f; border: 1.5px solid rgba(142,68,173,0.5); font-family: 'Inter', sans-serif; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <h2 style="color:#a569bd; border-bottom: 1px solid rgba(165,105,189,0.3); padding-bottom: 10px; margin-top:0; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+            <span>🏆 Championship Match Config</span>
+        </h2>
+        <div style="font-size: 12px; line-height: 1.6; color: #e0bdfa; margin-top: 15px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 10px; align-items: flex-start; background: rgba(142,68,173,0.1); padding: 10px; border-radius: 8px;">
+                <span style="font-size: 16px;">ℹ️</span>
+                <span style="flex: 1;"><strong>Mandatory Seat Cut</strong> to automate seating order, dealer, and clockwise distribution sequences.</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-start; background: rgba(142,68,173,0.1); padding: 10px; border-radius: 8px;">
+                <span style="font-size: 16px;">🚫</span>
+                <span style="flex: 1;"><strong>Strictly NO RE-ENTRY</strong>. Standard cutoff is &gt;240.</span>
+            </div>
         </div>
-        <button class="actionBtn" onclick="document.getElementById('releaseNotesModal').style.display='none'">Close</button>
+        <button class="actionBtn" style="background: #8e44ad; width: 100%; border: none; height: 38px; font-weight: 800; color: white; border-radius: 6px;" onclick="document.getElementById('tourneyInfoModal').style.display='none'">Got it</button>
     </div>
 </div>
 
@@ -689,6 +726,20 @@
             <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
                 <button class="actionBtn" style="background:#555; flex:1; height:40px; font-size:13px; margin:0; padding:0;" onclick="closeSeatCutModal()">Cancel</button>
                 <button id="btnSeatCutCalculate" class="actionBtn" style="background:var(--accent); flex:1; height:40px; font-size:13px; margin:0; padding:0;" onclick="calculateSeatCutResults()">Calculate Results 🧮</button>
+            </div>
+        </div>
+
+        <div id="seatCutStepTieBreaker" style="display:none;">
+            <p id="tieBreakerText" style="font-size:13px; color:#f1c40f; margin-top:0; margin-bottom:12px; line-height:1.4; font-weight:bold; font-family:'Inter', sans-serif;">
+                Tie Breaker
+            </p>
+
+            <div id="tieBreakerPlayersContainer" style="display:flex; flex-direction:column; gap:12px; margin-bottom:15px;">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+                <button class="actionBtn" style="background:#555; flex:1; height:40px; font-size:13px; margin:0; padding:0;" onclick="cancelTieBreaker()">Back to Setup</button>
+                <button id="btnTieBreakerCalculate" class="actionBtn" style="background:#8e44ad; flex:1; height:40px; font-size:13px; margin:0; padding:0;" onclick="resolveTieBreaker()">Resolve Tie Breaker ⚔️</button>
             </div>
         </div>
 
@@ -1173,6 +1224,7 @@ function setRulesetMode(mode) {
     const tourneyBtn = document.getElementById('ruleTourneyBtn');
     const customBlock = document.getElementById('customRulesBlock');
     const tourneyBlock = document.getElementById('tourneyBlock');
+    const tourneyInfoIcon = document.getElementById('tourneyInfoIcon');
 
     // Reset button designs to unselected styles
     const buttons = [stdBtn, custBtn, tourneyBtn];
@@ -1187,6 +1239,7 @@ function setRulesetMode(mode) {
 
     if (customBlock) customBlock.style.display = 'none';
     if (tourneyBlock) tourneyBlock.style.display = 'none';
+    if (tourneyInfoIcon) tourneyInfoIcon.style.display = 'none';
 
     if (mode === 'standard') {
         if (stdBtn) {
@@ -1296,7 +1349,8 @@ function setRulesetMode(mode) {
             tourneyBtn.style.background = '#8e44ad';
             tourneyBtn.classList.add('active-rule');
         }
-        if (tourneyBlock) tourneyBlock.style.display = 'block';
+        if (tourneyBlock) tourneyBlock.style.display = 'none';
+        if (tourneyInfoIcon) tourneyInfoIcon.style.display = 'inline-flex';
 
         if (hIcon) hIcon.textContent = '🏆';
         if (hTitle) {
@@ -1362,6 +1416,13 @@ function toggleTourneyInfo() {
             details.style.display = 'none';
             if (chevron) chevron.style.transform = 'rotate(0deg)';
         }
+    }
+}
+
+function showTourneyInfoModal() {
+    const modal = document.getElementById('tourneyInfoModal');
+    if (modal) {
+        modal.style.display = 'flex';
     }
 }
 
@@ -1456,8 +1517,11 @@ function renderNewGame() {
   document.getElementById('mainPane').innerHTML = `
     <div id="newGameHeader" style="display:flex; align-items:center; gap:12px; margin-bottom:20px; font-family:'Inter', sans-serif;">
         <span id="newGameHeaderIcon" style="font-size:28px;">🟢</span>
-        <div style="display:flex; flex-direction:column;">
-            <h2 id="newGameHeaderTitle" style="color:#27ae60; font-family:'Inter', sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin:0; line-height:1.2;">Regular Setup</h2>
+        <div style="display:flex; flex-direction:column; flex:1;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <h2 id="newGameHeaderTitle" style="color:#27ae60; font-family:'Inter', sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin:0; line-height:1.2;">Regular Setup</h2>
+                <span id="tourneyInfoIcon" onclick="showTourneyInfoModal()" style="display:none; font-size: 15px; background: rgba(142,68,173,0.3); width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; border: 1px solid rgba(165,105,189,0.5); font-weight: bold; color: #e0bdfa; transition: all 0.2s;" title="Championship Match Config">ⓘ</span>
+            </div>
             <span id="newGameHeaderSub" style="font-size:11px; color:#58d68d; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Standard / Custom Game Configuration</span>
         </div>
     </div>
@@ -1473,17 +1537,7 @@ function renderNewGame() {
                 <button id="ruleTourneyBtn" onclick="switchRulesetMode('tournament');" style="flex:1; font-size:12px; font-weight:bold; height:38px; border-radius:6px; cursor:pointer; padding:0 4px; transition: all 0.2s;">Tournament</button>
             </div>
             
-            <div id="tourneyBlock" style="display:none; margin-top:12px; font-family:'Inter', sans-serif;">
-                <div onclick="toggleTourneyInfo()" style="display:flex; align-items:center; gap:8px; background:rgba(142,68,173,0.15); border:1px solid rgba(165,105,189,0.3); padding:8px 12px; border-radius:8px; cursor:pointer;" title="Click to view info">
-                    <span style="font-size:14px; color:#a569bd;">ℹ️</span>
-                    <span style="font-size:11px; color:#c59bf6; font-weight:bold; flex:1;">Championship Match Config (Tap to expand)</span>
-                    <span id="tourneyInfoChevron" style="font-size:10px; color:#a569bd; transition: transform 0.2s; display:inline-block;">▼</span>
-                </div>
-                <div id="tourneyInfoDetails" style="display:none; background:rgba(142,68,173,0.08); border:1px solid rgba(165,105,189,0.15); border-top:none; border-bottom-left-radius:8px; border-bottom-right-radius:8px; padding:10px 12px; font-size:11px; color:#e0bdfa; line-height:1.4;">
-                    <p style="margin: 0 0 6px 0;">ℹ️ <strong>Mandatory Seat Cut</strong> to automate seating order, dealer, and clockwise distribution sequences.</p>
-                    <p style="margin: 0;">🚫 <strong>Strictly NO RE-ENTRY</strong>. Standard cutoff is &gt;240.</p>
-                </div>
-            </div>
+            <div id="tourneyBlock" style="display:none;"></div>
 
             <div id="customRulesBlock" style="display:none; background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; border:1px solid var(--glass-border); margin-top:10px;">
                 <div style="margin-bottom: 12px;">
@@ -1592,13 +1646,16 @@ function formatEliteDate(dateObj) {
 let seatCutPlayers = [];
 let seatCutVisiblePlayers = [];
 let seatCutSelections = {}; // { playerName: { player, suit, value, entryTime } }
+let seatCutTieBreakers = {}; // { playerName: { suit, value } }
 let activeSeatCutKeypad = null; // { player, suit }
 let seatCutCalculatedResults = null;
+let activeTieBreaker = null;
 
 function openSeatCutModal(pList) {
     seatCutPlayers = pList;
     seatCutVisiblePlayers = [...pList];
     seatCutSelections = {};
+    seatCutTieBreakers = {};
     activeSeatCutKeypad = null;
     seatCutCalculatedResults = null;
     
@@ -1709,6 +1766,7 @@ function renderSeatCutPlayersTable() {
 }
 
 function handleSeatCutSuitPress(player, suit) {
+    seatCutTieBreakers = {}; // Clear tie-breakers on any selection change
     if (suit === 'Joker') {
         seatCutSelections[player] = { player, suit: 'Joker', value: 'Joker', entryTime: Date.now() };
         activeSeatCutKeypad = null;
@@ -1727,6 +1785,7 @@ function handleSeatCutRankSelection(rank) {
     const { player, suit } = activeSeatCutKeypad;
     
     seatCutSelections[player] = { player, suit, value: rank, entryTime: Date.now() };
+    seatCutTieBreakers = {}; // Clear tie-breakers on any selection change
     activeSeatCutKeypad = null;
     
     renderSeatCutPlayersTable();
@@ -1847,75 +1906,353 @@ async function triggerSeatCutAuditLogUpdate() {
 }
 
 async function calculateSeatCutResults() {
-    const isAllEntered = seatCutVisiblePlayers.every(p => {
+    const isAllEntered = seatCutPlayers.every(p => {
         const sel = seatCutSelections[p];
         return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
     });
     if (!isAllEntered) return alert('Enter a card selection for all active players!');
+
+    const sortedPlayers = getSortedSeating();
+    const tie = findFirstUnresolvedTie(sortedPlayers);
     
-    const cards = Object.values(seatCutSelections).filter(sel => sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null));
-    const cardCounts = {};
-    cards.forEach(c => {
-        const key = c.suit === 'Joker' ? 'Joker' : `${c.value}${c.suit}`;
-        cardCounts[key] = (cardCounts[key] || 0) + 1;
+    if (tie) {
+        activeTieBreaker = {
+            playerA: tie.playerA,
+            playerB: tie.playerB,
+            tiedValue: tie.tiedValue,
+            position: tie.position,
+            selections: {
+                [tie.playerA]: { suit: null, value: null },
+                [tie.playerB]: { suit: null, value: null }
+            },
+            activeKeypad: null
+        };
+        showTieBreakerWarning(tie.playerA, tie.playerB, tie.position);
+    } else {
+        processFinalSeatCutResults(sortedPlayers);
+    }
+}
+
+function getCardWeight(value, suit) {
+    if (suit === 'Joker' || value === 'Joker') {
+        return 1;
+    }
+    const VALUE_ORDER_ASC = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const valIdx = VALUE_ORDER_ASC.indexOf(value);
+    if (valIdx === -1) return 1;
+    
+    const baseWeight = 2 + valIdx * 4;
+    
+    const SUIT_WEIGHTS = { '♠': 3, '♥': 2, '♦': 1, '♣': 0 };
+    const suitWeight = SUIT_WEIGHTS[suit] !== undefined ? SUIT_WEIGHTS[suit] : 0;
+    
+    return baseWeight + suitWeight;
+}
+
+function getSortedSeating() {
+    const list = [...seatCutPlayers];
+    list.sort((pA, pB) => {
+        const selA = seatCutSelections[pA];
+        const selB = seatCutSelections[pB];
+        
+        const wA = getCardWeight(selA.value, selA.suit);
+        const wB = getCardWeight(selB.value, selB.suit);
+        
+        if (wA !== wB) {
+            return wB - wA; // Descending order: highest weight map first
+        }
+        
+        // Tie on initial card value! Check if there's a resolved tie-breaker
+        const tbA = seatCutTieBreakers[pA];
+        const tbB = seatCutTieBreakers[pB];
+        
+        if (tbA && tbB) {
+            const tbWA = getCardWeight(tbA.value, tbA.suit);
+            const tbWB = getCardWeight(tbB.value, tbB.suit);
+            return tbWB - tbWA;
+        }
+        
+        if (tbA && !tbB) return -1;
+        if (!tbA && tbB) return 1;
+        
+        return 0; // completely tied for now
     });
     
-    const duplicateCards = Object.keys(cardCounts).filter(k => cardCounts[k] > 1);
+    return list;
+}
+
+function findFirstUnresolvedTie(sortedPlayers) {
+    for (let i = 0; i < sortedPlayers.length - 1; i++) {
+        const p1 = sortedPlayers[i];
+        const p2 = sortedPlayers[i + 1];
+        
+        const sel1 = seatCutSelections[p1];
+        const sel2 = seatCutSelections[p2];
+        
+        const w1 = getCardWeight(sel1.value, sel1.suit);
+        const w2 = getCardWeight(sel2.value, sel2.suit);
+        
+        if (w1 === w2) {
+            const tb1 = seatCutTieBreakers[p1];
+            const tb2 = seatCutTieBreakers[p2];
+            
+            if (!tb1 || !tb2) {
+                return {
+                    playerA: p1,
+                    playerB: p2,
+                    position: i + 1, // 1-indexed position
+                    tiedValue: sel1.suit === 'Joker' ? 'Joker' : `${sel1.value}${sel1.suit}`
+                };
+            }
+        }
+    }
+    return null;
+}
+
+function showTieBreakerWarning(playerA, playerB, position) {
+    const msg = `Tie Breaker between <strong>${playerA}</strong> and <strong>${playerB}</strong> for position <strong>${position}</strong> as per seat cut`;
     
-    if (duplicateCards.length > 0) {
-        const dupPlayers = cards.filter(c => {
-            const key = c.suit === 'Joker' ? 'Joker' : `${c.value}${c.suit}`;
-            return duplicateCards.includes(key);
-        }).map(c => c.player);
-        
-        alert("Duplicate values, repeating Seat cut");
-        
-        dupPlayers.forEach(p => {
-            seatCutSelections[p] = { player: p, suit: null, value: null, entryTime: Date.now() };
-        });
-        
-        seatCutVisiblePlayers = dupPlayers;
-        
-        document.getElementById('seatCutKeypad').style.display = 'none';
-        activeSeatCutKeypad = null;
-        
-        renderSeatCutPlayersTable();
-        updateSeatCutCalculateButtonState();
+    let warnModal = document.getElementById('seatCutTieWarningModal');
+    if (!warnModal) {
+        warnModal = document.createElement('div');
+        warnModal.id = 'seatCutTieWarningModal';
+        warnModal.className = 'modal-overlay';
+        warnModal.style.zIndex = '9999';
+        warnModal.innerHTML = `
+            <div class="modal-card" style="max-width: 440px; background: #16222f; border: 2px solid #a569bd; font-family: 'Inter', sans-serif; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                <h3 style="color: #a569bd; margin-top: 0; display: flex; align-items: center; gap: 8px; font-weight: 800; text-transform: uppercase; font-size: 15px; letter-spacing: 0.5px;">⚔️ Tie Breaker Triggered</h3>
+                <p id="seatCutTieWarningText" style="font-size: 13px; line-height: 1.6; color: #fff; margin: 15px 0;"></p>
+                <button class="actionBtn" style="background: #8e44ad; width: 100%; border: none; height: 38px; font-weight: 800; border-radius: 6px;" onclick="dismissTieBreakerWarning()">Proceed to Tie Breaker</button>
+            </div>
+        `;
+        document.body.appendChild(warnModal);
+    }
+    
+    document.getElementById('seatCutTieWarningText').innerHTML = msg;
+    warnModal.style.display = 'flex';
+}
+
+function dismissTieBreakerWarning() {
+    const warnModal = document.getElementById('seatCutTieWarningModal');
+    if (warnModal) warnModal.style.display = 'none';
+    
+    document.getElementById('seatCutStepEntry').style.display = 'none';
+    
+    const titleText = `⚔️ Tie Breaker: <strong>${activeTieBreaker.playerA}</strong> vs <strong>${activeTieBreaker.playerB}</strong> (Position ${activeTieBreaker.position})`;
+    document.getElementById('tieBreakerText').innerHTML = titleText;
+    document.getElementById('seatCutStepTieBreaker').style.display = 'block';
+    
+    renderTieBreakerPlayers();
+}
+
+function renderTieBreakerPlayers() {
+    const container = document.getElementById('tieBreakerPlayersContainer');
+    if (!container || !activeTieBreaker) return;
+    
+    const { playerA, playerB, selections, activeKeypad } = activeTieBreaker;
+    const players = [playerA, playerB];
+    
+    container.innerHTML = players.map(p => {
+        const sel = selections[p];
+        const hasCard = sel && sel.suit !== null;
+        let cardDisplay = '<span style="font-size:11px; opacity:0.5; font-style:italic;">None</span>';
+        if (hasCard) {
+            const isJoker = sel.suit === 'Joker';
+            const colorClass = isJoker ? 'color:#f1c40f;' : (['♥', '♦'].includes(sel.suit) ? 'color:#e74c3c;' : 'color:#111111;');
+            const badgeBg = isJoker ? 'background:#8e44ad;' : 'background:#ffffff;';
+            const displayValue = sel.value === null ? sel.suit : (isJoker ? '🃏 Joker' : (sel.value + sel.suit));
+            cardDisplay = `<span style="font-weight:900; font-size:14px; border:1px solid rgba(0,0,0,0.25); padding:4px 8px; border-radius:4px; ${badgeBg} ${colorClass}">${displayValue}</span>`;
+        }
+
+        const suits = ['♠', '♥', '♦', '♣', 'Joker'];
+        const getSuitBtnStyle = (suit, isSelected) => {
+            let bg, color, border;
+            if (suit === '♠' || suit === '♣') {
+                bg = isSelected ? '#ffffff' : 'rgba(240, 240, 240, 0.9)';
+                color = '#111111';
+                border = isSelected ? '3px solid #2ecc71' : '1px solid rgba(255,255,255,0.3)';
+            } else if (suit === '♥' || suit === '♦') {
+                bg = isSelected ? '#ffffff' : 'rgba(250, 240, 240, 0.9)';
+                color = '#e74c3c';
+                border = isSelected ? '3px solid #2ecc71' : '1px solid rgba(255,255,255,0.3)';
+            } else {
+                bg = isSelected ? '#f1c40f' : '#8e44ad';
+                color = isSelected ? '#8e44ad' : '#f1c40f';
+                border = isSelected ? '3px solid #2ecc71' : '1px solid rgba(255,255,255,0.3)';
+            }
+            
+            const size = isSelected ? '56px' : '48px';
+            const fontSize = isSelected ? '28px' : '22px';
+            const shadow = isSelected ? 'box-shadow:0 0 10px rgba(46,204,113,0.5); font-weight:900;' : 'font-weight:bold;';
+            return `background:${bg}; border:${border}; color:${color}; ${shadow} cursor:pointer; font-size:${fontSize}; width:${size}; height:${size}; border-radius:8px; margin-right:6px; transition:0.15s; display:inline-flex; align-items:center; justify-content:center;`;
+        };
+
+        const buttonsHtml = suits.map(suit => {
+            const isSelected = sel && sel.suit === suit;
+            const displayLabel = suit === 'Joker' ? '🃏' : suit;
+            return `<button type="button" style="${getSuitBtnStyle(suit, isSelected)}" onclick="handleTieBreakerSuitPress('${p.replace(/'/g, "\\'")}', '${suit}')">${displayLabel}</button>`;
+        }).join('');
+
+        let inlineKeypadHtml = '';
+        if (activeKeypad && activeKeypad.player === p) {
+            const currentSuit = activeKeypad.suit;
+            const ranks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+            const isRed = ['♥', '♦'].includes(currentSuit);
+            const textColor = isRed ? '#e74c3c' : '#111111';
+            
+            const keypadButtonsHtml = ranks.map(rank => {
+                const btnStyle = `background:#ffffff; color:${textColor}; border:2px solid ${textColor}; cursor:pointer; padding:10px 0; font-size:14px; font-weight:900; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.15); transition:transform 0.1s; display:flex; align-items:center; justify-content:center; gap:2px;`;
+                return `<button type="button" style="${btnStyle}" onclick="handleTieBreakerRankSelection('${rank}')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${rank}${currentSuit}</button>`;
+            }).join('');
+
+            inlineKeypadHtml = `
+            <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:10px; margin-top:8px; animation:fadeIn 0.2s;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:5px;">
+                    <span style="font-size:11px; font-weight:bold; color:#2ecc71;">Select Rank for <strong style="color:#f39c12;">${p}</strong> with suit <strong style="color:#2ecc71;">${currentSuit}</strong></span>
+                    <button type="button" onclick="cancelTieBreakerCardSelection()" style="background:none; border:none; color:var(--danger); font-size:11px; cursor:pointer; text-decoration:underline;">Cancel</button>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:6px;">
+                    ${keypadButtonsHtml}
+                </div>
+            </div>`;
+        }
+
+        return `
+        <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:12px; display:flex; flex-direction:column; gap:12px; margin-bottom:5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                <span style="font-size:15px; font-weight:800; color:#fff; letter-spacing:0.5px;">${p}</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase;">Card:</span>
+                    ${cardDisplay}
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <span style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Select Card Suit:</span>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                    ${buttonsHtml}
+                </div>
+            </div>
+            ${inlineKeypadHtml}
+        </div>`;
+    }).join('');
+    
+    updateTieBreakerCalculateButtonState();
+}
+
+function handleTieBreakerSuitPress(player, suit) {
+    if (!activeTieBreaker) return;
+    if (suit === 'Joker') {
+        activeTieBreaker.selections[player] = { suit: 'Joker', value: 'Joker' };
+        activeTieBreaker.activeKeypad = null;
+    } else {
+        activeTieBreaker.selections[player] = { suit: suit, value: null };
+        activeTieBreaker.activeKeypad = { player, suit };
+    }
+    renderTieBreakerPlayers();
+}
+
+function handleTieBreakerRankSelection(rank) {
+    if (!activeTieBreaker || !activeTieBreaker.activeKeypad) return;
+    const { player, suit } = activeTieBreaker.activeKeypad;
+    activeTieBreaker.selections[player] = { suit, value: rank };
+    activeTieBreaker.activeKeypad = null;
+    renderTieBreakerPlayers();
+}
+
+function cancelTieBreakerCardSelection() {
+    if (!activeTieBreaker) return;
+    activeTieBreaker.activeKeypad = null;
+    renderTieBreakerPlayers();
+}
+
+function updateTieBreakerCalculateButtonState() {
+    if (!activeTieBreaker) return;
+    const { playerA, playerB, selections } = activeTieBreaker;
+    const isReady = [playerA, playerB].every(p => {
+        const sel = selections[p];
+        return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
+    });
+    const btn = document.getElementById('btnTieBreakerCalculate');
+    if (btn) {
+        btn.disabled = !isReady;
+        btn.style.opacity = isReady ? '1' : '0.4';
+        btn.style.cursor = isReady ? 'pointer' : 'not-allowed';
+    }
+}
+
+function cancelTieBreaker() {
+    activeTieBreaker = null;
+    document.getElementById('seatCutStepTieBreaker').style.display = 'none';
+    document.getElementById('seatCutStepEntry').style.display = 'block';
+}
+
+function compareCards(a, b) {
+    const wA = getCardWeight(a.value, a.suit);
+    const wB = getCardWeight(b.value, b.suit);
+    if (wA > wB) return -1;
+    if (wA < wB) return 1;
+    return 0;
+}
+
+function resolveTieBreaker() {
+    if (!activeTieBreaker) return;
+    const { playerA, playerB, selections } = activeTieBreaker;
+    const cardA = selections[playerA];
+    const cardB = selections[playerB];
+    
+    const comp = compareCards(cardA, cardB);
+    if (comp === 0) {
+        alert("The card values are still a tie! Please draw different card values for Player A and Player B.");
         return;
     }
     
-    const VALUE_ORDER = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
-    const SUIT_ORDER = { '♠': 0, '♥': 1, '♦': 2, '♣': 3 };
+    // Store tie-breaker outcomes
+    seatCutTieBreakers[playerA] = cardA;
+    seatCutTieBreakers[playerB] = cardB;
     
-    const rankedCards = [...cards].sort((a, b) => {
-        const isAJoker = a.suit === 'Joker';
-        const isBJoker = b.suit === 'Joker';
-        
-        if (isAJoker && isBJoker) {
-            return b.entryTime - a.entryTime;
+    activeTieBreaker = null;
+    document.getElementById('seatCutStepTieBreaker').style.display = 'none';
+    
+    // Re-check for any remaining ties
+    const sortedPlayers = getSortedSeating();
+    const nextTie = findFirstUnresolvedTie(sortedPlayers);
+    
+    if (nextTie) {
+        activeTieBreaker = {
+            playerA: nextTie.playerA,
+            playerB: nextTie.playerB,
+            tiedValue: nextTie.tiedValue,
+            position: nextTie.position,
+            selections: {
+                [nextTie.playerA]: { suit: null, value: null },
+                [nextTie.playerB]: { suit: null, value: null }
+            },
+            activeKeypad: null
+        };
+        showTieBreakerWarning(nextTie.playerA, nextTie.playerB, nextTie.position);
+    } else {
+        processFinalSeatCutResults(sortedPlayers);
+    }
+}
+
+async function processFinalSeatCutResults(finalList) {
+    const seatingOrder = finalList.map((p, idx) => {
+        const sel = seatCutSelections[p];
+        const tb = seatCutTieBreakers[p];
+        let cardText = sel.suit === 'Joker' ? '🃏 Joker' : `${sel.value}${sel.suit}`;
+        if (tb) {
+            const tbText = tb.suit === 'Joker' ? '🃏 Joker' : `${tb.value}${tb.suit}`;
+            cardText = `${cardText} (TB: ${tbText})`;
         }
-        if (isAJoker) return 1;
-        if (isBJoker) return -1;
-        
-        const aValIdx = VALUE_ORDER.indexOf(a.value);
-        const bValIdx = VALUE_ORDER.indexOf(b.value);
-        if (aValIdx !== bValIdx) {
-            return aValIdx - bValIdx;
-        }
-        
-        const aSuitIdx = SUIT_ORDER[a.suit];
-        const bSuitIdx = SUIT_ORDER[b.suit];
-        return aSuitIdx - bSuitIdx;
+        return {
+            seat: idx + 1,
+            player: p,
+            card: cardText,
+            rank: idx + 1
+        };
     });
     
-    const seatingOrder = rankedCards.map((c, idx) => ({
-        seat: idx + 1,
-        player: c.player,
-        card: c.suit === 'Joker' ? '🃏 Joker' : `${c.value}${c.suit}`,
-        rank: idx + 1
-    }));
-    
-    const dealer = rankedCards[rankedCards.length - 1].player;
+    const dealer = seatingOrder[seatingOrder.length - 1].player;
     const distributionOrder = seatingOrder.map(s => s.player);
     
     seatCutCalculatedResults = {
@@ -1952,6 +2289,9 @@ async function calculateSeatCutResults() {
     }
     
     document.getElementById('seatCutStepEntry').style.display = 'none';
+    if (document.getElementById('seatCutStepTieBreaker')) {
+        document.getElementById('seatCutStepTieBreaker').style.display = 'none';
+    }
     document.getElementById('seatCutStepResults').style.display = 'block';
 }
 
