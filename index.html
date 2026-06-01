@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<title>Elite Rummy Circle - v100.0</title>
+<title>Elite Rummy Circle - v101.0</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" sizes="152x152" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
@@ -273,7 +273,7 @@
     </div>
 
     <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v100.0</span>
+        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v101.0</span>
         <div style="font-size: 10px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
     </div>
   </div>
@@ -358,7 +358,14 @@
          
          <!-- Scrollable middle content -->
          <div style="flex: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 8px;">
-              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v100.0 - Sports-Grade Weight-Based Seat Cut & Tie Breaker Logic</b>
+              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v101.0 - Scalable Bracket-Based Seeding & Cascading State Engine</b>
+               <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                   • <b>Recursive Bracket-Based Seeding:</b> Automated Seat Cut now scales seamlessly for 10+ players using a robust Grouped Bracket sorting algorithm.<br>
+                   • <b>Sequential Multi-Player Tie-Breaking:</b> Pauses positioning dynamically to resolve duplicate card matches via a clean input sub-menu, recursively handling any sub-ties in-place.<br>
+                   • <b>Cascading Position Lock:</b> Once bracket ties are resolved, competitors lock into their contiguous seats while lower ranks are cleanly cascaded downstream.<br>
+               </div>
+               <hr style="margin: 10px 0; opacity: 0.2;">
+               <b style="color: var(--warning); display: block; margin-bottom: 5px;">v100.0 - Sports-Grade Weight-Based Seat Cut & Tie Breaker Logic</b>
               <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
                   • <b>Official Card Weight Mapping:</b> Implemented a strict weight structure (53 to 2) mapping from Ace down to Two, with suits ranked from Spades (♠) down to Clubs (♣) and Joker at 1.<br>
                   • <b>Automated Seeding Layout:</b> Dynamic seat cut inputs now automatically evaluate, sort, and arrange competitors in descending rank order instantly.<br>
@@ -800,7 +807,7 @@
       <div class="tv-close" id="tvCloseBtn" onclick="closeFullScreen()">Close</div>
   </div>
   <div style="position: fixed; bottom: 8px; left: 12px; z-index: 4000; text-align: left; pointer-events: auto;">
-      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v100.0</div>
+      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v101.0</div>
       <div style="font-size: 9px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
   </div>
 </div>
@@ -1650,6 +1657,8 @@ let seatCutTieBreakers = {}; // { playerName: { suit, value } }
 let activeSeatCutKeypad = null; // { player, suit }
 let seatCutCalculatedResults = null;
 let activeTieBreaker = null;
+let seatCutBrackets = []; // List of brackets representing contested player groups
+let seatCutCardHistory = {}; // { playerLineupName: [ { suit, value }, ... ] }
 
 function openSeatCutModal(pList) {
     seatCutPlayers = pList;
@@ -1658,6 +1667,8 @@ function openSeatCutModal(pList) {
     seatCutTieBreakers = {};
     activeSeatCutKeypad = null;
     seatCutCalculatedResults = null;
+    seatCutBrackets = [];
+    seatCutCardHistory = {};
     
     pList.forEach(p => {
         seatCutSelections[p] = { player: p, suit: null, value: null, entryTime: 0 };
@@ -1812,6 +1823,7 @@ function updateSeatCutCalculateButtonState() {
 
 function renderEditableSeatCutResults() {
     const results = seatCutCalculatedResults;
+    if (!results) return;
     
     const seatingHtml = results.seatingOrder.map((s) => {
         return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:10px 14px; border-radius:8px; font-family:'Inter', 'Segoe UI', sans-serif; font-size:13px;">
@@ -1905,40 +1917,12 @@ async function triggerSeatCutAuditLogUpdate() {
     }
 }
 
-async function calculateSeatCutResults() {
-    const isAllEntered = seatCutPlayers.every(p => {
-        const sel = seatCutSelections[p];
-        return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
-    });
-    if (!isAllEntered) return alert('Enter a card selection for all active players!');
-
-    const sortedPlayers = getSortedSeating();
-    const tie = findFirstUnresolvedTie(sortedPlayers);
-    
-    if (tie) {
-        activeTieBreaker = {
-            playerA: tie.playerA,
-            playerB: tie.playerB,
-            tiedValue: tie.tiedValue,
-            position: tie.position,
-            selections: {
-                [tie.playerA]: { suit: null, value: null },
-                [tie.playerB]: { suit: null, value: null }
-            },
-            activeKeypad: null
-        };
-        showTieBreakerWarning(tie.playerA, tie.playerB, tie.position);
-    } else {
-        processFinalSeatCutResults(sortedPlayers);
-    }
-}
-
 function getCardWeight(value, suit) {
     if (suit === 'Joker' || value === 'Joker') {
         return 1;
     }
     const VALUE_ORDER_ASC = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    const valIdx = VALUE_ORDER_ASC.indexOf(value);
+    const valIdx = VALUE_ORDER_ASC.indexOf(String(value));
     if (valIdx === -1) return 1;
     
     const baseWeight = 2 + valIdx * 4;
@@ -1949,68 +1933,91 @@ function getCardWeight(value, suit) {
     return baseWeight + suitWeight;
 }
 
-function getSortedSeating() {
-    const list = [...seatCutPlayers];
-    list.sort((pA, pB) => {
-        const selA = seatCutSelections[pA];
-        const selB = seatCutSelections[pB];
-        
-        const wA = getCardWeight(selA.value, selA.suit);
-        const wB = getCardWeight(selB.value, selB.suit);
-        
-        if (wA !== wB) {
-            return wB - wA; // Descending order: highest weight map first
-        }
-        
-        // Tie on initial card value! Check if there's a resolved tie-breaker
-        const tbA = seatCutTieBreakers[pA];
-        const tbB = seatCutTieBreakers[pB];
-        
-        if (tbA && tbB) {
-            const tbWA = getCardWeight(tbA.value, tbA.suit);
-            const tbWB = getCardWeight(tbB.value, tbB.suit);
-            return tbWB - tbWA;
-        }
-        
-        if (tbA && !tbB) return -1;
-        if (!tbA && tbB) return 1;
-        
-        return 0; // completely tied for now
+async function calculateSeatCutResults() {
+    const isAllEntered = seatCutPlayers.every(p => {
+        const sel = seatCutSelections[p];
+        return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
+    });
+    if (!isAllEntered) return alert('Enter a card selection for all active players!');
+
+    // Initialize Card Trace History
+    seatCutCardHistory = {};
+    seatCutPlayers.forEach(p => {
+        const sel = seatCutSelections[p];
+        seatCutCardHistory[p] = [{ suit: sel.suit, value: sel.value }];
     });
     
-    return list;
-}
-
-function findFirstUnresolvedTie(sortedPlayers) {
-    for (let i = 0; i < sortedPlayers.length - 1; i++) {
-        const p1 = sortedPlayers[i];
-        const p2 = sortedPlayers[i + 1];
-        
-        const sel1 = seatCutSelections[p1];
-        const sel2 = seatCutSelections[p2];
-        
-        const w1 = getCardWeight(sel1.value, sel1.suit);
-        const w2 = getCardWeight(sel2.value, sel2.suit);
-        
-        if (w1 === w2) {
-            const tb1 = seatCutTieBreakers[p1];
-            const tb2 = seatCutTieBreakers[p2];
-            
-            if (!tb1 || !tb2) {
-                return {
-                    playerA: p1,
-                    playerB: p2,
-                    position: i + 1, // 1-indexed position
-                    tiedValue: sel1.suit === 'Joker' ? 'Joker' : `${sel1.value}${sel1.suit}`
-                };
-            }
+    // Group all initial players by raw card weight
+    const initialWeights = {};
+    seatCutPlayers.forEach(p => {
+        const sel = seatCutSelections[p];
+        const w = getCardWeight(sel.value, sel.suit);
+        if (!initialWeights[w]) {
+            initialWeights[w] = [];
         }
-    }
-    return null;
+        initialWeights[w].push(p);
+    });
+    
+    // Sort weights in descending order (highest goes first)
+    const sortedWeights = Object.keys(initialWeights)
+        .map(Number)
+        .sort((a, b) => b - a);
+        
+    // Build primary brackets queue
+    seatCutBrackets = [];
+    sortedWeights.forEach(w => {
+        const bracketPlayers = initialWeights[w];
+        seatCutBrackets.push({
+            players: bracketPlayers,
+            weight: w,
+            isResolved: bracketPlayers.length === 1
+        });
+    });
+    
+    // Launch the group-wise resolution engine
+    processNextBracket();
 }
 
-function showTieBreakerWarning(playerA, playerB, position) {
-    const msg = `Tie Breaker between <strong>${playerA}</strong> and <strong>${playerB}</strong> for position <strong>${position}</strong> as per seat cut`;
+function processNextBracket() {
+    let currentPos = 1;
+    let targetIndex = -1;
+    
+    for (let i = 0; i < seatCutBrackets.length; i++) {
+        const b = seatCutBrackets[i];
+        if (!b.isResolved) {
+            targetIndex = i;
+            break;
+        }
+        currentPos += b.players.length;
+    }
+    
+    if (targetIndex === -1) {
+        // No unresolved brackets remaining, finalize!
+        finalizeGroupedSeatCutResults();
+        return;
+    }
+    
+    const activeBracket = seatCutBrackets[targetIndex];
+    
+    // Package active state for rendering and submission
+    activeTieBreaker = {
+        bracketIndex: targetIndex,
+        players: [...activeBracket.players],
+        position: currentPos,
+        selections: {},
+        activeKeypad: null
+    };
+    
+    activeBracket.players.forEach(p => {
+        activeTieBreaker.selections[p] = { suit: null, value: null };
+    });
+    
+    showGroupedTieBreakerWarning(activeBracket.players, currentPos);
+}
+
+function showGroupedTieBreakerWarning(players, position) {
+    const playersListText = players.map(p => `<strong>${p}</strong>`).join(', ');
+    const msg = `Tie Breaker between ${playersListText} for Position <strong>${position}</strong> as per seat cut.`;
     
     let warnModal = document.getElementById('seatCutTieWarningModal');
     if (!warnModal) {
@@ -2038,7 +2045,8 @@ function dismissTieBreakerWarning() {
     
     document.getElementById('seatCutStepEntry').style.display = 'none';
     
-    const titleText = `⚔️ Tie Breaker: <strong>${activeTieBreaker.playerA}</strong> vs <strong>${activeTieBreaker.playerB}</strong> (Position ${activeTieBreaker.position})`;
+    const playersListText = activeTieBreaker.players.map(p => `<strong>${p}</strong>`).join(', ');
+    const titleText = `⚔️ Tie Breaker: ${playersListText} (Position ${activeTieBreaker.position})`;
     document.getElementById('tieBreakerText').innerHTML = titleText;
     document.getElementById('seatCutStepTieBreaker').style.display = 'block';
     
@@ -2049,8 +2057,7 @@ function renderTieBreakerPlayers() {
     const container = document.getElementById('tieBreakerPlayersContainer');
     if (!container || !activeTieBreaker) return;
     
-    const { playerA, playerB, selections, activeKeypad } = activeTieBreaker;
-    const players = [playerA, playerB];
+    const { players, selections, activeKeypad } = activeTieBreaker;
     
     container.innerHTML = players.map(p => {
         const sel = selections[p];
@@ -2167,8 +2174,8 @@ function cancelTieBreakerCardSelection() {
 
 function updateTieBreakerCalculateButtonState() {
     if (!activeTieBreaker) return;
-    const { playerA, playerB, selections } = activeTieBreaker;
-    const isReady = [playerA, playerB].every(p => {
+    const { players, selections } = activeTieBreaker;
+    const isReady = players.every(p => {
         const sel = selections[p];
         return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
     });
@@ -2186,64 +2193,91 @@ function cancelTieBreaker() {
     document.getElementById('seatCutStepEntry').style.display = 'block';
 }
 
-function compareCards(a, b) {
-    const wA = getCardWeight(a.value, a.suit);
-    const wB = getCardWeight(b.value, b.suit);
-    if (wA > wB) return -1;
-    if (wA < wB) return 1;
-    return 0;
-}
-
 function resolveTieBreaker() {
     if (!activeTieBreaker) return;
-    const { playerA, playerB, selections } = activeTieBreaker;
-    const cardA = selections[playerA];
-    const cardB = selections[playerB];
+    const { bracketIndex, players, selections } = activeTieBreaker;
     
-    const comp = compareCards(cardA, cardB);
-    if (comp === 0) {
-        alert("The card values are still a tie! Please draw different card values for Player A and Player B.");
+    const isReady = players.every(p => {
+        const sel = selections[p];
+        return sel && sel.suit !== null && (sel.suit === 'Joker' || sel.value !== null);
+    });
+    if (!isReady) {
+        alert("Please enter card selections for all tied players first!");
         return;
     }
     
-    // Store tie-breaker outcomes
-    seatCutTieBreakers[playerA] = cardA;
-    seatCutTieBreakers[playerB] = cardB;
+    // Save to historical trace list
+    players.forEach(p => {
+        const sel = selections[p];
+        if (!seatCutCardHistory[p]) {
+            seatCutCardHistory[p] = [];
+        }
+        seatCutCardHistory[p].push({ suit: sel.suit, value: sel.value });
+    });
     
+    // Group sub-players by newly drawn card weights
+    const newWeights = {};
+    players.forEach(p => {
+        const sel = selections[p];
+        const w = getCardWeight(sel.value, sel.suit);
+        if (!newWeights[w]) {
+            newWeights[w] = [];
+        }
+        newWeights[w].push(p);
+    });
+    
+    const sortedWeights = Object.keys(newWeights)
+        .map(Number)
+        .sort((a, b) => b - a);
+        
+    // Prevent infinite cycles by enforcing that they don't draw fully identical weights again
+    if (sortedWeights.length === 1 && newWeights[sortedWeights[0]].length === players.length) {
+        players.forEach(p => {
+            seatCutCardHistory[p].pop();
+        });
+        alert("All players drew identical weights again! Please select different cards to resolve the tie.");
+        return;
+    }
+    
+    // Construct sub-brackets to replace the contested parent bracket
+    const subBrackets = [];
+    sortedWeights.forEach(w => {
+        const bracketPlayers = newWeights[w];
+        subBrackets.push({
+            players: bracketPlayers,
+            weight: w,
+            isResolved: bracketPlayers.length === 1
+        });
+    });
+    
+    // Splice in-place to perfectly cascade following ranks downstream
+    seatCutBrackets.splice(bracketIndex, 1, ...subBrackets);
     activeTieBreaker = null;
+    
     document.getElementById('seatCutStepTieBreaker').style.display = 'none';
     
-    // Re-check for any remaining ties
-    const sortedPlayers = getSortedSeating();
-    const nextTie = findFirstUnresolvedTie(sortedPlayers);
-    
-    if (nextTie) {
-        activeTieBreaker = {
-            playerA: nextTie.playerA,
-            playerB: nextTie.playerB,
-            tiedValue: nextTie.tiedValue,
-            position: nextTie.position,
-            selections: {
-                [nextTie.playerA]: { suit: null, value: null },
-                [nextTie.playerB]: { suit: null, value: null }
-            },
-            activeKeypad: null
-        };
-        showTieBreakerWarning(nextTie.playerA, nextTie.playerB, nextTie.position);
-    } else {
-        processFinalSeatCutResults(sortedPlayers);
-    }
+    // Recursively handle the next unresolved bracket
+    processNextBracket();
 }
 
-async function processFinalSeatCutResults(finalList) {
-    const seatingOrder = finalList.map((p, idx) => {
-        const sel = seatCutSelections[p];
-        const tb = seatCutTieBreakers[p];
-        let cardText = sel.suit === 'Joker' ? '🃏 Joker' : `${sel.value}${sel.suit}`;
-        if (tb) {
-            const tbText = tb.suit === 'Joker' ? '🃏 Joker' : `${tb.value}${tb.suit}`;
-            cardText = `${cardText} (TB: ${tbText})`;
+async function finalizeGroupedSeatCutResults() {
+    const seatingOrder = seatCutBrackets.map((b, idx) => {
+        const p = b.players[0];
+        const history = seatCutCardHistory[p] || [];
+        
+        let cardText = '';
+        if (history.length > 0) {
+            const initCard = history[0];
+            cardText = initCard.suit === 'Joker' ? '🃏 Joker' : `${initCard.value}${initCard.suit}`;
+            
+            if (history.length > 1) {
+                const subCardTexts = history.slice(1).map(h => {
+                    return h.suit === 'Joker' ? '🃏 Joker' : `${h.value}${h.suit}`;
+                });
+                cardText = `${cardText} (TB: ${subCardTexts.join(' ➔ ')})`;
+            }
         }
+        
         return {
             seat: idx + 1,
             player: p,
