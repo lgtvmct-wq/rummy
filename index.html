@@ -1680,6 +1680,250 @@ let activeTieBreaker = null;
 let seatCutBrackets = []; // List of brackets representing contested player groups
 let seatCutCardHistory = {}; // { playerLineupName: [ { suit, value }, ... ] }
 
+// Global Victory Celebration Audio State
+let celebrationAudioPlayer = null;
+let celebrationTimeoutId = null;
+let celebrationFadeIntervalId = null;
+let celebrationSelectedTrackIndex = -1;
+let celebrationDurationTotal = 30000; // 30 seconds total duration to match full celebration
+let celebrationTimeRemaining = 30000;
+let celebrationCountdownIntervalId = null;
+let celebrationIsMuted = false;
+let autoplayBlocked = false;
+
+const CELEBRATION_TRACKS = [
+    {
+        name: "Elite Circle Anthem",
+        url: "https://raw.githubusercontent.com/lgtvmct-wq/rummy/main/elite_circle_anthem.mp3",
+        startOffset: 35.0,
+        tempoMs: 380,     // Perfectly synced theme speed
+        style: "anthem"
+    },
+    {
+        name: "Bright Rock Energy",
+        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+        startOffset: 0.0,
+        tempoMs: 380,     // Tempo matching rock guitars
+        style: "rock"
+    },
+    {
+        name: "Modern Pop Celebrate",
+        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+        startOffset: 0.0,
+        tempoMs: 400,     // Pop synth tempo
+        style: "pop"
+    }
+];
+
+function resumeOnInteraction() {
+    if (autoplayBlocked && celebrationAudioPlayer) {
+        celebrationAudioPlayer.play().then(() => {
+            console.log("Autoplay restriction bypassed successfully through user gesture!");
+            autoplayBlocked = false;
+        }).catch(err => {
+            console.log("Audio play failed on click:", err);
+        });
+    }
+}
+
+function playCelebrationTrack(trackIndex) {
+    if (celebrationTimeoutId) clearTimeout(celebrationTimeoutId);
+    if (celebrationFadeIntervalId) clearInterval(celebrationFadeIntervalId);
+    if (celebrationCountdownIntervalId) clearInterval(celebrationCountdownIntervalId);
+    
+    // Remove stale autoplay listener if any
+    document.removeEventListener('click', resumeOnInteraction);
+    document.removeEventListener('touchstart', resumeOnInteraction);
+    
+    if (celebrationAudioPlayer) {
+        try {
+            celebrationAudioPlayer.pause();
+        } catch(e) {}
+        celebrationAudioPlayer = null;
+    }
+    
+    celebrationSelectedTrackIndex = trackIndex;
+    const track = CELEBRATION_TRACKS[trackIndex];
+    if (!track) return;
+    
+    celebrationTimeRemaining = celebrationDurationTotal;
+    updateCelebrationCountdownUI();
+    
+    const audio = new Audio(track.url);
+    
+    // Graceful error-resilience handler: if the local elite_circle_anthem.mp3 has not yet been uploaded or fails to load,
+    // automatically fall back to the energetic rock track so the applet never breaks!
+    audio.onerror = () => {
+        console.warn("Failed to load track: " + track.url + ". Falling back to Bright Rock Energy.");
+        if (trackIndex !== 1) {
+            playCelebrationTrack(1); // Fallback to "Bright Rock Energy"
+        }
+    };
+
+    audio.currentTime = track.startOffset || 0;
+    audio.loop = false;
+    
+    if (trackIndex === 0) {
+        // Elite Circle Anthem specific 1-second fade-in starting from 35.0s to 36.0s (full volume)
+        audio.volume = 0;
+        let fadeInStart = Date.now();
+        const fadeInDuration = 1000; // 1 second
+        const fadeInIntervalId = setInterval(() => {
+            const elapsed = Date.now() - fadeInStart;
+            const ratio = Math.min(1, elapsed / fadeInDuration);
+            if (audio) {
+                audio.volume = celebrationIsMuted ? 0 : ratio;
+            }
+            if (ratio >= 1) {
+                clearInterval(fadeInIntervalId);
+            }
+        }, 50);
+    } else {
+        audio.volume = celebrationIsMuted ? 0 : 1.0;
+    }
+    
+    celebrationAudioPlayer = audio;
+    
+    autoplayBlocked = false;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("Celebration audio autoplay restricted or deferred until interaction:", error);
+            autoplayBlocked = true;
+            document.addEventListener('click', resumeOnInteraction, { once: true });
+            document.addEventListener('touchstart', resumeOnInteraction, { once: true });
+        });
+    }
+    
+    // Smooth countdown progress bar timer running at 50ms intervals for ultra-fluid progress rendering
+    const stepTime = 50;
+    celebrationCountdownIntervalId = setInterval(() => {
+        celebrationTimeRemaining -= stepTime;
+        if (celebrationTimeRemaining < 0) celebrationTimeRemaining = 0;
+        updateCelebrationCountdownUI();
+        if (celebrationTimeRemaining <= 0) {
+            clearInterval(celebrationCountdownIntervalId);
+        }
+    }, stepTime);
+    
+    // Smooth volume fade out in the final 2 seconds of the celebration duration window
+    celebrationTimeoutId = setTimeout(() => {
+        const fadeDuration = 2000;
+        const fadeInterval = 100;
+        const steps = fadeDuration / fadeInterval;
+        let currentStep = 0;
+        const initialVol = celebrationIsMuted ? 0 : 1.0;
+        
+        celebrationFadeIntervalId = setInterval(() => {
+            currentStep++;
+            if (celebrationAudioPlayer) {
+                const fraction = currentStep / steps;
+                const newVol = Math.max(0, initialVol * (1 - fraction));
+                celebrationAudioPlayer.volume = celebrationIsMuted ? 0 : newVol;
+            }
+            if (currentStep >= steps) {
+                clearInterval(celebrationFadeIntervalId);
+                if (celebrationAudioPlayer) {
+                    try { celebrationAudioPlayer.pause(); } catch(e) {}
+                    celebrationAudioPlayer = null;
+                }
+            }
+        }, fadeInterval);
+    }, celebrationDurationTotal - 2000);
+}
+
+function updateCelebrationCountdownUI() {
+    const textEl = document.getElementById('celebrationTimerCountdownText');
+    const barEl = document.getElementById('celebrationTimerProgress');
+    const remainingSeconds = (celebrationTimeRemaining / 1000).toFixed(1);
+    
+    if (textEl) {
+        textEl.innerText = `${remainingSeconds}s remaining`;
+    }
+    if (barEl) {
+        const pct = (celebrationTimeRemaining / celebrationDurationTotal) * 100;
+        barEl.style.width = `${pct}%`;
+        
+        if (celebrationTimeRemaining <= 2000) {
+            barEl.style.background = '#e74c3c';
+            barEl.style.boxShadow = '0 0 12px #e74c3c';
+        } else if (celebrationTimeRemaining <= 5000) {
+            barEl.style.background = '#f39c12';
+            barEl.style.boxShadow = '0 0 12px #f39c12';
+        } else {
+            barEl.style.background = '#f1c40f';
+            barEl.style.boxShadow = '0 0 12px #f1c40f';
+        }
+    }
+}
+
+function changeCelebrationTrack(trackIndex) {
+    playCelebrationTrack(trackIndex);
+    
+    const btns = document.querySelectorAll('.track-select-btn');
+    btns.forEach((btn, idx) => {
+        if (idx === trackIndex) {
+            btn.style.background = '#f1c40f';
+            btn.style.borderColor = '#fff';
+            btn.style.color = '#000';
+            btn.style.boxShadow = '0 0 12px rgba(241,196,15,0.6)';
+        } else {
+            btn.style.background = 'rgba(255,255,255,0.06)';
+            btn.style.borderColor = 'rgba(255,255,255,0.15)';
+            btn.style.color = '#fff';
+            btn.style.boxShadow = 'none';
+        }
+    });
+    
+    const displayEl = document.getElementById('activeTrackNameDisplay');
+    if (displayEl && CELEBRATION_TRACKS[trackIndex]) {
+        displayEl.innerText = `🎵 PLAYING: ${CELEBRATION_TRACKS[trackIndex].name.toUpperCase()}`;
+    }
+}
+
+function toggleCelebrationMute() {
+    celebrationIsMuted = !celebrationIsMuted;
+    const btnMute = document.getElementById('btnCelebrationMute');
+    if (btnMute) {
+        if (celebrationIsMuted) {
+            btnMute.innerText = '🔇';
+            btnMute.style.background = '#7f8c8d';
+            btnMute.style.boxShadow = 'none';
+        } else {
+            btnMute.innerText = '🔊';
+            btnMute.style.background = '#e74c3c';
+            btnMute.style.boxShadow = '0 4px 10px rgba(231,76,60,0.4)';
+        }
+    }
+    
+    if (celebrationAudioPlayer) {
+        celebrationAudioPlayer.volume = celebrationIsMuted ? 0 : 1.0;
+    }
+}
+
+function replayCelebrationCurrent() {
+    let idx = celebrationSelectedTrackIndex;
+    if (idx === -1) idx = 0;
+    changeCelebrationTrack(idx);
+    startCelebrationCanvas();
+}
+
+function stopCelebrationMusic() {
+    if (celebrationTimeoutId) clearTimeout(celebrationTimeoutId);
+    if (celebrationFadeIntervalId) clearInterval(celebrationFadeIntervalId);
+    if (celebrationCountdownIntervalId) clearInterval(celebrationCountdownIntervalId);
+    
+    document.removeEventListener('click', resumeOnInteraction);
+    document.removeEventListener('touchstart', resumeOnInteraction);
+    
+    if (celebrationAudioPlayer) {
+        try {
+            celebrationAudioPlayer.pause();
+        } catch(e) {}
+        celebrationAudioPlayer = null;
+    }
+}
+
 function openSeatCutModal(pList) {
     seatCutPlayers = pList;
     seatCutVisiblePlayers = [...pList];
@@ -3469,6 +3713,7 @@ function toggleFullScreen() {
 }
 
 function closeFullScreen() {
+    stopCelebrationMusic();
     const overlay = document.getElementById('fullscreenOverlay');
     if (overlay) overlay.style.display = 'none';
     releaseWakeLock();
@@ -3838,6 +4083,36 @@ function startHeartbeat() {
 function renderTVContent() {
     if (!state) return;
     
+    // Check if the game is aborted / abandoned
+    if (state.isAborted) {
+        const overlay = document.getElementById('fullscreenOverlay');
+        if (overlay) {
+            overlay.style.padding = '0';
+            overlay.style.overflow = 'hidden';
+            overlay.style.background = '#0a0d14'; // Premium deep-dark background
+        }
+        
+        let h = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width:100vw; text-align:center; position:relative; z-index:5; font-family:'Inter', sans-serif; box-sizing:border-box; background:#0a0d14; color:#fff;">
+                <div style="max-width: 600px; width: 90%; padding: 40px; border-radius: 16px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(231, 76, 60, 0.25); box-shadow: 0 15px 45px rgba(0,0,0,0.6);">
+                    <div style="color:#e74c3c; font-size: 6.5vh; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3vh;">
+                        🚫 ABANDONED
+                    </div>
+                    <h2 style="font-size: 3.5vh; font-weight: 700; margin: 0 0 3vh 0; color: #fff; opacity: 0.95;">
+                        ${state.name || "Game Session"}
+                    </h2>
+                    <div style="display: flex; flex-direction: column; gap: 14px; text-align: left; background: rgba(0,0,0,0.25); padding: 24px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); font-size: 1.8vh; opacity: 0.85;">
+                        <div><span style="opacity:0.5; font-weight: 600;">Game ID:</span> <span style="font-family: monospace; float: right;">#${state.id || "N/A"}</span></div>
+                        <div><span style="opacity:0.5; font-weight: 600;">Start Time:</span> <span style="float: right;">${formatEliteDate(state.startTime)}</span></div>
+                        <div><span style="opacity:0.5; font-weight: 600;">Status:</span> <span style="color:#e74c3c; font-weight: bold; float: right;">Aborted / Deleted</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('tvContent').innerHTML = h;
+        return;
+    }
+    
     const isGameOver = !!state.winner;
     
     // Auto-apply optimal vertical budget settings to the fullscreen overlay
@@ -3944,7 +4219,7 @@ function renderTVContent() {
                 const trimmedName = name.trim();
                 const avatarUrl = getTVAvatar(trimmedName);
                 winnerAvatarHtml += `
-                    <div style="position:relative; display:inline-block;">
+                    <div class="winner-avatar-container" style="position:relative; display:inline-block; transition: transform 0.15s ease-out;">
                         <img src="${avatarUrl}" style="width:26vh; height:26vh; border-radius:50%; border:6px solid #f1c40f; object-fit:cover; box-shadow: 0 0 50px rgba(241,196,15,0.7); background:#1a252f;" referrerPolicy="no-referrer">
                     </div>
                 `;
@@ -3954,10 +4229,10 @@ function renderTVContent() {
 
         let h = `
             <canvas id="celebrationCanvas" style="position:absolute; inset:0; pointer-events:none; width:100%; height:100%; z-index:2;"></canvas>
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width:100vw; text-align:center; position:relative; z-index:5; font-family:'Inter', sans-serif; overflow:hidden; box-sizing:border-box; background:#0a0d14;">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width:100vw; text-align:center; position:relative; z-index:5; font-family:'Inter', sans-serif; overflow:hidden; box-sizing:border-box; background:transparent;">
                 
                 <div style="animation: bounce-in 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); position:relative; z-index:10; margin-bottom:4.5vh;">
-                    <div style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000; font-weight:900; font-size:6vh; padding:1.8vh 8vh; border-radius:100px; text-transform:uppercase; letter-spacing:4px; box-shadow: 0px 15px 45px rgba(243,156,18,0.5); display:inline-block; border:4px solid #fff;">
+                    <div id="champBadge" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000; font-weight:900; font-size:6vh; padding:1.8vh 8vh; border-radius:100px; text-transform:uppercase; letter-spacing:4px; box-shadow: 0px 15px 45px rgba(243,156,18,0.5); display:inline-block; border:4px solid #fff; transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;">
                         🏆 Champion 🏆
                     </div>
                 </div>
@@ -3965,7 +4240,7 @@ function renderTVContent() {
                 ${winnerAvatarHtml}
 
                 <div style="animation: scale-up 0.8s ease-out 0.2s both; position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                    <h1 style="font-size:8.5vh; font-weight:900; margin:0 0 2vh 0; color:#fff; text-shadow: 0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(241,196,15,0.5); letter-spacing:1px; line-height:1.1; max-width:90vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    <h1 id="winnerH1" style="font-size:8.5vh; font-weight:900; margin:0 0 2vh 0; color:#fff; text-shadow: 0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(241,196,15,0.5); letter-spacing:1px; line-height:1.1; max-width:90vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition: transform 0.15s ease-out, text-shadow 0.15s ease-out;">
                         ${state.winner}
                     </h1>
                     
@@ -3979,7 +4254,15 @@ function renderTVContent() {
         `;
 
         document.getElementById('tvContent').innerHTML = h;
+        
+        let initialTrackIdx = celebrationSelectedTrackIndex;
+        if (initialTrackIdx === -1) {
+            initialTrackIdx = 0; // Default to Elite Circle Anthem instead of randomizing
+        }
+        
         startCelebrationCanvas();
+        changeCelebrationTrack(initialTrackIdx);
+        
         return;
     }
 
@@ -4150,8 +4433,8 @@ function startCelebrationCanvas() {
     const ctx = canvas.getContext('2d');
     
     function resizeCanvas() {
-        canvas.width = canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
-        canvas.height = canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -4174,6 +4457,10 @@ function startCelebrationCanvas() {
     
     const startTime = Date.now();
     let lastFireworkTime = 0;
+    
+    // Beat counting variables to match music tempo rhythm
+    let lastBeatTime = 0;
+    let beatCount = 0;
     
     // Initialize endless cascade of micro-ticker/confetti tape
     const confettiCount = 220;
@@ -4211,18 +4498,129 @@ function startCelebrationCanvas() {
         const now = Date.now();
         const elapsed = now - startTime;
         
-        // --- 1. RENDER CONTINUOUS CONFETTI ---
+        // --- MATCH AUDIO TEMPO BEATS ---
+        const activeTrack = CELEBRATION_TRACKS[celebrationSelectedTrackIndex] || CELEBRATION_TRACKS[0];
+        const beatInterval = activeTrack.tempoMs || 500;
+        if (elapsed - lastBeatTime >= beatInterval && elapsed < celebrationDurationTotal) {
+            lastBeatTime = elapsed;
+            beatCount++;
+            
+            // A. Dual Corner Jet Cannons firing confetti upwards!
+            if (beatCount % 2 === 0) {
+                // Left gun
+                for (let k = 0; k < 12; k++) {
+                    particles.push({
+                        x: 0,
+                        y: canvas.height * 0.9,
+                        r: Math.random() * 5 + 4,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        tilt: Math.random() * 8,
+                        tiltAngleIncremental: Math.random() * 0.08 + 0.04,
+                        tiltAngle: Math.random() * Math.PI,
+                        speed: Math.random() * 4 + 4.5,
+                        vx: Math.random() * 6 + 3, // Fly right
+                        vy: -(Math.random() * 8 + 6), // Fly up
+                        type: Math.random() > 0.5 ? 'rect' : 'circle'
+                    });
+                }
+                // Right gun
+                for (let k = 0; k < 12; k++) {
+                    particles.push({
+                        x: canvas.width,
+                        y: canvas.height * 0.9,
+                        r: Math.random() * 5 + 4,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        tilt: Math.random() * 8 - 8,
+                        tiltAngleIncremental: Math.random() * 0.08 + 0.04,
+                        tiltAngle: Math.random() * Math.PI,
+                        speed: Math.random() * 4 + 4.5,
+                        vx: -(Math.random() * 6 + 3), // Fly left
+                        vy: -(Math.random() * 8 + 6), // Fly up
+                        type: Math.random() > 0.5 ? 'rect' : 'circle'
+                    });
+                }
+            }
+            
+            // B. Scheduled Firework Rocket Launches on every Beat
+            const types = ['standard', 'ring', 'crackle', 'doubleRing', 'willow', 'heart', 'star'];
+            const chooseType = types[beatCount % types.length];
+            fireworks.push({
+                x: Math.random() * canvas.width * 0.6 + canvas.width * 0.2,
+                y: canvas.height + 15,
+                targetY: Math.random() * canvas.height * 0.35 + canvas.height * 0.08,
+                speed: Math.random() * 3 + 8,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                type: chooseType
+            });
+            
+            // C. UI Element Pulsing to Match Music Tempo Beats
+            const champBadge = document.getElementById('champBadge');
+            const winnerH1 = document.getElementById('winnerH1');
+            const avatars = document.querySelectorAll('.winner-avatar-container');
+            
+            if (champBadge) {
+                champBadge.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s ease-out';
+                champBadge.style.transform = 'scale(1.1)';
+                champBadge.style.boxShadow = '0px 25px 65px rgba(243,156,18,0.85)';
+                setTimeout(() => {
+                    champBadge.style.transform = 'scale(1)';
+                    champBadge.style.boxShadow = '0px 15px 45px rgba(243,156,18,0.5)';
+                }, 150);
+            }
+            
+            if (winnerH1) {
+                winnerH1.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), text-shadow 0.15s ease-out';
+                winnerH1.style.transform = 'scale(1.06)';
+                winnerH1.style.textShadow = '0 0 45px rgba(255,255,255,0.7), 0 0 90px rgba(241,196,15,0.95)';
+                setTimeout(() => {
+                    winnerH1.style.transform = 'scale(1)';
+                    winnerH1.style.textShadow = '0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(241,196,15,0.5)';
+                }, 150);
+            }
+            
+            avatars.forEach(av => {
+                av.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                av.style.transform = 'scale(1.08)';
+                const img = av.querySelector('img');
+                if (img) {
+                    img.style.transition = 'box-shadow 0.15s ease-out, border-color 0.15s ease-out';
+                    img.style.borderColor = '#fff';
+                    img.style.boxShadow = '0 0 70px rgba(241,196,15,0.95)';
+                }
+                setTimeout(() => {
+                    av.style.transform = 'scale(1)';
+                    if (img) {
+                        img.style.borderColor = '#f1c40f';
+                        img.style.boxShadow = '0 0 50px rgba(241,196,15,0.7)';
+                    }
+                }, 150);
+            });
+        }
+        
+        // --- 1. RENDER CONTINUOUS & JET CONFETTI ---
         for (let i = 0; i < particles.length; i++) {
             const p = particles[i];
-            p.tiltAngle += p.tiltAngleIncremental;
-            p.y += p.speed;
-            p.x += Math.sin(p.tiltAngle) * 0.8;
+            
+            // Check if this particle has custom jet velocity vectors
+            if (p.vx !== undefined && p.vy !== undefined) {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.12; // gravity influence
+                p.vx *= 0.98; // air resistance drag
+                p.tiltAngle += p.tiltAngleIncremental * 1.5;
+            } else {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += p.speed;
+                p.x += Math.sin(p.tiltAngle) * 0.8;
+            }
             
             // Loop confetti back to top endlessly for constant vibrance
-            if (p.y > canvas.height) {
+            if (p.y > canvas.height + 20 || p.x < -20 || p.x > canvas.width + 20) {
                 p.y = -20;
                 p.x = Math.random() * canvas.width;
                 p.speed = Math.random() * 2.5 + 2.0;
+                delete p.vx;
+                delete p.vy;
             }
             
             ctx.save();
@@ -4240,17 +4638,17 @@ function startCelebrationCanvas() {
             ctx.restore();
         }
         
-        // --- 2. CONTINOUS ROCKET CONTROLLER ---
-        // Dynamically launches a rocket every 450-700ms 
-        const interval = Math.max(450, 750 - Math.floor(elapsed / 120));
+        // --- 2. CONTINUOUS ROCKET CONTROLLER ---
+        const interval = Math.max(400, 680 - Math.floor(elapsed / 120));
         if (now - lastFireworkTime > interval) {
+            const types = ['standard', 'ring', 'crackle', 'doubleRing', 'willow', 'heart', 'star'];
             fireworks.push({
                 x: Math.random() * canvas.width * 0.74 + canvas.width * 0.13,
                 y: canvas.height + 15,
                 targetY: Math.random() * canvas.height * 0.40 + canvas.height * 0.08,
                 speed: Math.random() * 3.5 + 7.5,
                 color: colors[Math.floor(Math.random() * colors.length)],
-                type: Math.random() > 0.5 ? 'standard' : (Math.random() > 0.5 ? 'ring' : 'crackle')
+                type: types[Math.floor(Math.random() * types.length)]
             });
             lastFireworkTime = now;
         }
@@ -4306,6 +4704,103 @@ function startCelebrationCanvas() {
                             gravity: 0.05,
                             friction: 0.97,
                             glow: 15
+                        });
+                    }
+                } else if (shell === 'doubleRing') {
+                    const sparklesCountOuter = 45;
+                    const sparklesCountInner = 30;
+                    const altColors = colors.filter(c => c !== f.color);
+                    const secondaryColor = altColors[Math.floor(Math.random() * altColors.length)];
+                    
+                    // Outer Ring
+                    for (let k = 0; k < sparklesCountOuter; k++) {
+                        const angle = (k / sparklesCountOuter) * Math.PI * 2;
+                        const sp = Math.random() * 1.0 + 7.0; 
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: Math.cos(angle) * sp,
+                            vy: Math.sin(angle) * sp,
+                            color: f.color,
+                            alpha: 1.0,
+                            decay: Math.random() * 0.01 + 0.007,
+                            gravity: 0.04,
+                            friction: 0.98,
+                            glow: 18
+                        });
+                    }
+                    // Inner Ring
+                    for (let k = 0; k < sparklesCountInner; k++) {
+                        const angle = (k / sparklesCountInner) * Math.PI * 2;
+                        const sp = Math.random() * 0.8 + 4.2; 
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: Math.cos(angle) * sp,
+                            vy: Math.sin(angle) * sp,
+                            color: secondaryColor,
+                            alpha: 1.0,
+                            decay: Math.random() * 0.012 + 0.009,
+                            gravity: 0.04,
+                            friction: 0.98,
+                            glow: 16
+                        });
+                    }
+                } else if (shell === 'willow') {
+                    sparklesCount = 120;
+                    for (let k = 0; k < sparklesCount; k++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const sp = Math.random() * 5.0 + 1.2;
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: Math.cos(angle) * sp,
+                            vy: Math.sin(angle) * sp,
+                            color: '#ffbe76', // Sunset peach
+                            alpha: 1.0,
+                            decay: Math.random() * 0.006 + 0.004, // slow decay
+                            gravity: 0.025, // light gravity
+                            friction: 0.98,
+                            glow: 22
+                        });
+                    }
+                } else if (shell === 'heart') {
+                    const numHeartSparks = 70;
+                    for (let k = 0; k < numHeartSparks; k++) {
+                        const angle = (k / numHeartSparks) * Math.PI * 2;
+                        const hx = 16 * Math.pow(Math.sin(angle), 3);
+                        const hy = -(13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle));
+                        const sp = Math.random() * 0.12 + 0.42; 
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: hx * sp,
+                            vy: hy * sp,
+                            color: Math.random() > 0.2 ? '#ff007f' : '#e74c3c',
+                            alpha: 1.0,
+                            decay: Math.random() * 0.008 + 0.005,
+                            gravity: 0.03,
+                            friction: 0.975,
+                            glow: 22
+                        });
+                    }
+                } else if (shell === 'star') {
+                    const numStarSparks = 75;
+                    for (let k = 0; k < numStarSparks; k++) {
+                        const angle = (k / numStarSparks) * Math.PI * 2;
+                        const r = (k % 2 === 0) ? 7.2 : 3.0; 
+                        const sp = Math.random() * 0.15 + 0.85;
+                        fireworkParticles.push({
+                            x: f.x,
+                            y: f.y,
+                            vx: Math.cos(angle) * r * sp,
+                            vy: Math.sin(angle) * r * sp,
+                            color: Math.random() > 0.4 ? '#f1c40f' : '#00f3ff',
+                            alpha: 1.0,
+                            decay: Math.random() * 0.009 + 0.007,
+                            gravity: 0.04,
+                            friction: 0.975,
+                            glow: 20
                         });
                     }
                 } else if (shell === 'crackle') {
@@ -4408,6 +4903,7 @@ function startCelebrationCanvas() {
             cancelAnimationFrame(celebrationAnimationId);
             window.removeEventListener('resize', resizeCanvas);
             observer.disconnect();
+            stopCelebrationMusic();
         }
     });
     observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
@@ -4852,6 +5348,26 @@ function renderReportItem(g) {
 function viewTableReport(id, backToScreen = 'reports') {
     const g = savedGames.find(x => x.id === id);
     if(!g) return;
+
+    if (g.isAborted) {
+        let h = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0;">Report View</h3>
+                <button onclick="showScreen('${backToScreen}')" class="pause-btn">Back</button>
+            </div>
+            <div style="background:rgba(231,76,60,0.05); padding:40px 20px; border-radius:12px; margin-bottom:15px; border:1px solid rgba(231,76,60,0.3); text-align:center;">
+                <div style="color:#e74c3c; font-size:40px; font-weight:900; margin-bottom:15px; letter-spacing:1px;">🚫 GAME ABANDONED</div>
+                <div style="font-size:18px; font-weight:bold; color:#fff; margin-bottom:20px;">${g.name || "Game Session"}</div>
+                <div style="display:inline-block; text-align:left; background:rgba(0,0,0,0.3); padding:15px 30px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); font-size:14px; opacity:0.9;">
+                    <div style="margin-bottom:8px;"><span style="opacity:0.6; font-weight:600; min-width:90px; display:inline-block;">Game ID:</span> <span style="font-family:monospace;">#${g.id || "N/A"}</span></div>
+                    <div style="margin-bottom:8px;"><span style="opacity:0.6; font-weight:600; min-width:90px; display:inline-block;">Start Time:</span> <span>${formatEliteDate(g.startTime)}</span></div>
+                    <div><span style="opacity:0.6; font-weight:600; min-width:90px; display:inline-block;">Status:</span> <span style="color:#e74c3c; font-weight:bold;">Aborted / Left Unfinished</span></div>
+                </div>
+            </div>
+        `;
+        document.getElementById('mainPane').innerHTML = h;
+        return;
+    }
 
     // Helper to get first name
     const getFirstName = (fullName) => fullName.split(' ')[0];
