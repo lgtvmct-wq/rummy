@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<title>Elite Rummy Circle - v101.0</title>
+<title>Elite Rummy Circle - v102.0</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" sizes="152x152" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
@@ -273,7 +273,7 @@
     </div>
 
     <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v101.0</span>
+        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v102.0</span>
         <div style="font-size: 10px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
     </div>
   </div>
@@ -358,7 +358,14 @@
          
          <!-- Scrollable middle content -->
          <div style="flex: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 8px;">
-              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v101.0 - Scalable Bracket-Based Seeding & Cascading State Engine</b>
+              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v102.0 - Mid-Game Player Joining & Re-entry Dealer Identification</b>
+               <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                   • <b>Dynamic Seating Alignment:</b> Brand new players added mid-game or after seat cut are immediately merged into the core seating sequence (<code>startingPlayers</code>).<br>
+                   • <b>Automatic Dealer Identification:</b> Mid-game entrants and re-joining players are fully recognized in the round-based dealer rotation, ensuring they are queued as dealers in proper sequential order.<br>
+                   • <b>Robust Seating Recovery:</b> The dealer selection engine self-heals by dynamically restoring seating positions if active players are missing from target lists.<br>
+               </div>
+               <hr style="margin: 10px 0; opacity: 0.2;">
+               <b style="color: var(--warning); display: block; margin-bottom: 5px;">v101.0 - Scalable Bracket-Based Seeding & Cascading State Engine</b>
                <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
                    • <b>Recursive Bracket-Based Seeding:</b> Automated Seat Cut now scales seamlessly for 10+ players using a robust Grouped Bracket sorting algorithm.<br>
                    • <b>Sequential Multi-Player Tie-Breaking:</b> Pauses positioning dynamically to resolve duplicate card matches via a clean input sub-menu, recursively handling any sub-ties in-place.<br>
@@ -807,7 +814,7 @@
       <div class="tv-close" id="tvCloseBtn" onclick="closeFullScreen()">Close</div>
   </div>
   <div style="position: fixed; bottom: 8px; left: 12px; z-index: 4000; text-align: left; pointer-events: auto;">
-      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v101.0</div>
+      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v102.0</div>
       <div style="font-size: 9px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
   </div>
 </div>
@@ -899,6 +906,19 @@ function canPlayerReEnter(p, targetState) {
 function getDealerForState(sObj) {
     const targetState = sObj || state;
     if (!targetState || targetState.winner) return null;
+    
+    // Auto-align startingPlayers to always contain any newly added or active players in targetState.players
+    if (targetState.players) {
+        if (!targetState.startingPlayers) {
+            targetState.startingPlayers = [...targetState.players];
+        } else {
+            targetState.players.forEach(p => {
+                if (!targetState.startingPlayers.includes(p)) {
+                    targetState.startingPlayers.push(p);
+                }
+            });
+        }
+    }
     
     const activeInRound = targetState.players.filter(p => !targetState.eliminated[p] && !isPlayerExceededLimit(p, targetState));
     if (activeInRound.length === 0) return null;
@@ -4449,6 +4469,14 @@ async function confirmAddMidGame() {
     } else {
         state.totals[name] = es;
         state.eliminated[name] = false;
+    }
+    
+    // Ensure startingPlayers is hydrated and contains the added player to keep the seating/dealer sequence perfectly in sync
+    if (!state.startingPlayers) {
+        state.startingPlayers = [...state.players];
+    }
+    if (!state.startingPlayers.includes(name)) {
+        state.startingPlayers.push(name);
     }
     
     state.roundScores[name] = null; 
