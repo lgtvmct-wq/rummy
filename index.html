@@ -1685,8 +1685,8 @@ let celebrationAudioPlayer = null;
 let celebrationTimeoutId = null;
 let celebrationFadeIntervalId = null;
 let celebrationSelectedTrackIndex = -1;
-let celebrationDurationTotal = 30000; // 30 seconds total duration to match full celebration
-let celebrationTimeRemaining = 30000;
+let celebrationDurationTotal = 15000; // Plays exactly for 15 seconds
+let celebrationTimeRemaining = 15000;
 let celebrationCountdownIntervalId = null;
 let celebrationIsMuted = false;
 let autoplayBlocked = false;
@@ -1695,23 +1695,9 @@ const CELEBRATION_TRACKS = [
     {
         name: "Elite Circle Anthem",
         url: "https://raw.githubusercontent.com/lgtvmct-wq/rummy/main/elite_circle_anthem.mp3",
-        startOffset: 35.0,
+        startOffset: 36.0, // Plays exactly from 36 seconds mark
         tempoMs: 380,     // Perfectly synced theme speed
         style: "anthem"
-    },
-    {
-        name: "Bright Rock Energy",
-        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-        startOffset: 0.0,
-        tempoMs: 380,     // Tempo matching rock guitars
-        style: "rock"
-    },
-    {
-        name: "Modern Pop Celebrate",
-        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-        startOffset: 0.0,
-        tempoMs: 400,     // Pop synth tempo
-        style: "pop"
     }
 ];
 
@@ -1742,71 +1728,70 @@ function playCelebrationTrack(trackIndex) {
         celebrationAudioPlayer = null;
     }
     
-    celebrationSelectedTrackIndex = trackIndex;
-    const track = CELEBRATION_TRACKS[trackIndex];
+    celebrationSelectedTrackIndex = 0; // force 0 as only one track is used now
+    const track = CELEBRATION_TRACKS[0];
     if (!track) return;
     
     celebrationTimeRemaining = celebrationDurationTotal;
-    updateCelebrationCountdownUI();
     
-    const audio = new Audio(track.url);
-    
-    // Graceful error-resilience handler: if the local elite_circle_anthem.mp3 has not yet been uploaded or fails to load,
-    // automatically fall back to the energetic rock track so the applet never breaks!
-    audio.onerror = () => {
-        console.warn("Failed to load track: " + track.url + ". Falling back to Bright Rock Energy.");
-        if (trackIndex !== 1) {
-            playCelebrationTrack(1); // Fallback to "Bright Rock Energy"
-        }
-    };
+    // Fallback URLs chain for the custom anthem track to guarantee loading success 
+    let urlsToTry = [
+        "https://raw.githubusercontent.com/lgtvmct-wq/rummy/main/elite_circle_anthem.mp3",
+        "https://cdn.jsdelivr.net/gh/lgtvmct-wq/rummy@main/elite_circle_anthem.mp3",
+        "/elite_circle_anthem.mp3",
+        "elite_circle_anthem.mp3"
+    ];
 
-    audio.currentTime = track.startOffset || 0;
-    audio.loop = false;
+    let urlIndex = 0;
     
-    if (trackIndex === 0) {
-        // Elite Circle Anthem specific 1-second fade-in starting from 35.0s to 36.0s (full volume)
-        audio.volume = 0;
-        let fadeInStart = Date.now();
-        const fadeInDuration = 1000; // 1 second
-        const fadeInIntervalId = setInterval(() => {
-            const elapsed = Date.now() - fadeInStart;
-            const ratio = Math.min(1, elapsed / fadeInDuration);
-            if (audio) {
-                audio.volume = celebrationIsMuted ? 0 : ratio;
-            }
-            if (ratio >= 1) {
-                clearInterval(fadeInIntervalId);
-            }
-        }, 50);
-    } else {
+    function tryLoadAndPlay() {
+        if (urlIndex >= urlsToTry.length) {
+            console.warn("All URLs for Elite Circle Anthem failed to load.");
+            return;
+        }
+
+        const currentUrl = urlsToTry[urlIndex];
+        console.log("Attempting to load celebration audio URL (" + (urlIndex+1) + "/" + urlsToTry.length + "): " + currentUrl);
+
+        const audio = new Audio(currentUrl);
+        audio.currentTime = track.startOffset || 36.0;
+        audio.loop = false;
+        
+        audio.onerror = (e) => {
+            console.warn("Error loading audio URL (" + currentUrl + "):", e, ". Attempting backup candidate.");
+            urlIndex++;
+            tryLoadAndPlay();
+        };
+
         audio.volume = celebrationIsMuted ? 0 : 1.0;
+
+        celebrationAudioPlayer = audio;
+        autoplayBlocked = false;
+        
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log("Celebration audio autoplay restricted or deferred until interaction:", error);
+                autoplayBlocked = true;
+                document.addEventListener('click', resumeOnInteraction, { once: true });
+                document.addEventListener('touchstart', resumeOnInteraction, { once: true });
+            });
+        }
     }
+
+    tryLoadAndPlay();
     
-    celebrationAudioPlayer = audio;
-    
-    autoplayBlocked = false;
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            console.log("Celebration audio autoplay restricted or deferred until interaction:", error);
-            autoplayBlocked = true;
-            document.addEventListener('click', resumeOnInteraction, { once: true });
-            document.addEventListener('touchstart', resumeOnInteraction, { once: true });
-        });
-    }
-    
-    // Smooth countdown progress bar timer running at 50ms intervals for ultra-fluid progress rendering
+    // Smooth countdown progress bar timer running at 50ms intervals
     const stepTime = 50;
     celebrationCountdownIntervalId = setInterval(() => {
         celebrationTimeRemaining -= stepTime;
         if (celebrationTimeRemaining < 0) celebrationTimeRemaining = 0;
-        updateCelebrationCountdownUI();
         if (celebrationTimeRemaining <= 0) {
             clearInterval(celebrationCountdownIntervalId);
         }
     }, stepTime);
     
-    // Smooth volume fade out in the final 2 seconds of the celebration duration window
+    // Smooth volume fade out in the final 2 seconds of the 15-second celebration duration window
     celebrationTimeoutId = setTimeout(() => {
         const fadeDuration = 2000;
         const fadeInterval = 100;
@@ -1833,78 +1818,22 @@ function playCelebrationTrack(trackIndex) {
 }
 
 function updateCelebrationCountdownUI() {
-    const textEl = document.getElementById('celebrationTimerCountdownText');
-    const barEl = document.getElementById('celebrationTimerProgress');
-    const remainingSeconds = (celebrationTimeRemaining / 1000).toFixed(1);
-    
-    if (textEl) {
-        textEl.innerText = `${remainingSeconds}s remaining`;
-    }
-    if (barEl) {
-        const pct = (celebrationTimeRemaining / celebrationDurationTotal) * 100;
-        barEl.style.width = `${pct}%`;
-        
-        if (celebrationTimeRemaining <= 2000) {
-            barEl.style.background = '#e74c3c';
-            barEl.style.boxShadow = '0 0 12px #e74c3c';
-        } else if (celebrationTimeRemaining <= 5000) {
-            barEl.style.background = '#f39c12';
-            barEl.style.boxShadow = '0 0 12px #f39c12';
-        } else {
-            barEl.style.background = '#f1c40f';
-            barEl.style.boxShadow = '0 0 12px #f1c40f';
-        }
-    }
+    // No UI updates needed as countdown visual tracks are removed
 }
 
 function changeCelebrationTrack(trackIndex) {
-    playCelebrationTrack(trackIndex);
-    
-    const btns = document.querySelectorAll('.track-select-btn');
-    btns.forEach((btn, idx) => {
-        if (idx === trackIndex) {
-            btn.style.background = '#f1c40f';
-            btn.style.borderColor = '#fff';
-            btn.style.color = '#000';
-            btn.style.boxShadow = '0 0 12px rgba(241,196,15,0.6)';
-        } else {
-            btn.style.background = 'rgba(255,255,255,0.06)';
-            btn.style.borderColor = 'rgba(255,255,255,0.15)';
-            btn.style.color = '#fff';
-            btn.style.boxShadow = 'none';
-        }
-    });
-    
-    const displayEl = document.getElementById('activeTrackNameDisplay');
-    if (displayEl && CELEBRATION_TRACKS[trackIndex]) {
-        displayEl.innerText = `🎵 PLAYING: ${CELEBRATION_TRACKS[trackIndex].name.toUpperCase()}`;
-    }
+    playCelebrationTrack(0);
 }
 
 function toggleCelebrationMute() {
     celebrationIsMuted = !celebrationIsMuted;
-    const btnMute = document.getElementById('btnCelebrationMute');
-    if (btnMute) {
-        if (celebrationIsMuted) {
-            btnMute.innerText = '🔇';
-            btnMute.style.background = '#7f8c8d';
-            btnMute.style.boxShadow = 'none';
-        } else {
-            btnMute.innerText = '🔊';
-            btnMute.style.background = '#e74c3c';
-            btnMute.style.boxShadow = '0 4px 10px rgba(231,76,60,0.4)';
-        }
-    }
-    
     if (celebrationAudioPlayer) {
         celebrationAudioPlayer.volume = celebrationIsMuted ? 0 : 1.0;
     }
 }
 
 function replayCelebrationCurrent() {
-    let idx = celebrationSelectedTrackIndex;
-    if (idx === -1) idx = 0;
-    changeCelebrationTrack(idx);
+    changeCelebrationTrack(0);
     startCelebrationCanvas();
 }
 
@@ -4463,36 +4392,38 @@ function startCelebrationCanvas() {
     let beatCount = 0;
     
     // Initialize endless cascade of micro-ticker/confetti tape
-    const confettiCount = 220;
+    const confettiCount = 180; // slightly reduced for even cleaner large-screen performance
     for (let i = 0; i < confettiCount; i++) {
         particles.push({
             x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height * 1.5 - canvas.height, // staggered initial coordinates
-            r: Math.random() * 5 + 4,
+            y: Math.random() * canvas.height * 1.5 - canvas.height, 
+            r: Math.random() * 4 + 3,
             color: colors[Math.floor(Math.random() * colors.length)],
             tilt: Math.random() * 8 - 4,
             tiltAngleIncremental: Math.random() * 0.05 + 0.03,
             tiltAngle: Math.random() * Math.PI,
-            speed: Math.random() * 2.5 + 2.0,
+            speed: Math.random() * 2.0 + 1.8,
             type: Math.random() > 0.5 ? 'rect' : 'circle'
         });
     }
 
-    // Instantly launch multiple grand rockets for immediate theatrical action
+    // Instantly launch multiple rockets for immediate action
     for (let i = 0; i < 3; i++) {
         fireworks.push({
             x: canvas.width * (0.18 + i * 0.32) + (Math.random() * 60 - 30),
             y: canvas.height + 15,
+            px: canvas.width * (0.18 + i * 0.32) + (Math.random() * 60 - 30),
+            py: canvas.height + 15,
             targetY: Math.random() * canvas.height * 0.32 + canvas.height * 0.08,
             speed: Math.random() * 3 + 8,
             color: colors[Math.floor(Math.random() * colors.length)],
-            type: i === 1 ? 'ring' : (i === 2 ? 'crackle' : 'standard')
+            type: i === 1 ? 'ring' : (i === 2 ? 'willow' : 'standard')
         });
     }
 
     function animate() {
-        // Redraw transparent overlay to leave magnificent neon particle trails
-        ctx.fillStyle = 'rgba(10, 13, 20, 0.25)';
+        // Clear background with semi-transparent black to create amazing natural clean trail fading
+        ctx.fillStyle = 'rgba(10, 13, 20, 0.22)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         const now = Date.now();
@@ -4505,48 +4436,50 @@ function startCelebrationCanvas() {
             lastBeatTime = elapsed;
             beatCount++;
             
-            // A. Dual Corner Jet Cannons firing confetti upwards!
+            // A. Dual Corner Jet Cannons firing confetti!
             if (beatCount % 2 === 0) {
                 // Left gun
-                for (let k = 0; k < 12; k++) {
+                for (let k = 0; k < 10; k++) {
                     particles.push({
                         x: 0,
                         y: canvas.height * 0.9,
-                        r: Math.random() * 5 + 4,
+                        r: Math.random() * 4 + 3,
                         color: colors[Math.floor(Math.random() * colors.length)],
                         tilt: Math.random() * 8,
                         tiltAngleIncremental: Math.random() * 0.08 + 0.04,
                         tiltAngle: Math.random() * Math.PI,
                         speed: Math.random() * 4 + 4.5,
-                        vx: Math.random() * 6 + 3, // Fly right
-                        vy: -(Math.random() * 8 + 6), // Fly up
+                        vx: Math.random() * 5 + 3, // Fly right
+                        vy: -(Math.random() * 7 + 6), // Fly up
                         type: Math.random() > 0.5 ? 'rect' : 'circle'
                     });
                 }
                 // Right gun
-                for (let k = 0; k < 12; k++) {
+                for (let k = 0; k < 10; k++) {
                     particles.push({
                         x: canvas.width,
                         y: canvas.height * 0.9,
-                        r: Math.random() * 5 + 4,
+                        r: Math.random() * 4 + 3,
                         color: colors[Math.floor(Math.random() * colors.length)],
                         tilt: Math.random() * 8 - 8,
                         tiltAngleIncremental: Math.random() * 0.08 + 0.04,
                         tiltAngle: Math.random() * Math.PI,
                         speed: Math.random() * 4 + 4.5,
-                        vx: -(Math.random() * 6 + 3), // Fly left
-                        vy: -(Math.random() * 8 + 6), // Fly up
+                        vx: -(Math.random() * 5 + 3), // Fly left
+                        vy: -(Math.random() * 7 + 6), // Fly up
                         type: Math.random() > 0.5 ? 'rect' : 'circle'
                     });
                 }
             }
             
-            // B. Scheduled Firework Rocket Launches on every Beat
-            const types = ['standard', 'ring', 'crackle', 'doubleRing', 'willow', 'heart', 'star'];
+            // B. Scheduled Firework Rocket Launch on every Beat (Standard / Ring / Willow)
+            const types = ['standard', 'ring', 'willow'];
             const chooseType = types[beatCount % types.length];
             fireworks.push({
                 x: Math.random() * canvas.width * 0.6 + canvas.width * 0.2,
                 y: canvas.height + 15,
+                px: Math.random() * canvas.width * 0.6 + canvas.width * 0.2,
+                py: canvas.height + 15,
                 targetY: Math.random() * canvas.height * 0.35 + canvas.height * 0.08,
                 speed: Math.random() * 3 + 8,
                 color: colors[Math.floor(Math.random() * colors.length)],
@@ -4614,11 +4547,11 @@ function startCelebrationCanvas() {
                 p.x += Math.sin(p.tiltAngle) * 0.8;
             }
             
-            // Loop confetti back to top endlessly for constant vibrance
+            // Loop confetti back to top
             if (p.y > canvas.height + 20 || p.x < -20 || p.x > canvas.width + 20) {
                 p.y = -20;
                 p.x = Math.random() * canvas.width;
-                p.speed = Math.random() * 2.5 + 2.0;
+                p.speed = Math.random() * 2.0 + 1.8;
                 delete p.vx;
                 delete p.vy;
             }
@@ -4638,13 +4571,21 @@ function startCelebrationCanvas() {
             ctx.restore();
         }
         
-        // --- 2. CONTINUOUS ROCKET CONTROLLER ---
-        const interval = Math.max(400, 680 - Math.floor(elapsed / 120));
+        // Eliminate bloated confetti lists from Jet cannons
+        if (particles.length > 350) {
+            particles.splice(180, particles.length - 180);
+        }
+
+        // --- 2. ROCKET LAUNCH INTERVAL CONTROLLER ---
+        const interval = Math.max(450, 750 - Math.floor(elapsed / 120));
         if (now - lastFireworkTime > interval) {
-            const types = ['standard', 'ring', 'crackle', 'doubleRing', 'willow', 'heart', 'star'];
+            const types = ['standard', 'ring', 'willow'];
+            const rx = Math.random() * canvas.width * 0.74 + canvas.width * 0.13;
             fireworks.push({
-                x: Math.random() * canvas.width * 0.74 + canvas.width * 0.13,
+                x: rx,
                 y: canvas.height + 15,
+                px: rx,
+                py: canvas.height + 15,
                 targetY: Math.random() * canvas.height * 0.40 + canvas.height * 0.08,
                 speed: Math.random() * 3.5 + 7.5,
                 color: colors[Math.floor(Math.random() * colors.length)],
@@ -4653,194 +4594,100 @@ function startCelebrationCanvas() {
             lastFireworkTime = now;
         }
         
-        // --- 3. COMMENCE ROCKET CORES ---
+        // --- 3. COMMENCE ROCKET CORES (NO GLOW/NO SHADOWBLUR) ---
         for (let i = fireworks.length - 1; i >= 0; i--) {
             const f = fireworks[i];
+            f.px = f.x;
+            f.py = f.y;
             f.y -= f.speed;
             
-            // Draw glowing rocket flare
+            // Draw smooth high-contrast classic white flying streak
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3.5;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.arc(f.x, f.y, 4.5, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = f.color;
-            ctx.fill();
-            ctx.shadowBlur = 0; // stop shadow bleeding to standard primitives
+            ctx.moveTo(f.px, f.py);
+            ctx.lineTo(f.x, f.y);
+            ctx.stroke();
             
-            // Launch small golden sparks falling behind the rocket flight trail
-            if (Math.random() < 0.6) {
+            // Launch small golden sparks trailing the rocket flight (as clean vector streaks)
+            if (Math.random() < 0.45) {
                 fireworkParticles.push({
                     x: f.x,
                     y: f.y + 4,
-                    vx: Math.random() * 1.4 - 0.7,
-                    vy: Math.random() * 1.5 + 1.8,
+                    px: f.x,
+                    py: f.y + 4,
+                    vx: Math.random() * 1.2 - 0.6,
+                    vy: Math.random() * 1.5 + 1.5,
                     color: '#ffdd57',
                     alpha: 0.95,
                     decay: Math.random() * 0.04 + 0.03,
                     gravity: 0.03,
-                    friction: 0.98,
-                    glow: 8
+                    friction: 0.98
                 });
             }
             
-            // Explode once threshold elevation reached
+            // Explode when targeted height is hit
             if (f.y <= f.targetY) {
-                let sparklesCount = 80;
+                let sparklesCount = 60;
                 let shell = f.type;
                 
                 if (shell === 'ring') {
-                    sparklesCount = 60;
+                    sparklesCount = 50;
                     for (let k = 0; k < sparklesCount; k++) {
                         const angle = (k / sparklesCount) * Math.PI * 2;
-                        const sp = Math.random() * 1.5 + 5.5; // tight velocity ring bands
+                        const sp = Math.random() * 1.2 + 4.8; 
                         fireworkParticles.push({
                             x: f.x,
                             y: f.y,
+                            px: f.x,
+                            py: f.y,
                             vx: Math.cos(angle) * sp,
                             vy: Math.sin(angle) * sp,
                             color: f.color,
                             alpha: 1.0,
-                            decay: Math.random() * 0.012 + 0.008,
-                            gravity: 0.05,
-                            friction: 0.97,
-                            glow: 15
-                        });
-                    }
-                } else if (shell === 'doubleRing') {
-                    const sparklesCountOuter = 45;
-                    const sparklesCountInner = 30;
-                    const altColors = colors.filter(c => c !== f.color);
-                    const secondaryColor = altColors[Math.floor(Math.random() * altColors.length)];
-                    
-                    // Outer Ring
-                    for (let k = 0; k < sparklesCountOuter; k++) {
-                        const angle = (k / sparklesCountOuter) * Math.PI * 2;
-                        const sp = Math.random() * 1.0 + 7.0; 
-                        fireworkParticles.push({
-                            x: f.x,
-                            y: f.y,
-                            vx: Math.cos(angle) * sp,
-                            vy: Math.sin(angle) * sp,
-                            color: f.color,
-                            alpha: 1.0,
-                            decay: Math.random() * 0.01 + 0.007,
+                            decay: Math.random() * 0.015 + 0.009,
                             gravity: 0.04,
-                            friction: 0.98,
-                            glow: 18
-                        });
-                    }
-                    // Inner Ring
-                    for (let k = 0; k < sparklesCountInner; k++) {
-                        const angle = (k / sparklesCountInner) * Math.PI * 2;
-                        const sp = Math.random() * 0.8 + 4.2; 
-                        fireworkParticles.push({
-                            x: f.x,
-                            y: f.y,
-                            vx: Math.cos(angle) * sp,
-                            vy: Math.sin(angle) * sp,
-                            color: secondaryColor,
-                            alpha: 1.0,
-                            decay: Math.random() * 0.012 + 0.009,
-                            gravity: 0.04,
-                            friction: 0.98,
-                            glow: 16
+                            friction: 0.98
                         });
                     }
                 } else if (shell === 'willow') {
-                    sparklesCount = 120;
+                    sparklesCount = 55;
                     for (let k = 0; k < sparklesCount; k++) {
                         const angle = Math.random() * Math.PI * 2;
-                        const sp = Math.random() * 5.0 + 1.2;
+                        const sp = Math.random() * 3.8 + 1.0;
                         fireworkParticles.push({
                             x: f.x,
                             y: f.y,
+                            px: f.x,
+                            py: f.y,
                             vx: Math.cos(angle) * sp,
                             vy: Math.sin(angle) * sp,
-                            color: '#ffbe76', // Sunset peach
+                            color: '#ffbe76', // Sunset peach willow drips
                             alpha: 1.0,
-                            decay: Math.random() * 0.006 + 0.004, // slow decay
-                            gravity: 0.025, // light gravity
-                            friction: 0.98,
-                            glow: 22
-                        });
-                    }
-                } else if (shell === 'heart') {
-                    const numHeartSparks = 70;
-                    for (let k = 0; k < numHeartSparks; k++) {
-                        const angle = (k / numHeartSparks) * Math.PI * 2;
-                        const hx = 16 * Math.pow(Math.sin(angle), 3);
-                        const hy = -(13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle));
-                        const sp = Math.random() * 0.12 + 0.42; 
-                        fireworkParticles.push({
-                            x: f.x,
-                            y: f.y,
-                            vx: hx * sp,
-                            vy: hy * sp,
-                            color: Math.random() > 0.2 ? '#ff007f' : '#e74c3c',
-                            alpha: 1.0,
-                            decay: Math.random() * 0.008 + 0.005,
-                            gravity: 0.03,
-                            friction: 0.975,
-                            glow: 22
-                        });
-                    }
-                } else if (shell === 'star') {
-                    const numStarSparks = 75;
-                    for (let k = 0; k < numStarSparks; k++) {
-                        const angle = (k / numStarSparks) * Math.PI * 2;
-                        const r = (k % 2 === 0) ? 7.2 : 3.0; 
-                        const sp = Math.random() * 0.15 + 0.85;
-                        fireworkParticles.push({
-                            x: f.x,
-                            y: f.y,
-                            vx: Math.cos(angle) * r * sp,
-                            vy: Math.sin(angle) * r * sp,
-                            color: Math.random() > 0.4 ? '#f1c40f' : '#00f3ff',
-                            alpha: 1.0,
-                            decay: Math.random() * 0.009 + 0.007,
-                            gravity: 0.04,
-                            friction: 0.975,
-                            glow: 20
-                        });
-                    }
-                } else if (shell === 'crackle') {
-                    sparklesCount = 95;
-                    for (let k = 0; k < sparklesCount; k++) {
-                        const angle = Math.random() * Math.PI * 2;
-                        const sp = Math.random() * 7.0 + 1.2;
-                        fireworkParticles.push({
-                            x: f.x,
-                            y: f.y,
-                            vx: Math.cos(angle) * sp,
-                            vy: Math.sin(angle) * sp,
-                            color: '#ffdd57', // gold stars
-                            alpha: 1.0,
-                            decay: Math.random() * 0.024 + 0.015,
-                            gravity: 0.06,
-                            friction: 0.96,
-                            glow: 11,
-                            isCracker: true
+                            decay: Math.random() * 0.007 + 0.004, // slow elegant decay
+                            gravity: 0.022, // light gravity
+                            friction: 0.98
                         });
                     }
                 } else {
-                    // Massive Chrysanthemum / Radial burst spanning alternate secondary glow
-                    sparklesCount = 100;
-                    const altColors = colors.filter(c => c !== f.color);
-                    const secondaryColor = altColors[Math.floor(Math.random() * altColors.length)];
+                    // Standard Premium Radial burst (elegant, beautiful outward sparks)
+                    sparklesCount = 65;
                     for (let k = 0; k < sparklesCount; k++) {
                         const angle = Math.random() * Math.PI * 2;
-                        const sp = Math.random() * 8.5 + 1.5;
+                        const sp = Math.random() * 6.0 + 1.5;
                         fireworkParticles.push({
                             x: f.x,
                             y: f.y,
+                            px: f.x,
+                            py: f.y,
                             vx: Math.cos(angle) * sp,
                             vy: Math.sin(angle) * sp,
-                            color: Math.random() > 0.4 ? f.color : secondaryColor,
+                            color: f.color,
                             alpha: 1.0,
-                            decay: Math.random() * 0.012 + 0.007,
+                            decay: Math.random() * 0.016 + 0.01,
                             gravity: 0.045,
-                            friction: 0.975,
-                            glow: 18
+                            friction: 0.975
                         });
                     }
                 }
@@ -4849,44 +4696,35 @@ function startCelebrationCanvas() {
             }
         }
         
-        // --- 4. ANIMATE EXPLOSION SPARKS ---
+        // Culling safety cap on active sparks to prevent any performance regression
+        if (fireworkParticles.length > 300) {
+            fireworkParticles.splice(0, fireworkParticles.length - 300);
+        }
+
+        // --- 4. ANIMATE EXPLOSION SPARKS USING CRISP VECTOR STREAKS (ZERO SHADOWBLUR) ---
         for (let j = fireworkParticles.length - 1; j >= 0; j--) {
             const p = fireworkParticles[j];
+            p.px = p.x;
+            p.py = p.y;
             p.x += p.vx;
             p.y += p.vy;
             p.vy += p.gravity || 0.05; // apply physics gravity
-            p.vx *= p.friction || 0.97; // air friction
-            p.vy *= p.friction || 0.97;
+            p.vx *= p.friction || 0.972; // air friction
+            p.vy *= p.friction || 0.972;
             p.alpha -= p.decay;
-            
-            // Playful sub-crackle spark releases
-            if (p.isCracker && p.alpha > 0.35 && Math.random() < 0.09) {
-                // Spawn micro sub-crackers flashing in-flight
-                fireworkParticles.push({
-                    x: p.x + (Math.random() * 6 - 3),
-                    y: p.y + (Math.random() * 6 - 3),
-                    vx: Math.random() * 2.2 - 1.1,
-                    vy: Math.random() * 2.2 - 1.1,
-                    color: '#ffffff',
-                    alpha: 0.85,
-                    decay: 0.08,
-                    gravity: 0.03,
-                    friction: 0.94,
-                    glow: 10
-                });
-            }
             
             if (p.alpha <= 0) {
                 fireworkParticles.splice(j, 1);
             } else {
                 ctx.save();
                 ctx.globalAlpha = p.alpha;
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = Math.random() * 1.5 + 1.5; // Beautiful crisp neon strokes
+                ctx.lineCap = 'round';
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, Math.random() * 2.0 + 2.2, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.shadowBlur = p.glow || 12;
-                ctx.shadowColor = p.color;
-                ctx.fill();
+                ctx.moveTo(p.px, p.py);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
                 ctx.restore();
             }
         }
