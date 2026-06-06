@@ -12,3 +12,7 @@ Keep the following files intact in all commits:
 *   `.github/workflows/firebase-deploy.yml`
 
 Before deleting or altering any deployment-related file, always ask the user for explicit confirmation.
+
+## Critical App Assets
+
+The custom file `elite_circle_anthem.mp3` is a critical production asset of the application and must **NEVER** be deleted, renamed, replaced with stock audio, or omitted from any build or project directory. It must be preserved locally in the project root and compiled successfully into the production build directory (`dist/`).
