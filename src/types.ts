@@ -21,6 +21,7 @@ export interface GameHistoryEntry {
   totals: Record<string, number>;
   reentries: Record<string, number>;
   bustedTotals: Record<string, number>;
+  dealer?: string | null;
 }
 
 export type RoundEntry = GameHistoryEntry;

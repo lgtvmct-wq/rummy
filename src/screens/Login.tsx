@@ -330,7 +330,7 @@ export const Login: React.FC<LoginProps> = ({ onShowReleaseNotes }) => {
             onClick={onShowReleaseNotes}
             className="text-xs font-black text-[var(--accent)] hover:underline cursor-pointer"
           >
-            v91.6
+            v102.1
           </button>
           <div className="text-[10px] opacity-40 mt-1">Developer: Elite IT</div>
         </div>

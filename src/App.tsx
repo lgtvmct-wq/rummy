@@ -140,7 +140,7 @@ export default function App() {
             onClick={() => setIsReleaseNotesOpen(true)}
             className="underline text-[var(--accent)] hover:text-emerald-400 font-bold cursor-pointer"
           >
-            v91.6
+            v102.1
           </span>
           <div className="text-[10px] mt-1 text-slate-400 font-mono">Developer: Elite IT</div>
         </footer>
@@ -386,6 +386,15 @@ export default function App() {
           </h3>
           
           <div className="max-h-72 overflow-y-auto pr-1 flex flex-col gap-4 text-xs">
+            <div>
+              <b className="text-yellow-500 block mb-1">v102.1 - Core Engine Refinements</b>
+              <p className="opacity-80 leading-relaxed font-sans">
+                Engine Update: Fixed mid-game dealer rotation, improved manual score editing overrides, and applied optimistic UI rendering for instantaneous round transitions.
+              </p>
+            </div>
+            
+            <hr className="opacity-10" />
+
             <div>
               <b className="text-yellow-500 block mb-1">v91.6 - Custom Tactic Separation & Keyboard Decoupling</b>
               <p className="opacity-80 leading-relaxed font-sans">
@@ -807,7 +816,7 @@ export default function App() {
           onClick={() => setIsReleaseNotesOpen(true)}
           className="underline text-[var(--accent)] hover:text-[#52e28c] font-bold cursor-pointer bg-black/30 px-2 py-1.5 rounded"
         >
-          v91.6
+          v102.1
         </span>
         <div className="text-[9px] mt-1 text-slate-400 font-mono">Developer: Elite IT</div>
       </footer>

@@ -381,6 +381,13 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
 
   const finalizeRound = async (currentState: GameState, entry: RoundEntry, allParticipants: string[]) => {
     const updated = { ...currentState };
+
+    // Capture who explicitly dealt the round that was just completed
+    const currentDealer = getDealerForState(currentState);
+    if (currentDealer) {
+      entry.dealer = currentDealer;
+    }
+
     allParticipants.forEach(p => {
       entry.totals[p] = updated.totals?.[p] !== undefined ? updated.totals[p] : 0;
     });
@@ -416,10 +423,12 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
       }
     }
 
+    // Optimistic UI update BEFORE await setDoc
+    setState(updated);
+
     try {
       const docRef = doc(db, 'eliteGames', updated.id);
       await setDoc(docRef, updated);
-      setState(updated);
     } catch (e) {
       console.error(e);
     }
@@ -517,12 +526,17 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
   const setEditTacticState = (player: string, tactic: string) => {
     setEditRoundData(prev => {
       const current = { ...prev[player] };
-      current.tactic = tactic;
-      if (tactic === 'S') current.score = 'S';
-      else if (tactic === 'D') current.score = '20';
-      else if (tactic === 'MD') current.score = '40';
-      else if (tactic === 'FC') current.score = '80';
-      else if (tactic === 'FS') current.score = '0';
+      if (current.tactic === tactic) {
+        // Toggle off the same tactic
+        current.tactic = '';
+      } else {
+        current.tactic = tactic;
+        if (tactic === 'S') current.score = 'S';
+        else if (tactic === 'D') current.score = '20';
+        else if (tactic === 'MD') current.score = '40';
+        else if (tactic === 'FC') current.score = '80';
+        else if (tactic === 'FS') current.score = '0';
+      }
 
       return { ...prev, [player]: current };
     });
@@ -582,12 +596,14 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
     const nextState = { ...state, history: updatedHistory };
     recalculateStateFromHistory(nextState);
 
+    // Optimistic UI update BEFORE await setDoc
+    setState(nextState);
+    setIsEditRoundOpen(false);
+    setEditRoundNum(null);
+
     try {
       const docRef = doc(db, 'eliteGames', nextState.id);
       await setDoc(docRef, nextState);
-      setState(nextState);
-      setIsEditRoundOpen(false);
-      setEditRoundNum(null);
     } catch (e) {
       console.error(e);
       alert('Failed to update historical round scores in Database.');

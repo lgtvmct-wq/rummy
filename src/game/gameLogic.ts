@@ -39,50 +39,99 @@ export function canPlayerReEnter(p: string, g?: Partial<GameState> | null): bool
 export function getDealerForState(g?: Partial<GameState> | null): string | null {
   if (!g || g.winner) return null;
   
+  // Combine startingPlayers and any other players to ensure everyone is represented in order
+  const roster: string[] = [];
+  const seen = new Set<string>();
+  if (g.startingPlayers) {
+    g.startingPlayers.forEach(p => {
+      if (!seen.has(p)) {
+        seen.add(p);
+        roster.push(p);
+      }
+    });
+  }
+  if (g.players) {
+    g.players.forEach(p => {
+      if (!seen.has(p)) {
+        seen.add(p);
+        roster.push(p);
+      }
+    });
+  }
+  if (roster.length === 0) return null;
+
+  // Active players in the current round
   const activeInRound = (g.players || []).filter(p => !g.eliminated?.[p] && !isPlayerExceededLimit(p, g));
   if (activeInRound.length === 0) return null;
-  
-  const roster = g.startingPlayers || g.players || [];
-  if (roster.length === 0) return null;
-  
-  const dIdx = (g.round - 1) % roster.length;
-  let dealer = roster[dIdx];
-  
-  // Rule: If a player Y is slated to deal this round (g.round), and they exited in the playing round (g.round - 1) and reentered,
-  // the deal must go back to them. We force them as dealer, bypassing standard skip/repeat dealer logic.
-  let forceReenteredDealer = false;
-  if (g.round > 1 && g.history) {
-    const lastRound = g.round - 1;
-    const lastEntry = g.history.find(h => h.round === lastRound);
-    if (lastEntry) {
-      const scoreInLastRound = lastEntry.scores?.[dealer];
-      const wasBusted = (lastEntry.bustedTotals && lastEntry.bustedTotals[dealer] !== undefined) || (scoreInLastRound === 'OUT');
-      const hasReentered = (lastEntry.reentries && lastEntry.reentries[dealer] !== undefined) || 
-                           (!g.eliminated?.[dealer] && !isPlayerExceededLimit(dealer, g));
+
+  // If we are at Round 1, the dealer is roster[0]
+  if (!g.history || g.history.length === 0) {
+    return roster[0];
+  }
+
+  // Find who dealt the last round
+  let lastDealer: string | null = null;
+  const lastHistoryEntry = g.history[g.history.length - 1];
+  if (lastHistoryEntry && lastHistoryEntry.dealer) {
+    lastDealer = lastHistoryEntry.dealer;
+  }
+
+  // If no last dealer is saved (legacy games/refresh), reconstruct sequentially
+  if (!lastDealer) {
+    let simulatedDealer = roster[0];
+    for (let i = 0; i < g.history.length; i++) {
+      const hEntry = g.history[i];
+      hEntry.dealer = simulatedDealer; // save/cache it
       
-      if (wasBusted && hasReentered) {
-        forceReenteredDealer = true;
+      // Compute the next dealer for the next round
+      const dIdx = roster.indexOf(simulatedDealer);
+      const startSearchIdx = dIdx !== -1 ? dIdx : 0;
+      
+      // For history round i+2, find the next active player for the next round
+      let foundNext = false;
+      for (let offset = 1; offset <= roster.length; offset++) {
+        const checkIdx = (startSearchIdx + offset) % roster.length;
+        const candidate = roster[checkIdx];
+        
+        // If this is the last history round, the next round is the current active round g
+        const isLastHistory = (i === g.history.length - 1);
+        if (isLastHistory) {
+          if (!g.eliminated?.[candidate] && !isPlayerExceededLimit(candidate, g) && g.players?.includes(candidate)) {
+            simulatedDealer = candidate;
+            foundNext = true;
+            break;
+          }
+        } else {
+          // For intermediate history round, check if player was active in that next round
+          const nextHEntry = g.history[i + 1];
+          const isActiveInNext = nextHEntry && nextHEntry.players && nextHEntry.players.includes(candidate);
+          if (isActiveInNext) {
+            simulatedDealer = candidate;
+            foundNext = true;
+            break;
+          }
+        }
+      }
+      if (!foundNext) {
+        simulatedDealer = roster[(i + 1) % roster.length];
       }
     }
+    lastDealer = g.history[g.history.length - 1]?.dealer || roster[0];
   }
-  
-  if (forceReenteredDealer && g.eliminated && !g.eliminated[dealer] && !isPlayerExceededLimit(dealer, g)) {
-    return dealer;
-  }
-  
-  // Standard rotation: If dealer is OUT, the previous active player repeats.
-  if (g.eliminated?.[dealer] || isPlayerExceededLimit(dealer, g)) {
-    for (let i = 1; i <= roster.length; i++) {
-      const prevIdx = (dIdx - i + roster.length) % roster.length;
-      const prevP = roster[prevIdx];
-      if (!g.eliminated?.[prevP] && !isPlayerExceededLimit(prevP, g) && g.players.includes(prevP)) {
-        dealer = prevP;
-        break;
-      }
+
+  // Use the explicitly found lastDealer to determine the current dealer
+  const lastDealerIdx = roster.indexOf(lastDealer);
+  const startSearchIdx = lastDealerIdx !== -1 ? lastDealerIdx : 0;
+
+  for (let offset = 1; offset <= roster.length; offset++) {
+    const checkIdx = (startSearchIdx + offset) % roster.length;
+    const candidate = roster[checkIdx];
+    if (!g.eliminated?.[candidate] && !isPlayerExceededLimit(candidate, g) && g.players?.includes(candidate)) {
+      return candidate;
     }
   }
-  
-  return dealer;
+
+  return roster[0];
 }
 
 export function formatEliteDate(dateObj: any): string {
