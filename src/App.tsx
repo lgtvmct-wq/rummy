@@ -28,7 +28,7 @@ export default function App() {
   // New Game values
   const [gName, setGName] = useState('');
   const [rulesetMode, setRulesetMode] = useState<'standard' | 'custom' | 'tournament'>('standard');
-  const [exitScoreInput, setExitScoreInput] = useState('240');
+  const [exitScoreInput, setExitScoreInput] = useState('241');
   const [maxReentriesInput, setMaxReentriesInput] = useState('1');
   const [selectedGameAdmin, setSelectedGameAdmin] = useState('');
   const [newGamePlayers, setNewGamePlayers] = useState<string[]>(['', '']); // Initial 2 empty selects
@@ -140,7 +140,7 @@ export default function App() {
             onClick={() => setIsReleaseNotesOpen(true)}
             className="underline text-[var(--accent)] hover:text-emerald-400 font-bold cursor-pointer"
           >
-            v102.1
+            v102.2
           </span>
           <div className="text-[10px] mt-1 text-slate-400 font-mono">Developer: Elite IT</div>
         </footer>
@@ -172,7 +172,7 @@ export default function App() {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
 
-    const limit = rulesetMode === 'custom' ? parseInt(exitScoreInput) : 240;
+    const limit = rulesetMode === 'custom' ? parseInt(exitScoreInput) : 241;
     const maxRE = rulesetMode === 'custom' ? parseInt(maxReentriesInput) : (rulesetMode === 'tournament' ? 0 : 1);
 
     if (isNaN(limit) || limit <= 0) {
@@ -387,6 +387,16 @@ export default function App() {
           
           <div className="max-h-72 overflow-y-auto pr-1 flex flex-col gap-4 text-xs">
             <div>
+              <b className="text-yellow-500 block mb-1">v102.2 - Score Overrides & Elite Ruleset Cutoff</b>
+              <p className="opacity-80 leading-relaxed font-sans pb-1">
+                • <b>Elite Ruleset Cutoff:</b> Updated Elite ruleset exit standard to &gt;241 points from the previous 240.<br />
+                • <b>Score Edit Auto-Deactivation:</b> Manually editing scores now automatically deactivates active Tactic highlights (S, D, MD, FC, FS) to prevent status discrepancies in historical round sheets and active rounds. Clicking an active Tactic button again cleanly toggles it off.
+              </p>
+            </div>
+
+            <hr className="opacity-10" />
+
+            <div>
               <b className="text-yellow-500 block mb-1">v102.1 - Core Engine Refinements</b>
               <p className="opacity-80 leading-relaxed font-sans">
                 Engine Update: Fixed mid-game dealer rotation, improved manual score editing overrides, and applied optimistic UI rendering for instantaneous round transitions.
@@ -537,7 +547,7 @@ export default function App() {
                 <div className="bg-purple-950/20 p-4 border border-purple-500/20 rounded-xl flex flex-col gap-1.5 animate-slideDown text-[11px] text-purple-300">
                   <strong className="text-yellow-500 text-xs">🏁 CHAMPIONSHIP MODE PROTOCOL</strong>
                   <p>• Mandatory Seat Cut to automate seating order, dealer, and clockwise distribution sequences.</p>
-                  <p>• Strictly <strong className="text-[#e74c3c]">NO RE-ENTRY</strong>. Standard cutoff is &gt;240.</p>
+                  <p>• Strictly <strong className="text-[#e74c3c]">NO RE-ENTRY</strong>. Standard cutoff is &gt;241.</p>
                 </div>
               )}
 
@@ -816,7 +826,7 @@ export default function App() {
           onClick={() => setIsReleaseNotesOpen(true)}
           className="underline text-[var(--accent)] hover:text-[#52e28c] font-bold cursor-pointer bg-black/30 px-2 py-1.5 rounded"
         >
-          v102.1
+          v102.2
         </span>
         <div className="text-[9px] mt-1 text-slate-400 font-mono">Developer: Elite IT</div>
       </footer>

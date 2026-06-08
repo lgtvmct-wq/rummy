@@ -1,8 +1,8 @@
 import { GameState } from '../types';
 
 export function getExitLimitFor(g?: Partial<GameState> | null): number {
-  if (!g) return 240;
-  return g.exitScoreLimit !== undefined ? Number(g.exitScoreLimit) : 240;
+  if (!g) return 241;
+  return g.exitScoreLimit !== undefined ? Number(g.exitScoreLimit) : 241;
 }
 
 export function getMaxReEntriesFor(g?: Partial<GameState> | null): number {
@@ -23,7 +23,7 @@ export function isPlayerExceededLimit(p: string, g?: Partial<GameState> | null):
   const score = g.totals?.[p] ?? 0;
   const limit = getExitLimitFor(g);
   if (g.ruleset === 'standard' || g.ruleset === 'tournament') {
-    return score > 240;
+    return score > 241;
   }
   return score >= limit;
 }

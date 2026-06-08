@@ -118,39 +118,40 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
     let v: any = null;
     let tactic: string | null = type;
 
-    if (type === 'S') {
-      const isCurrentlyS = updatedScores[player] === 'S' && updatedTactics[player] === 'S';
-      
-      // Clear other S
-      state.players?.forEach(pl => {
-        if (updatedScores[pl] === 'S') {
-          updatedScores[pl] = null;
-          updatedTactics[pl] = null;
-        }
-      });
+    // Toggle off if the exact same tactic is already chosen
+    const isCurrently = updatedTactics[player] === type;
 
-      v = isCurrentlyS ? null : 'S';
-      tactic = isCurrentlyS ? null : 'S';
-    } 
-    else if (type === 'D') {
-      const isCurrentlyD = updatedScores[player] === 20 && updatedTactics[player] === 'D';
-      v = isCurrentlyD ? null : 20;
-      tactic = isCurrentlyD ? null : 'D';
-    } 
-    else if (type === 'MD') {
-      const isCurrentlyMD = updatedScores[player] === 40 && updatedTactics[player] === 'MD';
-      v = isCurrentlyMD ? null : 40;
-      tactic = isCurrentlyMD ? null : 'MD';
-    } 
-    else if (type === 'FC') {
-      const isCurrentlyFC = updatedScores[player] === 80 && updatedTactics[player] === 'FC';
-      v = isCurrentlyFC ? null : 80;
-      tactic = isCurrentlyFC ? null : 'FC';
-    } 
-    else if (type === 'FS') {
-      const isCurrentlyFS = updatedScores[player] === 0 && updatedTactics[player] === 'FS';
-      v = isCurrentlyFS ? null : 0;
-      tactic = isCurrentlyFS ? null : 'FS';
+    if (isCurrently) {
+      v = null;
+      tactic = null;
+    } else {
+      if (type === 'S') {
+        // Clear other S
+        state.players?.forEach(pl => {
+          if (updatedScores[pl] === 'S' || updatedTactics[pl] === 'S') {
+            updatedScores[pl] = null;
+            updatedTactics[pl] = null;
+          }
+        });
+        v = 'S';
+        tactic = 'S';
+      } 
+      else if (type === 'D') {
+        v = 20;
+        tactic = 'D';
+      } 
+      else if (type === 'MD') {
+        v = 40;
+        tactic = 'MD';
+      } 
+      else if (type === 'FC') {
+        v = 80;
+        tactic = 'FC';
+      } 
+      else if (type === 'FS') {
+        v = 0;
+        tactic = 'FS';
+      }
     }
 
     updatedScores[player] = v;
@@ -526,9 +527,13 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
   const setEditTacticState = (player: string, tactic: string) => {
     setEditRoundData(prev => {
       const current = { ...prev[player] };
-      if (current.tactic === tactic) {
+      const currentTactic = String(current.tactic || '').trim().toUpperCase();
+      const targetTactic = String(tactic || '').trim().toUpperCase();
+
+      if (currentTactic === targetTactic) {
         // Toggle off the same tactic
         current.tactic = '';
+        current.score = ''; // Clear default preset score on toggle-off
       } else {
         current.tactic = tactic;
         if (tactic === 'S') current.score = 'S';
@@ -555,6 +560,8 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
     setEditRoundData(prev => {
       const current = { ...prev[player] };
       current.score = value;
+      // When user manually types any score, auto-deactivate the active tactic style
+      current.tactic = '';
       return { ...prev, [player]: current };
     });
   };
@@ -572,18 +579,28 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
         const { score, tactic } = editRoundData[p];
         const val = score.trim().toUpperCase();
 
+        let finalTactic = tactic || '';
+        // If the manually entered score does not match the chosen tactic, deactivate it completely.
+        if (finalTactic === 'S' && val !== 'S') finalTactic = '';
+        else if (finalTactic === 'D' && val !== '20') finalTactic = '';
+        else if (finalTactic === 'MD' && val !== '40') finalTactic = '';
+        else if (finalTactic === 'FC' && val !== '80') finalTactic = '';
+        else if (finalTactic === 'FS' && val !== '0') finalTactic = '';
+
         if (val === '') {
           nextScores[p] = null;
         } else if (val === 'OUT') {
           nextScores[p] = 'OUT';
+          finalTactic = '';
         } else if (val === 'S') {
           nextScores[p] = 'S';
+          finalTactic = 'S';
         } else {
           const num = parseInt(val);
           nextScores[p] = isNaN(num) ? null : num;
         }
 
-        nextTactics[p] = tactic || null;
+        nextTactics[p] = finalTactic || null;
       });
 
       return {
@@ -866,14 +883,14 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
                         <button 
                           onClick={() => setTactic(p, 'S')}
                           disabled={isOut || isGameOver}
-                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${rs === 'S' && tactic === 'S' ? 'bg-[#2ecc71] text-white font-extrabold shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-emerald-400 border border-emerald-500/20 hover:bg-slate-700'}`}
+                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${(rs === 'S' || String(rs) === 'S') && tactic === 'S' ? 'bg-[#2ecc71] text-white font-extrabold shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-emerald-400 border border-emerald-500/20 hover:bg-slate-700'}`}
                         >
                           S
                         </button>
                         <button 
                           onClick={() => setTactic(p, 'D')}
                           disabled={isOut || dLock || isGameOver}
-                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${rs === 20 && tactic === 'D' ? 'bg-[#f1c40f] text-black font-extrabold shadow-lg shadow-yellow-500/20' : 'bg-slate-800 text-yellow-500 border border-yellow-500/20 hover:bg-slate-700 disabled:opacity-20'}`}
+                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${(rs === 20 || String(rs) === '20') && tactic === 'D' ? 'bg-[#f1c40f] text-black font-extrabold shadow-lg shadow-yellow-500/20' : 'bg-slate-800 text-yellow-500 border border-yellow-500/20 hover:bg-slate-700 disabled:opacity-20'}`}
                           title={dLock ? 'Drop Locked from previous round' : 'Standard Drop (20 points)'}
                         >
                           D
@@ -881,21 +898,21 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
                         <button 
                           onClick={() => setTactic(p, 'MD')}
                           disabled={isOut || isGameOver}
-                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${rs === 40 && tactic === 'MD' ? 'bg-[#9b59b6] text-white font-extrabold shadow-lg shadow-purple-500/30' : 'bg-slate-800 text-purple-400 border border-purple-500/20 hover:bg-slate-700'}`}
+                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${(rs === 40 || String(rs) === '40') && tactic === 'MD' ? 'bg-[#9b59b6] text-white font-extrabold shadow-lg shadow-purple-500/30' : 'bg-slate-800 text-purple-400 border border-purple-500/20 hover:bg-slate-700'}`}
                         >
                           MD
                         </button>
                         <button 
                           onClick={() => setTactic(p, 'FC')}
                           disabled={isOut || isGameOver}
-                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${rs === 80 && tactic === 'FC' ? 'bg-[#e74c3c] text-white font-extrabold shadow-lg shadow-red-500/30' : 'bg-slate-800 text-red-500 border border-red-500/10 hover:bg-slate-700'}`}
+                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${(rs === 80 || String(rs) === '80') && tactic === 'FC' ? 'bg-[#e74c3c] text-white font-extrabold shadow-lg shadow-red-500/30' : 'bg-slate-800 text-red-500 border border-red-500/10 hover:bg-slate-700'}`}
                         >
                           FC
                         </button>
                         <button 
                           onClick={() => setTactic(p, 'FS')}
                           disabled={isOut || isGameOver}
-                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${rs === 0 && tactic === 'FS' ? 'bg-[#efefef] text-slate-800 font-extrabold shadow-lg shadow-slate-300/30' : 'bg-slate-800 text-slate-300 border border-slate-700/50 hover:bg-slate-700'}`}
+                          className={`tactic-btn text-[10px] w-7 h-7 flex items-center justify-center font-black rounded cursor-pointer transition active:scale-95 ${(rs === 0 || String(rs) === '0') && tactic === 'FS' ? 'bg-[#efefef] text-slate-800 font-extrabold shadow-lg shadow-slate-300/30' : 'bg-slate-800 text-slate-300 border border-slate-700/50 hover:bg-slate-700'}`}
                         >
                           FS
                         </button>
@@ -1155,16 +1172,19 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
                     <div className="font-bold text-xs text-white uppercase">{pName}</div>
                     
                     <div className="flex gap-1 flex-wrap">
-                      {['S', 'D', 'MD', 'FC', 'FS'].map(tType => (
-                        <button 
-                          key={tType}
-                          type="button"
-                          onClick={() => setEditTacticState(pName, tType)}
-                          className={`px-2 py-1 text-[9px] font-bold rounded cursor-pointer transition ${item.tactic === tType ? 'bg-yellow-500 text-black font-extrabold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
-                        >
-                          {tType}
-                        </button>
-                      ))}
+                      {['S', 'D', 'MD', 'FC', 'FS'].map(tType => {
+                        const isActive = String(item.tactic || '').trim().toUpperCase() === String(tType || '').trim().toUpperCase();
+                        return (
+                          <button 
+                            key={tType}
+                            type="button"
+                            onClick={() => setEditTacticState(pName, tType)}
+                            className={`px-2 py-1 text-[9px] font-bold rounded cursor-pointer transition ${isActive ? 'bg-yellow-500 text-black font-extrabold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                          >
+                            {tType}
+                          </button>
+                        );
+                      })}
                     </div>
 
                     <div className="flex gap-2 items-center">
