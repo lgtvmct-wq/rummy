@@ -3968,19 +3968,29 @@ async function saveEditedRoundScores() {
         let val = scoreInput ? scoreInput.value.trim().toUpperCase() : '';
         let tact = tacticInput ? tacticInput.value.trim() : '';
         
+        let finalTactic = tact || '';
+        // If the manually entered score does not match the chosen tactic, deactivate it completely.
+        if (finalTactic === 'S' && val !== 'S') finalTactic = '';
+        else if (finalTactic === 'D' && val !== '20') finalTactic = '';
+        else if (finalTactic === 'MD' && val !== '40') finalTactic = '';
+        else if (finalTactic === 'FC' && val !== '80') finalTactic = '';
+        else if (finalTactic === 'FS' && val !== '0') finalTactic = '';
+
         if (val === '') {
             r.scores[p] = null;
         } else if (val === 'OUT') {
             r.scores[p] = 'OUT';
+            finalTactic = '';
         } else if (val === 'S') {
             r.scores[p] = 'S';
+            finalTactic = 'S';
         } else {
             const parsed = parseInt(val);
             r.scores[p] = isNaN(parsed) ? null : parsed;
         }
         
         if (!r.tactics) r.tactics = {};
-        r.tactics[p] = tact || null;
+        r.tactics[p] = finalTactic || null;
     });
     
     recalculateGameStateFromHistory();
