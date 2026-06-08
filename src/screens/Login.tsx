@@ -57,7 +57,19 @@ export const Login: React.FC<LoginProps> = ({ onShowReleaseNotes }) => {
       await signInWithPopup(auth, provider);
     } catch (err: any) {
       console.error('Google Sign-In error:', err);
-      alert(err.message || 'Google authentication failed.');
+      if (err && err.code === 'auth/unauthorized-domain') {
+        alert(
+          `Unauthorized Domain Error:\n\n` +
+          `This domain (${window.location.hostname}) is not authorized for Google Sign-In in your Firebase Console.\n\n` +
+          `To resolve this, please:\n` +
+          `1. Open your Firebase Console\n` +
+          `2. Navigate to Authentication -> Settings -> Authorized Domains\n` +
+          `3. Add "${window.location.hostname}" as an authorized domain.\n\n` +
+          `Once added, please refresh and try again!`
+        );
+      } else {
+        alert(err?.message || 'Google authentication failed. Please check your browser\'s popup settings and Firebase Console configuration.');
+      }
     } finally {
       setLoading(false);
     }

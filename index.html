@@ -824,6 +824,18 @@
       <div id="tvContent"></div>
       <div class="tv-close" id="tvCloseBtn" onclick="closeFullScreen()">Close</div>
   </div>
+  <div id="tvSeatCutLogModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; padding:15px; overflow-y:auto; z-index:9100; font-family:'Inter', sans-serif;">
+    <div class="modal-card" style="background:#16222f; width:100%; max-width:500px; padding:25px; border-radius:15px; text-align:left; border:1px solid rgba(255,255,255,0.1); box-shadow:0 15px 45px rgba(0,0,0,0.6); max-height:90vh; overflow-y:auto; margin: auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px; margin-bottom:15px;">
+          <h3 style="margin:0; color:#2ecc71; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+              <span>📜 Seat Cut Protocol Audit Log</span>
+          </h3>
+          <span style="font-size:12px; opacity:0.6; cursor:pointer; font-weight:bold; text-decoration:underline; color:#fff;" onclick="closeTVSeatCutLog()">Close</span>
+      </div>
+      <div id="tvSeatCutLogContent" style="display:flex; flex-direction:column; gap:15px;"></div>
+      <button class="actionBtn" style="margin-top:20px; font-size:14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); height:40px; color:#fff; cursor:pointer;" onclick="closeTVSeatCutLog()">Back to Scoreboard</button>
+    </div>
+  </div>
   <div style="position: fixed; bottom: 8px; left: 12px; z-index: 4000; text-align: left; pointer-events: auto;">
       <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v102.2</div>
       <div style="font-size: 9px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
@@ -1045,7 +1057,27 @@ auth.onAuthStateChanged(async user => {
 });
 
 function login() { auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); }
-async function googleSignIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+async function googleSignIn() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch (error) {
+    console.error("Google Sign-In error:", error);
+    if (error && error.code === 'auth/unauthorized-domain') {
+      alert(
+        "Unauthorized Domain Error:\n\n" +
+        "This domain (" + window.location.hostname + ") is not authorized for Google Sign-In in your Firebase Console.\n\n" +
+        "To resolve this, please:\n" +
+        "1. Open your Firebase Console\n" +
+        "2. Navigate to Authentication -> Settings -> Authorized Domains\n" +
+        "3. Add '" + window.location.hostname + "' as an authorized domain.\n\n" +
+        "Once added, please refresh and try again!"
+      );
+    } else {
+      alert((error && error.message) || "Google authentication failed. Please check your browser's popup settings and Firebase Console configurations.");
+    }
+  }
+}
 async function signup() {
     const pass = document.getElementById('signupPass').value;
     const confirm = document.getElementById('signupConfirmPass').value;
@@ -2692,6 +2724,7 @@ function renderActive(focusPlayer = null) {
         ${titleHtml}
     </div>
     <div style="display:flex; gap:5px; flex-shrink: 0; margin-left: auto;">
+        ${state.seatCutOutcome ? `<button onclick="showTVSeatCutLog(event)" class="pause-btn" style="background: linear-gradient(to bottom, #8e44ad, #6c3483); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 8px rgba(142, 68, 173, 0.3); font-weight: bold; width: 110px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">Seat Cut Log 📜</button>` : ''}
         <button onclick="state=null; showScreen('newGame')" class="pause-btn" style="width:80px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;">${state.winner?'Home':'Pause'}</button>
     </div>
   </div>`;
@@ -3546,11 +3579,11 @@ function handleTVMouseMove() {
     const overlay = document.getElementById('fullscreenOverlay');
     if (!overlay || overlay.style.display !== 'flex') return;
     const btn = document.getElementById('tvCloseBtn');
-    if (!btn) return;
-    btn.classList.add('visible');
+    if (btn) btn.classList.add('visible');
+    
     if (tvCloseTimer) clearTimeout(tvCloseTimer);
     tvCloseTimer = setTimeout(() => {
-        btn.classList.remove('visible');
+        if (btn) btn.classList.remove('visible');
     }, 3000);
 }
 document.addEventListener('mousemove', handleTVMouseMove);
@@ -3667,6 +3700,92 @@ function closeFullScreen() {
     }
 }
 
+function showTVSeatCutLog(event) {
+    if (event) {
+         event.stopPropagation();
+    }
+    if (!state || !state.seatCutOutcome) return;
+    
+    const results = state.seatCutOutcome;
+    const dealer = results.dealer;
+    
+    let seatingRowsHtml = '';
+    if (results.seatingOrder) {
+        results.seatingOrder.forEach(s => {
+            const isDealer = s.player === dealer;
+            const cardBg = isDealer 
+                ? 'background: rgba(231,76,60,0.1); border-color: rgba(231,76,60,0.25)' 
+                : (s.rank === 1 ? 'background: rgba(39,174,96,0.1); border-color: rgba(39,174,96,0.25)' : 'background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05)');
+            const subLabel = isDealer 
+                ? '👑 Designated Starting Dealer' 
+                : (s.rank === 1 ? '🌟 Seat 1 (Highest Rank Selection)' : `Rank ${s.rank}`);
+                
+            seatingRowsHtml += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 15px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); font-family:monospace; margin-bottom: 8px; ${cardBg}">
+                    <div style="display:flex; flex-direction:column; gap:2px; text-align: left;">
+                        <span style="font-weight:bold; color:#fff; font-size:13px;">Seat ${s.seat}: ${s.player}</span>
+                        <span style="font-size:10px; opacity:0.5; text-transform:uppercase;">${subLabel}</span>
+                    </div>
+                    <span style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); color:var(--accent); font-weight:bold; padding:4px 10px; border-radius:6px; font-size:12px;">${s.card || ''}</span>
+                </div>
+            `;
+        });
+    }
+    
+    let distributionRowsHtml = '';
+    if (results.distributionOrder) {
+        results.distributionOrder.forEach((pName, idx) => {
+            const color = idx === 0 
+                ? 'color:#2ecc71; font-weight:bold;' 
+                : (pName === dealer ? 'color:#e74c3c; font-weight:bold;' : 'color:rgba(255,255,255,0.8);');
+            const label = idx === 0 
+                ? ' (Receives First, clock-one)' 
+                : (pName === dealer ? ' (Dealer last)' : '');
+                
+            distributionRowsHtml += `
+                <div style="display:flex; gap:10px; align-items:center; font-family:monospace; font-size:12px; border-bottom:1px solid rgba(255,255,255,0.02); padding-bottom:4px; text-align: left;">
+                    <span style="opacity:0.4; font-weight:bold; width:20px;">${idx + 1}.</span>
+                    <span style="${color}">${pName}${label}</span>
+                </div>
+            `;
+        });
+    }
+    
+    let distributionBlock = '';
+    if (results.distributionOrder) {
+        distributionBlock = `
+        <div style="padding:12px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; display:flex; flex-direction:column; gap:6px; margin-top:10px;">
+            <span style="font-size:9px; text-transform:uppercase; font-weight:bold; color:rgba(255,255,255,0.4); letter-spacing:0.5px; display:block; margin-bottom:4px;">Clockwise Distribution Sequence</span>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                ${distributionRowsHtml}
+            </div>
+        </div>`;
+    }
+    
+    const h = `
+        <div style="padding:15px; background:rgba(231,76,60,0.1); border:1px solid rgba(231,76,60,0.2); border-radius:12px; margin-bottom:5px;">
+            <span style="font-size:9px; text-transform:uppercase; font-weight:bold; color:#e74c3c; letter-spacing:0.5px; display:block; margin-bottom:4px;">Designated Starting Dealer</span>
+            <span style="font-size:15px; font-weight:black; color:#fff; font-family:monospace; text-transform:uppercase;">👑 Starting Dealer: ${dealer}</span>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:9px; text-transform:uppercase; font-weight:bold; color:rgba(255,255,255,0.4); letter-spacing:0.5px; display:block; margin-bottom:4px;">Clockwise Seating Order</span>
+            <div style="max-height: 200px; overflow-y:auto; padding-right:4px;">
+                ${seatingRowsHtml}
+            </div>
+        </div>
+        
+        ${distributionBlock}
+    `;
+    
+    document.getElementById('tvSeatCutLogContent').innerHTML = h;
+    document.getElementById('tvSeatCutLogModal').style.display = 'flex';
+}
+
+function closeTVSeatCutLog() {
+    document.getElementById('tvSeatCutLogModal').style.display = 'none';
+}
+
 function openHistoryScoreboard(id) {
     const g = savedGames.find(x => x.id === id);
     if (!g) return;
@@ -3762,7 +3881,7 @@ function openEditRoundModal(roundNum) {
             </div>
             <div style="display:flex; gap:6px; align-items:center;">
                 <button type="button" class="tactic-btn t-OUT" style="background:var(--danger); color:white; font-size:10px; height:32px; padding:0 8px; font-weight:900;" onclick="setEditOut('${p}')">OUT</button>
-                <input type="text" id="edit-score-${p}" inputmode="numeric" pattern="[0-9]*" class="std-input" style="height:32px; margin:0; flex:1; font-size:13px; text-align:center; background:#fff; color:#000; font-weight:bold;" value="${rs}" placeholder="Enter score">
+                <input type="text" id="edit-score-${p}" inputmode="numeric" pattern="[0-9]*" class="std-input" style="height:32px; margin:0; flex:1; font-size:13px; text-align:center; background:#fff; color:#000; font-weight:bold;" value="${rs}" placeholder="Enter score" oninput="handleEditScoreChangeHTML('${p}', this.value)">
                 <input type="hidden" id="edit-tactic-val-${p}" value="${tact || ''}">
             </div>
         </div>
@@ -3773,26 +3892,47 @@ function openEditRoundModal(roundNum) {
     document.getElementById('editRoundModal').style.display = 'flex';
 }
 
+function handleEditScoreChangeHTML(player, value) {
+    const tacticInput = document.getElementById(`edit-tactic-val-${player}`);
+    if (tacticInput) tacticInput.value = '';
+    ['S', 'D', 'MD', 'FC', 'FS'].forEach(t => {
+        const btn = document.getElementById(`edit-tactic-${t}-${player}`);
+        if (btn) btn.classList.remove('active');
+    });
+}
+
 function setEditTactic(player, tactic) {
     const scoreInput = document.getElementById(`edit-score-${player}`);
     const tacticInput = document.getElementById(`edit-tactic-val-${player}`);
     if (!scoreInput || !tacticInput) return;
     
-    ['S', 'D', 'MD', 'FC', 'FS'].forEach(t => {
-        const btn = document.getElementById(`edit-tactic-${t}-${player}`);
-        if (btn) {
-            if (t === tactic) btn.classList.add('active');
-            else btn.classList.remove('active');
-        }
-    });
+    const isCurrently = (String(tacticInput.value || '').trim().toUpperCase() === String(tactic || '').trim().toUpperCase());
     
-    tacticInput.value = tactic;
-    
-    if (tactic === 'S') scoreInput.value = 'S';
-    else if (tactic === 'D') scoreInput.value = '20';
-    else if (tactic === 'MD') scoreInput.value = '40';
-    else if (tactic === 'FC') scoreInput.value = '80';
-    else if (tactic === 'FS') scoreInput.value = '0';
+    if (isCurrently) {
+        // Toggle OFF
+        ['S', 'D', 'MD', 'FC', 'FS'].forEach(t => {
+            const btn = document.getElementById(`edit-tactic-${t}-${player}`);
+            if (btn) btn.classList.remove('active');
+        });
+        tacticInput.value = '';
+        scoreInput.value = '';
+    } else {
+        ['S', 'D', 'MD', 'FC', 'FS'].forEach(t => {
+            const btn = document.getElementById(`edit-tactic-${t}-${player}`);
+            if (btn) {
+                if (t === tactic) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
+        });
+        
+        tacticInput.value = tactic;
+        
+        if (tactic === 'S') scoreInput.value = 'S';
+        else if (tactic === 'D') scoreInput.value = '20';
+        else if (tactic === 'MD') scoreInput.value = '40';
+        else if (tactic === 'FC') scoreInput.value = '80';
+        else if (tactic === 'FS') scoreInput.value = '0';
+    }
 }
 
 function setEditOut(player) {

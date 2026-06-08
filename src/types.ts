@@ -53,6 +53,12 @@ export interface GameState {
   admin?: string;
   midGamePlayerEntries?: Record<string, number>;
   lastActivity?: number;
+  seatCutOutcome?: {
+    shuffledPlayers: string[];
+    dealer: string;
+    seatingOrder: { seat: number; player: string; card: string; rank: number }[];
+    distributionOrder: string[];
+  };
 }
 
 export enum OperationType {
