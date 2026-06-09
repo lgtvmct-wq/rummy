@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, db } from '../services/firebase';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   sendPasswordResetEmail, 
   GoogleAuthProvider, 
-  signInWithPopup 
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
@@ -33,6 +34,42 @@ export const Login: React.FC<LoginProps> = ({ onShowReleaseNotes }) => {
 
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // Check if the page is loading from a redirect auth flow
+    setLoading(true);
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          console.log('Google redirect login successful: ', result.user);
+        }
+      })
+      .catch((err: any) => {
+        console.error('Google Sign-In Redirect error:', err);
+        if (err && err.code === 'auth/unauthorized-domain') {
+          alert(
+            `Unauthorized Domain Error:\n\n` +
+            `This domain (${window.location.hostname}) is not authorized for Google Sign-In in your Firebase Console.\n\n` +
+            `To resolve this, please:\n` +
+            `1. Open your Firebase Console\n` +
+            `2. Navigate to Authentication -> Settings -> Authorized Domains\n` +
+            `3. Add "${window.location.hostname}" as an authorized domain.\n\n` +
+            `Once added, please refresh and try again!`
+          );
+        } else if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) {
+          alert(
+            `Google Sign-In Redirect was blocked or interrupted.\n` +
+            `Please make sure cross-site tracking/cookies are allowed in your browser settings.`
+          );
+        } else {
+          const errCode = err?.code ? ` (${err.code})` : '';
+          alert((err?.message || 'Google authentication failed. Please check your browser\'s settings and Firebase Console configuration.') + errCode);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) {
@@ -54,24 +91,12 @@ export const Login: React.FC<LoginProps> = ({ onShowReleaseNotes }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithRedirect(auth, provider);
     } catch (err: any) {
-      console.error('Google Sign-In error:', err);
-      if (err && err.code === 'auth/unauthorized-domain') {
-        alert(
-          `Unauthorized Domain Error:\n\n` +
-          `This domain (${window.location.hostname}) is not authorized for Google Sign-In in your Firebase Console.\n\n` +
-          `To resolve this, please:\n` +
-          `1. Open your Firebase Console\n` +
-          `2. Navigate to Authentication -> Settings -> Authorized Domains\n` +
-          `3. Add "${window.location.hostname}" as an authorized domain.\n\n` +
-          `Once added, please refresh and try again!`
-        );
-      } else {
-        const errCode = err?.code ? ` (${err.code})` : '';
-        alert((err?.message || 'Google authentication failed. Please check your browser\'s popup settings and Firebase Console configuration.') + errCode);
-      }
-    } finally {
+      console.error('Google Sign-In Redirect initialization error:', err);
+      const errCode = err?.code ? ` (${err.code})` : '';
+      alert((err?.message || 'Failed to initiate Google Sign-In redirect.') + errCode);
       setLoading(false);
     }
   };
