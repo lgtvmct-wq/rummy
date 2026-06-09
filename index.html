@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<title>Elite Rummy Circle - v102.2</title>
+<title>Elite Rummy Circle - v103.0</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
 <link rel="apple-touch-icon" sizes="152x152" href="https://raw.githubusercontent.com/lgtvmct-wq/rummy_saga/main/favicon.png">
@@ -273,7 +273,7 @@
     </div>
 
     <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v102.2</span>
+        <span onclick="showReleaseNotes()" style="font-size: 11px; opacity: 0.6; cursor: pointer; text-decoration: underline; color: var(--accent); font-weight: bold;">v103.0</span>
         <div style="font-size: 10px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
     </div>
   </div>
@@ -358,6 +358,13 @@
          
          <!-- Scrollable middle content -->
          <div style="flex: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 8px;">
+              <b style="color: var(--warning); display: block; margin-bottom: 5px;">v103.0 - Robust Google Auth Integration & Logo Aesthetics</b>
+               <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
+                   • <b>Robust Google Authentication (signInWithRedirect):</b> Upgraded Google Sign-In with a persistent redirections flow (<code>signInWithRedirect</code> and <code>getRedirectResult</code>) in place of popups. This completely resolves mobile browser popup blocks, private/incognito mode constraints, and Safari's cross-site tracking blockades for the production live environment.<br>
+                   • <b>Firebase Analytics Synchronization:</b> Connected the official Firebase <code>measurementId</code> directly to the initialized app context configuration, perfecting cross-platform traffic verification.<br>
+                   • <b>Clean Tactical UI:</b> Removed the excessive scroll emoji (<code>📜</code>) from the active seat cut log operations action button to establish a smoother, distraction-free aesthetic layout.<br>
+               </div>
+               <hr style="margin: 10px 0; opacity: 0.2;">
               <b style="color: var(--warning); display: block; margin-bottom: 5px;">v102.2 - Score Overrides & Elite Ruleset Cutoff</b>
                <div style="font-size: 11px; line-height: 1.4; opacity: 0.9;">
                    • <b>Elite Ruleset Cutoff:</b> Updated Elite ruleset exit standard to &gt;241 points from the previous 240.<br>
@@ -837,7 +844,7 @@
     </div>
   </div>
   <div style="position: fixed; bottom: 8px; left: 12px; z-index: 4000; text-align: left; pointer-events: auto;">
-      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v102.2</div>
+      <div onclick="showReleaseNotes()" style="font-size: 10px; opacity: 0.6; color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">v103.0</div>
       <div style="font-size: 9px; opacity: 0.4; margin-top: 4px;">Developer: Elite IT</div>
   </div>
 </div>
@@ -861,7 +868,8 @@ const firebaseConfig = {
   projectId: "elite-rummy-circle",
   storageBucket: "elite-rummy-circle.firebasestorage.app",
   messagingSenderId: "762468709641",
-  appId: "1:762468709641:web:b4e193ed1670e5d13ccfd8"
+  appId: "1:762468709641:web:b4e193ed1670e5d13ccfd8",
+  measurementId: "G-D5Z38J9JMC"
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();

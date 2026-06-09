@@ -140,7 +140,7 @@ export default function App() {
             onClick={() => setIsReleaseNotesOpen(true)}
             className="underline text-[var(--accent)] hover:text-emerald-400 font-bold cursor-pointer"
           >
-            v102.2
+            v103.0
           </span>
           <div className="text-[10px] mt-1 text-slate-400 font-mono">Developer: Elite IT</div>
         </footer>
@@ -386,6 +386,17 @@ export default function App() {
           </h3>
           
           <div className="max-h-72 overflow-y-auto pr-1 flex flex-col gap-4 text-xs">
+            <div>
+              <b className="text-yellow-500 block mb-1">v103.0 - Robust Google Auth Integration & Logo Aesthetics</b>
+              <p className="opacity-80 leading-relaxed font-sans pb-1">
+                • <b>Robust Google Authentication (signInWithRedirect):</b> Upgraded Google Sign-In with a persistent redirections flow (<code>signInWithRedirect</code> and <code>getRedirectResult</code>) in place of popups. This completely resolves mobile browser popup blocks, private/incognito mode constraints, and Safari's cross-site tracking blockades for the production live environment.<br />
+                • <b>Firebase Analytics Synchronization:</b> Connected the official Firebase <code>measurementId</code> directly to the initialized app context configuration, perfecting cross-platform traffic verification.<br />
+                • <b>Clean Tactical UI:</b> Removed the excessive scroll emoji (<code>📜</code>) from the active seat cut log operations action button to establish a smoother, distraction-free aesthetic layout.
+              </p>
+            </div>
+
+            <hr className="opacity-10" />
+
             <div>
               <b className="text-yellow-500 block mb-1">v102.2 - Score Overrides & Elite Ruleset Cutoff</b>
               <p className="opacity-80 leading-relaxed font-sans pb-1">
@@ -826,7 +837,7 @@ export default function App() {
           onClick={() => setIsReleaseNotesOpen(true)}
           className="underline text-[var(--accent)] hover:text-[#52e28c] font-bold cursor-pointer bg-black/30 px-2 py-1.5 rounded"
         >
-          v102.2
+          v103.0
         </span>
         <div className="text-[9px] mt-1 text-slate-400 font-mono">Developer: Elite IT</div>
       </footer>

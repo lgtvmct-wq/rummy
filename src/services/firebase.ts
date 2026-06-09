@@ -9,7 +9,8 @@ const firebaseConfig = {
   projectId: "elite-rummy-circle",
   storageBucket: "elite-rummy-circle.firebasestorage.app",
   messagingSenderId: "762468709641",
-  appId: "1:762468709641:web:b4e193ed1670e5d13ccfd8"
+  appId: "1:762468709641:web:b4e193ed1670e5d13ccfd8",
+  measurementId: "G-D5Z38J9JMC"
 };
 
 const app = initializeApp(firebaseConfig);
