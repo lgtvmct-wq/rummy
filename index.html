@@ -1074,7 +1074,8 @@ async function googleSignIn() {
         "Once added, please refresh and try again!"
       );
     } else {
-      alert((error && error.message) || "Google authentication failed. Please check your browser's popup settings and Firebase Console configurations.");
+      const errCode = (error && error.code) ? " (" + error.code + ")" : "";
+      alert(((error && error.message) || "Google authentication failed. Please check your browser's popup settings and Firebase Console configurations.") + errCode);
     }
   }
 }
@@ -2724,7 +2725,7 @@ function renderActive(focusPlayer = null) {
         ${titleHtml}
     </div>
     <div style="display:flex; gap:5px; flex-shrink: 0; margin-left: auto;">
-        ${state.seatCutOutcome ? `<button onclick="showTVSeatCutLog(event)" class="pause-btn" style="background: linear-gradient(to bottom, #8e44ad, #6c3483); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 8px rgba(142, 68, 173, 0.3); font-weight: bold; width: 110px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">Seat Cut Log 📜</button>` : ''}
+        ${state.seatCutOutcome ? `<button onclick="showTVSeatCutLog(event)" class="pause-btn" style="background: linear-gradient(to bottom, #8e44ad, #6c3483); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 8px rgba(142, 68, 173, 0.3); font-weight: bold; width: 110px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">Seat Cut Log</button>` : ''}
         <button onclick="state=null; showScreen('newGame')" class="pause-btn" style="width:80px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;">${state.winner?'Home':'Pause'}</button>
     </div>
   </div>`;

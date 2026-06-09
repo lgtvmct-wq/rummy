@@ -68,7 +68,8 @@ export const Login: React.FC<LoginProps> = ({ onShowReleaseNotes }) => {
           `Once added, please refresh and try again!`
         );
       } else {
-        alert(err?.message || 'Google authentication failed. Please check your browser\'s popup settings and Firebase Console configuration.');
+        const errCode = err?.code ? ` (${err.code})` : '';
+        alert((err?.message || 'Google authentication failed. Please check your browser\'s popup settings and Firebase Console configuration.') + errCode);
       }
     } finally {
       setLoading(false);

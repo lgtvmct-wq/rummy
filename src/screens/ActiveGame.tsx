@@ -795,7 +795,7 @@ export const ActiveGame: React.FC<ActiveGameProps> = ({ gameState, playersDb, on
               onClick={() => setShowSeatCutAuditLog(true)}
               className="bg-gradient-to-b from-purple-600 to-indigo-700 hover:opacity-90 min-w-20 h-8 px-2.5 flex items-center justify-center font-bold text-xs rounded border border-white/20 shadow shadow-purple-500/10 text-white cursor-pointer"
             >
-              Seat Cut Log 📜
+              Seat Cut Log
             </button>
           )}
           
